@@ -39,19 +39,7 @@ const coolant: ConsumableItem = {
 
 describe('calculateUrgency', () => {
   describe('unknown — 기록 없음', () => {
-    it('lastLoggedDate도 lastLoggedMileage도 null이면 unknown', () => {
-      const result = calculateUrgency({
-        item: engineOil,
-        currentMileage: 50000,
-        lastLoggedMileage: null,
-        lastLoggedDate: null,
-      });
-      expect(result.status).toBe('unknown');
-      expect(result.ratio).toBeNull();
-      expect(result.displayText).toBe('미기록');
-    });
-
-    it('km 전용 항목에서 currentMileage가 null이면 unknown', () => {
+    it('currentMileage도 lastLoggedDate도 null이면 unknown', () => {
       const result = calculateUrgency({
         item: engineOil,
         currentMileage: null,
@@ -59,6 +47,34 @@ describe('calculateUrgency', () => {
         lastLoggedDate: null,
       });
       expect(result.status).toBe('unknown');
+      expect(result.ratio).toBeNull();
+      expect(result.displayText).toBe('미기록');
+    });
+  });
+
+  describe('미기록 → 0km 기준 계산', () => {
+    it('lastLoggedMileage가 null이면 0km 기준으로 km 남음 계산', () => {
+      // 현재 5000km, 교체 기록 없음(0km 기준) → 남은 거리 = 10000 - 5000 = 5000km
+      const result = calculateUrgency({
+        item: engineOil,
+        currentMileage: 5000,
+        lastLoggedMileage: null,
+        lastLoggedDate: null,
+      });
+      expect(result.status).toBe('ok');
+      expect(result.displayText).toBe('5,000 km 남음');
+    });
+
+    it('lastLoggedMileage가 null이고 주행거리가 interval 초과면 overdue', () => {
+      // 현재 50000km, 교체 기록 없음(0km 기준) → 50000 > 10000km 초과
+      const result = calculateUrgency({
+        item: engineOil,
+        currentMileage: 50000,
+        lastLoggedMileage: null,
+        lastLoggedDate: null,
+      });
+      expect(result.status).toBe('overdue');
+      expect(result.displayText).toMatch(/km 초과/);
     });
   });
 

@@ -36,9 +36,10 @@ function calcKmRatio(
   lastLoggedMileage: number | null,
 ): number | null {
   if (item.interval_km === null || item.urgency_threshold_km === null) return null;
-  if (currentMileage === null || lastLoggedMileage === null) return null;
+  if (currentMileage === null) return null;
 
-  const kmRemaining = item.interval_km - (currentMileage - lastLoggedMileage);
+  const baseMileage = lastLoggedMileage ?? 0;
+  const kmRemaining = item.interval_km - (currentMileage - baseMileage);
   return kmRemaining / item.urgency_threshold_km;
 }
 
@@ -61,9 +62,10 @@ function buildDisplayText(
   lastLoggedMileage: number | null,
   lastLoggedDate: string | null,
 ): string {
-  // km 기준 항목이 있고 데이터가 있을 때
-  if (item.interval_km !== null && currentMileage !== null && lastLoggedMileage !== null) {
-    const kmRemaining = item.interval_km - (currentMileage - lastLoggedMileage);
+  // km 기준 항목이 있고 현재 주행거리가 있을 때 (미기록이면 0km 기준)
+  if (item.interval_km !== null && currentMileage !== null) {
+    const baseMileage = lastLoggedMileage ?? 0;
+    const kmRemaining = item.interval_km - (currentMileage - baseMileage);
     if (kmRemaining <= 0) {
       return `${Math.abs(kmRemaining).toLocaleString()} km 초과`;
     }
