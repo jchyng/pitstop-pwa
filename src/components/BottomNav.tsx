@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 type Tab = 'home' | 'log' | 'settings';
 
 interface Props {
@@ -31,10 +33,10 @@ const SettingsIcon = () => (
   </svg>
 );
 
-const tabs: { id: Tab; label: string; Icon: React.FC }[] = [
-  { id: 'home',     label: '홈',  Icon: HomeIcon },
-  { id: 'log',      label: '기록', Icon: LogIcon },
-  { id: 'settings', label: '설정', Icon: SettingsIcon },
+const tabs: { id: Tab; label: string; href: string; Icon: React.FC }[] = [
+  { id: 'home',     label: '홈',  href: '/',         Icon: HomeIcon },
+  { id: 'log',      label: '기록', href: '/log',      Icon: LogIcon },
+  { id: 'settings', label: '설정', href: '/settings', Icon: SettingsIcon },
 ];
 
 export default function BottomNav({ activeTab }: Props) {
@@ -58,13 +60,13 @@ export default function BottomNav({ activeTab }: Props) {
         zIndex: 100,
       }}
     >
-      {tabs.map(({ id, label, Icon }) => {
+      {tabs.map(({ id, label, href, Icon }) => {
         const isActive = activeTab === id;
         const color = isActive ? 'var(--color-nav-active)' : 'var(--color-nav-inactive)';
         return (
-          <button
+          <Link
             key={id}
-            type="button"
+            href={href}
             aria-current={isActive ? 'page' : undefined}
             aria-label={label}
             style={{
@@ -81,12 +83,13 @@ export default function BottomNav({ activeTab }: Props) {
               fontFamily: 'var(--font)',
               padding: '6px 0',
               color,
+              textDecoration: 'none',
               transition: 'opacity 0.15s',
             }}
           >
             <Icon />
             <span style={{ fontSize: 11, fontWeight: 500, lineHeight: 1 }}>{label}</span>
-          </button>
+          </Link>
         );
       })}
     </nav>
