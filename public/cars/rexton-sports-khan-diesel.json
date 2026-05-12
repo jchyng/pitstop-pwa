@@ -169,14 +169,25 @@
     },
     {
       "id": "tires",
-      "name_ko": "타이어",
+      "name_ko": "타이어 위치교환",
       "category": "타이어·배터리",
       "interval_km": 5000,
       "max_km": null,
       "interval_months": null,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": "위치교환 주기. 교체 목표: 60,000km"
+      "notes": "위치교환(로테이션) 주기"
+    },
+    {
+      "id": "tire-replacement",
+      "name_ko": "타이어 교체",
+      "category": "타이어·배터리",
+      "interval_km": 60000,
+      "max_km": null,
+      "interval_months": 60,
+      "urgency_threshold_km": 10000,
+      "urgency_threshold_days": 180,
+      "notes": "마모 한계선 도달 또는 제조 후 5년 기준"
     },
     {
       "id": "battery",
