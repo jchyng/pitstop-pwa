@@ -1,66 +1,323 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
+import type { CarData, ItemWithUrgency } from '@/types';
+import { calculateUrgency } from '@/lib/urgency';
+import { getMileage, setMileage, getLastLog, getLastMileage } from '@/lib/storage';
+import AlertBanner from '@/components/AlertBanner';
+import BottomNav from '@/components/BottomNav';
+import CarChip from '@/components/CarChip';
+import CategorySection from '@/components/CategorySection';
+import ConsumableCard from '@/components/ConsumableCard';
+import MileageInput from '@/components/MileageInput';
+import ViewToggle from '@/components/ViewToggle';
+
+interface CarIndex {
+  car_id: string;
+  name_ko: string;
+  file: string;
+}
+
+interface ItemWithLog extends ItemWithUrgency {
+  lastLoggedDate: string | null;
+  lastLoggedMileage: number | null;
+}
+
+const CATEGORIES = [
+  '엔진·오일',
+  '연료·증발가스',
+  '공조·외부',
+  '제동·냉각·변속',
+  '점화·벨트',
+  '타이어·배터리',
+] as const;
 
 export default function Home() {
+  const [carList, setCarList] = useState<CarIndex[]>([]);
+  const [selectedCarId, setSelectedCarId] = useState('avante-md-gasoline');
+  const [carData, setCarData] = useState<CarData | null>(null);
+  const [currentMileage, setCurrentMileage] = useState<number | null>(null);
+  const [view, setView] = useState<'attention' | 'full'>('attention');
+  const [showMileageInput, setShowMileageInput] = useState(false);
+
+  // 차종 목록 로드
+  useEffect(() => {
+    fetch('/cars/index.json')
+      .then(r => r.json())
+      .then((list: CarIndex[]) => {
+        setCarList(list);
+        // 저장된 선택 차량 복원
+        const saved = localStorage.getItem('pitstop_selected_car');
+        if (saved && list.some(c => c.car_id === saved)) {
+          setSelectedCarId(saved);
+        }
+      });
+  }, []);
+
+  // 선택 차량 데이터 로드
+  useEffect(() => {
+    if (!selectedCarId) return;
+    let cancelled = false;
+    fetch(`/cars/${selectedCarId}.json`)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setCarData(data); });
+
+    const mileage = getMileage(selectedCarId);
+    // 두 setState를 비동기 마이크로태스크로 묶어 연속 렌더링 방지
+    Promise.resolve().then(() => {
+      if (!cancelled) {
+        setCurrentMileage(mileage);
+        setShowMileageInput(mileage === null);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [selectedCarId]);
+
+  const itemsWithLog = useMemo<ItemWithLog[]>(() => {
+    if (!carData) return [];
+    return carData.items.map(item => {
+      const lastLoggedDate = getLastLog(selectedCarId, item.id);
+      const lastLoggedMileage = getLastMileage(selectedCarId, item.id);
+      const urgency = calculateUrgency({ item, currentMileage, lastLoggedMileage, lastLoggedDate });
+      return { item, urgency, lastLoggedDate, lastLoggedMileage };
+    });
+  }, [carData, currentMileage, selectedCarId]);
+
+  const overdueItems = useMemo(
+    () => itemsWithLog.filter(x => x.urgency.status === 'overdue'),
+    [itemsWithLog],
+  );
+  const urgentItems = useMemo(
+    () => itemsWithLog.filter(x => x.urgency.status === 'urgent'),
+    [itemsWithLog],
+  );
+
+  const attentionItems = useMemo(() => {
+    return [...overdueItems, ...urgentItems].sort((a, b) => {
+      const ra = a.urgency.ratio ?? Infinity;
+      const rb = b.urgency.ratio ?? Infinity;
+      return ra - rb;
+    });
+  }, [overdueItems, urgentItems]);
+
+  const byCategory = useMemo(() => {
+    return CATEGORIES.map(cat => ({
+      category: cat,
+      items: itemsWithLog.filter(x => x.item.category === cat),
+    }));
+  }, [itemsWithLog]);
+
+  function handleCarSelect(carId: string) {
+    setSelectedCarId(carId);
+    localStorage.setItem('pitstop_selected_car', carId);
+  }
+
+  function handleMileageSave(mileage: number) {
+    setMileage(selectedCarId, mileage);
+    setCurrentMileage(mileage);
+    setShowMileageInput(false);
+  }
+
+  const overdueSorted = useMemo(
+    () => [...overdueItems].sort((a, b) => (a.urgency.ratio ?? -Infinity) - (b.urgency.ratio ?? -Infinity)),
+    [overdueItems],
+  );
+  const urgentSorted = useMemo(
+    () => [...urgentItems].sort((a, b) => (a.urgency.ratio ?? Infinity) - (b.urgency.ratio ?? Infinity)),
+    [urgentItems],
+  );
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div
+      style={{
+        maxWidth: 390,
+        margin: '0 auto',
+        minHeight: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: 'var(--color-bg)',
+        borderLeft: '1px solid transparent',
+        borderRight: '1px solid transparent',
+      }}
+    >
+      {/* Header */}
+      <header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '20px var(--page-pad) 14px',
+        }}
+        role="banner"
+      >
+        <h1
+          style={{
+            fontSize: 24,
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            userSelect: 'none',
+          }}
+        >
+          <span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop
+        </h1>
+        <CarChip
+          cars={carList}
+          selectedCarId={selectedCarId}
+          currentMileage={currentMileage}
+          onSelect={handleCarSelect}
         />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </header>
+
+      {/* Mileage input (expandable) */}
+      {showMileageInput && (
+        <MileageInput
+          currentMileage={currentMileage}
+          onSave={handleMileageSave}
+        />
+      )}
+      {!showMileageInput && (
+        <div style={{ padding: '0 var(--page-pad) 8px', textAlign: 'right' }}>
+          <button
+            type="button"
+            onClick={() => setShowMileageInput(true)}
+            style={{
+              fontSize: 12,
+              color: 'var(--color-text-muted)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'var(--font)',
+              textDecoration: 'underline',
+            }}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            주행거리 수정
+          </button>
         </div>
+      )}
+
+      {/* Main content */}
+      <main
+        id="main-content"
+        role="main"
+        style={{
+          flex: 1,
+          padding: '0 var(--page-pad)',
+          paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
+          overflowY: 'auto',
+        }}
+      >
+        {/* Alert banner */}
+        <AlertBanner
+          overdueCount={overdueItems.length}
+          urgentCount={urgentItems.length}
+        />
+
+        {/* View toggle */}
+        <ViewToggle
+          view={view}
+          attentionCount={attentionItems.length}
+          onChange={setView}
+        />
+
+        {/* View: 봐야 할 항목 */}
+        {view === 'attention' && (
+          <div id="view-attention" role="tabpanel" aria-label="봐야 할 항목">
+            {attentionItems.length === 0 ? (
+              <p
+                style={{
+                  textAlign: 'center',
+                  color: 'var(--color-text-muted)',
+                  fontSize: 14,
+                  padding: '40px 0',
+                }}
+              >
+                {currentMileage === null
+                  ? '주행거리를 입력하면 점검 항목이 표시됩니다.'
+                  : '확인이 필요한 항목이 없습니다.'}
+              </p>
+            ) : (
+              <>
+                {overdueSorted.length > 0 && (
+                  <section aria-labelledby="attn-overdue">
+                    <p
+                      id="attn-overdue"
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--color-text-muted)',
+                        letterSpacing: '0.07em',
+                        textTransform: 'uppercase',
+                        marginBottom: 8,
+                      }}
+                    >
+                      과기한
+                    </p>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 0 }} role="list">
+                      {overdueSorted.map(({ item, urgency, lastLoggedDate, lastLoggedMileage }) => (
+                        <ConsumableCard
+                          key={item.id}
+                          item={item}
+                          urgency={urgency}
+                          currentMileage={currentMileage}
+                          lastLoggedDate={lastLoggedDate}
+                          lastLoggedMileage={lastLoggedMileage}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
+                {urgentSorted.length > 0 && (
+                  <section style={{ marginTop: overdueSorted.length > 0 ? 22 : 0 }} aria-labelledby="attn-urgent">
+                    <p
+                      id="attn-urgent"
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--color-text-muted)',
+                        letterSpacing: '0.07em',
+                        textTransform: 'uppercase',
+                        marginBottom: 8,
+                      }}
+                    >
+                      교체 임박
+                    </p>
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 0 }} role="list">
+                      {urgentSorted.map(({ item, urgency, lastLoggedDate, lastLoggedMileage }) => (
+                        <ConsumableCard
+                          key={item.id}
+                          item={item}
+                          urgency={urgency}
+                          currentMileage={currentMileage}
+                          lastLoggedDate={lastLoggedDate}
+                          lastLoggedMileage={lastLoggedMileage}
+                        />
+                      ))}
+                    </ul>
+                  </section>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* View: 전체보기 */}
+        {view === 'full' && (
+          <div id="view-all" role="tabpanel" aria-label="전체보기">
+            {byCategory.map(({ category, items }) => (
+              <CategorySection
+                key={category}
+                category={category}
+                items={items}
+                currentMileage={currentMileage}
+              />
+            ))}
+          </div>
+        )}
       </main>
+
+      <BottomNav activeTab="home" />
     </div>
   );
 }
