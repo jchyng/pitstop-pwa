@@ -1,3 +1,6 @@
+// 정비 기록 유형: 교체 or 점검
+export type LogType = 'replace' | 'inspect';
+
 // 소모품 항목 하나의 정적 데이터 (JSON에서 읽어오는 원본 구조)
 export interface ConsumableItem {
   id: string;
@@ -9,6 +12,7 @@ export interface ConsumableItem {
   urgency_threshold_km: number | null;
   urgency_threshold_days: number | null;
   notes?: string;
+  item_type?: LogType; // 생략 시 'replace'로 간주
 }
 
 // 차종 데이터 (car_id, 차종명, 소모품 목록 포함)

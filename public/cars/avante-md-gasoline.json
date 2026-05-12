@@ -55,6 +55,7 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
+      "item_type": "inspect",
       "notes": "증발가스 호스·케니스터 점검"
     },
     {
@@ -99,6 +100,7 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
+      "item_type": "inspect",
       "notes": "마모 확인 후 교체"
     },
     {
@@ -110,6 +112,7 @@
       "interval_months": null,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": null,
+      "item_type": "inspect",
       "notes": "마모 확인 후 교체"
     },
     {
@@ -143,6 +146,7 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
+      "item_type": "inspect",
       "notes": "점검 주기. 불량 시 교체"
     },
     {

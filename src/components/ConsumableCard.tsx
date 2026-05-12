@@ -1,4 +1,4 @@
-import type { ConsumableItem, UrgencyResult } from '@/types';
+import type { ConsumableItem, UrgencyResult, LogType } from '@/types';
 
 interface Props {
   item: ConsumableItem;
@@ -6,6 +6,8 @@ interface Props {
   currentMileage: number | null;
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
+  lastLogType: LogType | null;
+  onClick: () => void;
 }
 
 function formatDate(iso: string): string {
@@ -46,6 +48,8 @@ export default function ConsumableCard({
   urgency,
   lastLoggedDate,
   lastLoggedMileage,
+  lastLogType,
+  onClick,
 }: Props) {
   const { status, displayText } = urgency;
   const { num, unit } = parseStatDisplay(displayText);
@@ -77,6 +81,7 @@ export default function ConsumableCard({
   return (
     <li style={{ listStyle: 'none' }}>
       <div
+        onClick={onClick}
         style={{
           display: 'flex',
           alignItems: 'stretch',
@@ -88,8 +93,10 @@ export default function ConsumableCard({
           cursor: 'pointer',
           transition: 'background 0.15s',
         }}
-        role="article"
-        aria-label={`${item.name_ko}: ${displayText}`}
+        role="button"
+        tabIndex={0}
+        aria-label={`${item.name_ko} 기록하기`}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       >
         {/* Body */}
         <div style={{ flex: 1, minWidth: 0, padding: '12px 6px 12px 15px' }}>
@@ -111,7 +118,7 @@ export default function ConsumableCard({
           {/* Last service line */}
           {lastLoggedDate ? (
             <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-              교체 {formatDate(lastLoggedDate)}
+              {lastLogType === 'inspect' ? '점검' : '교체'} {formatDate(lastLoggedDate)}
               {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
             </p>
           ) : (
@@ -123,7 +130,7 @@ export default function ConsumableCard({
                 lineHeight: 1.55,
               }}
             >
-              교체 기록 없음
+              기록 없음
             </p>
           )}
 

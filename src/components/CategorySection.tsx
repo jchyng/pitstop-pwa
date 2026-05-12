@@ -1,18 +1,20 @@
-import type { ItemWithUrgency } from '@/types';
+import type { ItemWithUrgency, LogType } from '@/types';
 import ConsumableCard from './ConsumableCard';
 
 interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
+  lastLogType: LogType | null;
 }
 
 interface Props {
   category: string;
   items: ItemWithLog[];
   currentMileage: number | null;
+  onCardClick: (item: ItemWithLog) => void;
 }
 
-export default function CategorySection({ category, items, currentMileage }: Props) {
+export default function CategorySection({ category, items, currentMileage, onCardClick }: Props) {
   if (items.length === 0) return null;
 
   return (
@@ -31,14 +33,16 @@ export default function CategorySection({ category, items, currentMileage }: Pro
         {category}
       </p>
       <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 0 }} role="list">
-        {items.map(({ item, urgency, lastLoggedDate, lastLoggedMileage }) => (
+        {items.map(x => (
           <ConsumableCard
-            key={item.id}
-            item={item}
-            urgency={urgency}
+            key={x.item.id}
+            item={x.item}
+            urgency={x.urgency}
             currentMileage={currentMileage}
-            lastLoggedDate={lastLoggedDate}
-            lastLoggedMileage={lastLoggedMileage}
+            lastLoggedDate={x.lastLoggedDate}
+            lastLoggedMileage={x.lastLoggedMileage}
+            lastLogType={x.lastLogType}
+            onClick={() => onCardClick(x)}
           />
         ))}
       </ul>
