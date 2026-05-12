@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ConsumableItem, LogType } from '@/types';
-import { setLastLog, setLastMileage, setLastLogType } from '@/lib/storage';
+import { setLastLog, setLastMileage, setLastLogType, addLog } from '@/lib/storage';
 
 interface Props {
   item: ConsumableItem;
@@ -38,15 +38,27 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
   const [date, setDate] = useState(todayISO());
   const [mileageStr, setMileageStr] = useState(currentMileage !== null ? String(currentMileage) : '');
   const [logType, setLogType] = useState<LogType>(isInspectItem ? 'inspect' : 'replace');
+  const [note, setNote] = useState('');
 
   function handleSave() {
     if (!date) return;
     setLastLog(carId, item.id, date);
     const km = Number(mileageStr);
-    if (Number.isFinite(km) && km > 0) {
-      setLastMileage(carId, item.id, km);
+    const mileage = Number.isFinite(km) && km > 0 ? km : null;
+    if (mileage !== null) {
+      setLastMileage(carId, item.id, mileage);
     }
     setLastLogType(carId, item.id, logType);
+    addLog(carId, {
+      id: Date.now().toString(),
+      itemId: item.id,
+      itemName: item.name_ko,
+      category: item.category,
+      date,
+      mileage,
+      logType,
+      note: note.trim() || undefined,
+    });
     onSave();
     onClose();
   }
@@ -159,7 +171,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         </div>
 
         {/* Mileage */}
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 14 }}>
           <label
             htmlFor="log-mileage"
             style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
@@ -174,6 +186,24 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
             placeholder="예: 50000"
             inputMode="numeric"
             style={sheetInputStyle}
+          />
+        </div>
+
+        {/* Note */}
+        <div style={{ marginBottom: 24 }}>
+          <label
+            htmlFor="log-note"
+            style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
+          >
+            메모 (선택)
+          </label>
+          <textarea
+            id="log-note"
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="예: 합성유 5W-30, 오일필터 동시 교체"
+            rows={2}
+            style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }}
           />
         </div>
 

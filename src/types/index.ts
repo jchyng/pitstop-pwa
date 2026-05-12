@@ -37,3 +37,15 @@ export interface ItemWithUrgency {
   item: ConsumableItem;
   urgency: UrgencyResult;
 }
+
+// 정비 이력 한 건
+export interface LogEntry {
+  id: string;           // Date.now().toString()
+  itemId: string;
+  itemName: string;     // ConsumableItem.name_ko 캐시
+  category: string;     // ConsumableItem.category 캐시
+  date: string;         // YYYY-MM-DD
+  mileage: number | null;
+  logType: LogType;
+  note?: string;
+}
