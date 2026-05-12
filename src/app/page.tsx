@@ -37,7 +37,7 @@ export default function Home() {
   const [selectedCarId, setSelectedCarId] = useState('avante-md-gasoline');
   const [carData, setCarData] = useState<CarData | null>(null);
   const [currentMileage, setCurrentMileage] = useState<number | null>(null);
-  const [view, setView] = useState<'attention' | 'full'>('attention');
+  const [view, setView] = useState<'attention' | 'full'>('full');
   const [showMileageInput, setShowMileageInput] = useState(false);
 
   // 차종 목록 로드

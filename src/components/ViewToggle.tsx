@@ -48,6 +48,17 @@ export default function ViewToggle({ view, attentionCount, onChange }: Props) {
     >
       <button
         role="tab"
+        aria-selected={view === 'full'}
+        aria-controls="view-all"
+        type="button"
+        onClick={() => onChange('full')}
+        style={{ ...btnBase, ...(view === 'full' ? activeStyle : inactiveStyle) }}
+      >
+        전체보기
+      </button>
+
+      <button
+        role="tab"
         aria-selected={view === 'attention'}
         aria-controls="view-attention"
         type="button"
@@ -78,17 +89,6 @@ export default function ViewToggle({ view, attentionCount, onChange }: Props) {
             {attentionCount}
           </span>
         )}
-      </button>
-
-      <button
-        role="tab"
-        aria-selected={view === 'full'}
-        aria-controls="view-all"
-        type="button"
-        onClick={() => onChange('full')}
-        style={{ ...btnBase, ...(view === 'full' ? activeStyle : inactiveStyle) }}
-      >
-        전체보기
       </button>
     </div>
   );
