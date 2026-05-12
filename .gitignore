@@ -13,3 +13,10 @@ out/
 # misc
 .DS_Store
 *.pem
+
+# typescript
+tsconfig.tsbuildinfo
+
+# next-pwa (빌드 시 자동 생성)
+public/sw.js
+public/workbox-*.js
