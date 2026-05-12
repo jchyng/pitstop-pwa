@@ -22,9 +22,9 @@ export default function CategorySection({ category, items, currentMileage, onCar
       <p
         id={`sec-${category}`}
         style={{
-          fontSize: 11,
+          fontSize: 11.5,
           fontWeight: 600,
-          color: 'var(--color-text-muted)',
+          color: 'var(--color-text-secondary)',
           letterSpacing: '0.07em',
           textTransform: 'uppercase',
           marginBottom: 8,
@@ -32,7 +32,7 @@ export default function CategorySection({ category, items, currentMileage, onCar
       >
         {category}
       </p>
-      <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 0 }} role="list">
+      <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
         {items.map(x => (
           <ConsumableCard
             key={x.item.id}

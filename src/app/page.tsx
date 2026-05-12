@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import type { CarData, ItemWithUrgency, LogType } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
 import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType } from '@/lib/storage';
-import AlertBanner from '@/components/AlertBanner';
 import BottomNav from '@/components/BottomNav';
 import CarChip from '@/components/CarChip';
+import CarHero from '@/components/CarHero';
 import CategorySection from '@/components/CategorySection';
 import ConsumableCard from '@/components/ConsumableCard';
-import LogSheet from '@/components/LogSheet';
-import MileageInput from '@/components/MileageInput';
+import MileageSheet from '@/components/MileageSheet';
 import ViewToggle from '@/components/ViewToggle';
 
 interface CarIndex {
@@ -35,14 +35,13 @@ const CATEGORIES = [
 ] as const;
 
 export default function Home() {
+  const router = useRouter();
   const [carList, setCarList] = useState<CarIndex[]>([]);
   const [selectedCarId, setSelectedCarId] = useState('avante-md-gasoline');
   const [carData, setCarData] = useState<CarData | null>(null);
   const [currentMileage, setCurrentMileage] = useState<number | null>(null);
   const [view, setView] = useState<'attention' | 'full'>('full');
-  const [showMileageInput, setShowMileageInput] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<ItemWithLog | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [showMileageSheet, setShowMileageSheet] = useState(false);
 
   // 차종 목록 로드
   useEffect(() => {
@@ -71,7 +70,7 @@ export default function Home() {
     Promise.resolve().then(() => {
       if (!cancelled) {
         setCurrentMileage(mileage);
-        setShowMileageInput(mileage === null);
+        setShowMileageSheet(mileage === null);
       }
     });
 
@@ -87,7 +86,7 @@ export default function Home() {
       const urgency = calculateUrgency({ item, currentMileage, lastLoggedMileage, lastLoggedDate });
       return { item, urgency, lastLoggedDate, lastLoggedMileage, lastLogType };
     });
-  }, [carData, currentMileage, selectedCarId, refreshKey]);
+  }, [carData, currentMileage, selectedCarId]);
 
   const overdueItems = useMemo(
     () => itemsWithLog.filter(x => x.urgency.status === 'overdue'),
@@ -121,7 +120,6 @@ export default function Home() {
   function handleMileageSave(mileage: number) {
     setMileage(selectedCarId, mileage);
     setCurrentMileage(mileage);
-    setShowMileageInput(false);
   }
 
   const overdueSorted = useMemo(
@@ -152,13 +150,13 @@ export default function Home() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '20px var(--page-pad) 14px',
+          padding: '16px var(--page-pad) 12px',
         }}
         role="banner"
       >
         <h1
           style={{
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: 700,
             letterSpacing: '-0.5px',
             userSelect: 'none',
@@ -169,37 +167,19 @@ export default function Home() {
         <CarChip
           cars={carList}
           selectedCarId={selectedCarId}
-          currentMileage={currentMileage}
           onSelect={handleCarSelect}
         />
       </header>
 
-      {/* Mileage input (expandable) */}
-      {showMileageInput && (
-        <MileageInput
+      {/* Car hero */}
+      <div style={{ padding: '8px var(--page-pad) 4px' }}>
+        <CarHero
+          carId={selectedCarId}
+          carName={carData?.name_ko ?? carList.find(c => c.car_id === selectedCarId)?.name_ko ?? ''}
           currentMileage={currentMileage}
-          onSave={handleMileageSave}
+          onEditClick={() => setShowMileageSheet(true)}
         />
-      )}
-      {!showMileageInput && (
-        <div style={{ padding: '0 var(--page-pad) 8px', textAlign: 'right' }}>
-          <button
-            type="button"
-            onClick={() => setShowMileageInput(true)}
-            style={{
-              fontSize: 12,
-              color: 'var(--color-text-muted)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontFamily: 'var(--font)',
-              textDecoration: 'underline',
-            }}
-          >
-            주행거리 수정
-          </button>
-        </div>
-      )}
+      </div>
 
       {/* Main content */}
       <main
@@ -207,17 +187,11 @@ export default function Home() {
         role="main"
         style={{
           flex: 1,
-          padding: '0 var(--page-pad)',
+          padding: '12px var(--page-pad) 0',
           paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
           overflowY: 'auto',
         }}
       >
-        {/* Alert banner */}
-        <AlertBanner
-          overdueCount={overdueItems.length}
-          urgentCount={urgentItems.length}
-        />
-
         {/* View toggle */}
         <ViewToggle
           view={view}
@@ -250,7 +224,7 @@ export default function Home() {
                       style={{
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'var(--color-text-muted)',
+                        color: 'var(--color-overdue-sub)',
                         letterSpacing: '0.07em',
                         textTransform: 'uppercase',
                         marginBottom: 8,
@@ -258,7 +232,7 @@ export default function Home() {
                     >
                       과기한
                     </p>
-                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 0 }} role="list">
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
                       {overdueSorted.map(x => (
                         <ConsumableCard
                           key={x.item.id}
@@ -268,7 +242,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
-                          onClick={() => setSelectedItem(x)}
+                          onClick={() => router.push(`/items/${x.item.id}`)}
                         />
                       ))}
                     </ul>
@@ -282,7 +256,7 @@ export default function Home() {
                       style={{
                         fontSize: 11,
                         fontWeight: 600,
-                        color: 'var(--color-text-muted)',
+                        color: 'var(--color-urgent-text)',
                         letterSpacing: '0.07em',
                         textTransform: 'uppercase',
                         marginBottom: 8,
@@ -290,7 +264,7 @@ export default function Home() {
                     >
                       교체 임박
                     </p>
-                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 0 }} role="list">
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
                       {urgentSorted.map(x => (
                         <ConsumableCard
                           key={x.item.id}
@@ -300,7 +274,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
-                          onClick={() => setSelectedItem(x)}
+                          onClick={() => router.push(`/items/${x.item.id}`)}
                         />
                       ))}
                     </ul>
@@ -320,7 +294,7 @@ export default function Home() {
                 category={category}
                 items={items}
                 currentMileage={currentMileage}
-                onCardClick={setSelectedItem}
+                onCardClick={(x) => router.push(`/items/${x.item.id}`)}
               />
             ))}
           </div>
@@ -329,15 +303,14 @@ export default function Home() {
 
       <BottomNav activeTab="home" />
 
-      {selectedItem && (
-        <LogSheet
-          item={selectedItem.item}
-          carId={selectedCarId}
+      {showMileageSheet && (
+        <MileageSheet
           currentMileage={currentMileage}
-          onSave={() => setRefreshKey(k => k + 1)}
-          onClose={() => setSelectedItem(null)}
+          onSave={handleMileageSave}
+          onClose={() => setShowMileageSheet(false)}
         />
       )}
+
     </div>
   );
 }

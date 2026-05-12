@@ -58,9 +58,11 @@ export default function ConsumableCard({
   const isUrgent = status === 'urgent';
   const isUnknown = status === 'unknown';
 
-  const cardBorder = isOverdue
-    ? 'rgba(185, 28, 28, 0.2)'
-    : 'var(--color-border)';
+  const accentColor = isOverdue
+    ? 'var(--color-overdue-sub)'
+    : isUrgent
+    ? 'var(--color-urgent-text)'
+    : null;
 
   const statColor = isOverdue
     ? 'var(--color-overdue-sub)'
@@ -86,7 +88,7 @@ export default function ConsumableCard({
           display: 'flex',
           alignItems: 'stretch',
           background: 'var(--color-surface)',
-          border: `1px solid ${cardBorder}`,
+          border: '1px solid var(--color-border)',
           borderRadius: 'var(--radius-card)',
           boxShadow: 'var(--shadow-card)',
           overflow: 'hidden',
@@ -95,14 +97,14 @@ export default function ConsumableCard({
         }}
         role="button"
         tabIndex={0}
-        aria-label={`${item.name_ko} 기록하기`}
+        aria-label={`${item.name_ko} 상세 보기`}
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       >
         {/* Body */}
         <div style={{ flex: 1, minWidth: 0, padding: '12px 6px 12px 15px' }}>
           <p
             style={{
-              fontSize: 15,
+              fontSize: 16,
               fontWeight: 600,
               lineHeight: 1.3,
               marginBottom: 5,
@@ -117,14 +119,14 @@ export default function ConsumableCard({
 
           {/* Last service line */}
           {lastLoggedDate ? (
-            <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
+            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
               {lastLogType === 'inspect' ? '점검' : '교체'} {formatDate(lastLoggedDate)}
               {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
             </p>
           ) : (
             <p
               style={{
-                fontSize: 12,
+                fontSize: 13,
                 color: 'var(--color-text-muted)',
                 fontStyle: 'italic',
                 lineHeight: 1.55,
@@ -138,7 +140,7 @@ export default function ConsumableCard({
           {nextKmText ? (
             <p
               style={{
-                fontSize: 12,
+                fontSize: 13,
                 color: metaColor,
                 lineHeight: 1.55,
                 fontWeight: (isOverdue || isUrgent) ? 500 : 400,
@@ -177,7 +179,7 @@ export default function ConsumableCard({
           {unit && (
             <span
               style={{
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: 500,
                 marginTop: 2,
                 whiteSpace: 'nowrap',
