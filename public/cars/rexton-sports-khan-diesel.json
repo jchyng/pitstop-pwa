@@ -11,7 +11,7 @@
       "interval_months": 12,
       "urgency_threshold_km": 2000,
       "urgency_threshold_days": 30,
-      "notes": "가혹 조건(도심 주행·짧은 거리) 시 단축"
+      "notes": "가혹 조건(도심 주행·짧은 거리) 시 6개월/10,000km로 단축"
     },
     {
       "id": "oil-filter",
@@ -62,11 +62,11 @@
       "id": "cabin-filter",
       "name_ko": "에어컨필터",
       "category": "공조·외부",
-      "interval_km": null,
+      "interval_km": 10000,
       "max_km": null,
-      "interval_months": 24,
-      "urgency_threshold_km": null,
-      "urgency_threshold_days": 60,
+      "interval_months": null,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": null,
       "notes": "오염 심하면 조기 교체"
     },
     {
@@ -96,13 +96,13 @@
       "id": "brake-pad-rear",
       "name_ko": "브레이크패드 (후방)",
       "category": "제동·냉각·변속",
-      "interval_km": 60000,
+      "interval_km": 10000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 10000,
+      "urgency_threshold_km": 2000,
       "urgency_threshold_days": null,
       "item_type": "inspect",
-      "notes": "마모 확인 후 교체"
+      "notes": "점검 주기. 마모 시 교체"
     },
     {
       "id": "brake-fluid",
@@ -113,7 +113,7 @@
       "interval_months": 24,
       "urgency_threshold_km": null,
       "urgency_threshold_days": 60,
-      "notes": null
+      "notes": "수시 점검"
     },
     {
       "id": "coolant",
@@ -135,7 +135,7 @@
       "interval_months": null,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": null,
-      "notes": "AISIN 자동미션"
+      "notes": "AISIN 자동미션, 30,000km마다 점검 후 60,000km 교환. 가혹 시 단축"
     },
     {
       "id": "glow-plugs",
@@ -152,7 +152,7 @@
       "id": "drive-belt",
       "name_ko": "구동벨트",
       "category": "점화·벨트",
-      "interval_km": 10000,
+      "interval_km": 15000,
       "max_km": null,
       "interval_months": null,
       "urgency_threshold_km": 2000,
@@ -162,14 +162,15 @@
     },
     {
       "id": "transfer-oil",
-      "name_ko": "트랜스퍼 오일 (4륜)",
+      "name_ko": "트랜스퍼 케이스 오일 (4륜)",
       "category": "점화·벨트",
-      "interval_km": 30000,
+      "interval_km": 10000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 5000,
+      "urgency_threshold_km": 2000,
       "urgency_threshold_days": null,
-      "notes": "4WD 전용"
+      "item_type": "inspect",
+      "notes": "4WD 전용, 10,000km마다 점검 후 60,000km 교환"
     },
     {
       "id": "tires",
@@ -180,18 +181,19 @@
       "interval_months": null,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": "위치교환(로테이션) 주기"
+      "notes": "위치교환(로테이션) 주기. 공기압 수시 점검, 4륜 규격 준수"
     },
     {
       "id": "tire-replacement",
-      "name_ko": "타이어 교체",
+      "name_ko": "타이어 점검",
       "category": "타이어·배터리",
-      "interval_km": 60000,
+      "interval_km": 30000,
       "max_km": null,
-      "interval_months": 60,
-      "urgency_threshold_km": 10000,
-      "urgency_threshold_days": 180,
-      "notes": "마모 한계선 도달 또는 제조 후 5년 기준"
+      "interval_months": null,
+      "urgency_threshold_km": 5000,
+      "urgency_threshold_days": null,
+      "item_type": "inspect",
+      "notes": "마모 한계선 도달 시 교체"
     },
     {
       "id": "battery",
@@ -206,25 +208,37 @@
     },
     {
       "id": "differential-oil",
-      "name_ko": "디퍼런셜오일 (전)",
+      "name_ko": "디퍼런셜오일 (전 액슬)",
       "category": "타이어·배터리",
       "interval_km": 30000,
       "max_km": null,
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
-      "notes": "일체차축 방식"
+      "notes": "4WD 전용"
     },
     {
       "id": "rear-axle-oil",
       "name_ko": "리어 액슬 오일",
       "category": "타이어·배터리",
-      "interval_km": 60000,
+      "interval_km": 30000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 10000,
+      "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": "4WD 전용"
+    },
+    {
+      "id": "propeller-shaft",
+      "name_ko": "프로펠러 샤프트",
+      "category": "타이어·배터리",
+      "interval_km": 10000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": null,
+      "item_type": "inspect",
+      "notes": "그리스 충진 점검. 4WD 전용"
     }
   ]
 }
