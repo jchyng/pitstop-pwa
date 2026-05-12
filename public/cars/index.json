@@ -1,0 +1,17 @@
+[
+  {
+    "car_id": "avante-md-gasoline",
+    "name_ko": "아반떼 MD 가솔린",
+    "file": "/cars/avante-md-gasoline.json"
+  },
+  {
+    "car_id": "grandeur-hg-gasoline",
+    "name_ko": "그랜저 HG 가솔린",
+    "file": "/cars/grandeur-hg-gasoline.json"
+  },
+  {
+    "car_id": "rexton-sports-khan-diesel",
+    "name_ko": "렉스턴 스포츠 칸 디젤",
+    "file": "/cars/rexton-sports-khan-diesel.json"
+  }
+]
