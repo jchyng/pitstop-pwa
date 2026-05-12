@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+  <title>Pitstop — 정비 이력</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg:            #ffffff;
+      --color-surface:       #ffffff;
+      --color-surface-hover: #f9fafb;
+      --color-border:        #e8e8e8;
+      --color-text-primary:  #111111;
+      --color-text-secondary:#6b7280;
+      --color-text-muted:    #9ca3af;
+
+      --color-nav-active:    #ef4444;
+      --color-nav-inactive:  #9ca3af;
+
+      --urgent-text:         #d97706;
+      --overdue-text:        #b91c1c;
+
+      /* 페이지 고유 변수 */
+      --color-chip-active-bg: #ef4444;
+      --color-chip-active-txt:#ffffff;
+      --color-chip-bg:        #f3f4f6;
+      --color-chip-txt:       #6b7280;
+      --color-footer-bg:      #f9fafb;
+      --color-normal-bg:      #dcfce7;
+      --color-normal-text:    #16a34a;
+
+      --radius-card: 12px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.07);
+      --font: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-pad: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg:            #111111;
+        --color-surface:       #1e1e1e;
+        --color-surface-hover: #272727;
+        --color-border:        #333333;
+        --color-text-primary:  #f3f3f3;
+        --color-text-secondary:#a0a0a0;
+        --color-text-muted:    #666666;
+
+        --color-nav-active:    #f87171;
+        --color-nav-inactive:  #555555;
+
+        --urgent-text:         #fbbf24;
+        --overdue-text:        #fca5a5;
+
+        --color-chip-active-bg: #f87171;
+        --color-chip-active-txt:#111111;
+        --color-chip-bg:        #252525;
+        --color-chip-txt:       #888888;
+        --color-footer-bg:      #1a1a1a;
+        --color-normal-bg:      #0d2b19;
+        --color-normal-text:    #4ade80;
+
+        --shadow-card: 0 1px 4px rgba(0,0,0,0.35);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      height: 100%;
+      background: var(--color-bg);
+      font-family: var(--font);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 390px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg);
+    }
+
+    /* ─── Header ─────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px var(--page-pad) 14px;
+      background: var(--color-bg);
+    }
+    .header__back {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--color-text-primary);
+      margin-left: -8px;
+      border-radius: 8px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .header__back:hover { background: var(--color-surface-hover); }
+    .header__back:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: 2px; }
+    .header__title {
+      flex: 1;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+    .header__car-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 24px;
+      background: var(--color-surface);
+      min-height: 44px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-text-primary);
+      white-space: nowrap;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .header__car-chip:hover { background: var(--color-surface-hover); }
+    .header__car-chip:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: 2px; }
+    .header__car-chip-divider { color: var(--color-text-muted); margin: 0 1px; }
+
+    /* ─── Filter chips ───────────────────── */
+    .filters {
+      padding: 0 var(--page-pad) 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      display: flex;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 7px 13px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+      font-family: var(--font);
+      transition: background 0.12s, color 0.12s;
+      min-height: 36px;
+    }
+    .filter-chip--active {
+      background: var(--color-chip-active-bg);
+      color: var(--color-chip-active-txt);
+    }
+    .filter-chip--inactive {
+      background: var(--color-chip-bg);
+      color: var(--color-chip-txt);
+    }
+    .filter-chip--inactive:hover { background: var(--color-border); }
+
+    /* ─── Divider ────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 0 var(--page-pad);
+    }
+
+    /* ─── Main ───────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 16px var(--page-pad) 0;
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
+    }
+
+    /* ─── Timeline ───────────────────────── */
+    .timeline { list-style: none; }
+
+    .timeline__date-anchor {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 0 10px;
+    }
+    .timeline__date-anchor:first-child { padding-top: 2px; }
+    .timeline__date-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-nav-active);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .timeline__date-line {
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    .timeline__entry {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 0 0 18px 0;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .timeline__entry:hover { opacity: 0.8; }
+
+    .timeline__axis {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 20px;
+    }
+    .timeline__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-border);
+      border: 2px solid var(--color-surface);
+      box-shadow: 0 0 0 1.5px var(--color-border);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .timeline__dot--accent {
+      background: var(--color-nav-active);
+      box-shadow: 0 0 0 1.5px var(--color-nav-active);
+    }
+    .timeline__connector {
+      width: 1.5px;
+      flex: 1;
+      background: var(--color-border);
+      min-height: 18px;
+      margin-top: 4px;
+    }
+
+    .timeline__content {
+      flex: 1;
+      min-width: 0;
+      padding-top: 1px;
+    }
+    .timeline__item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .timeline__item-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      line-height: 1.3;
+    }
+    .timeline__item-km {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .timeline__item-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 3px;
+    }
+    .timeline__item-date {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .timeline__item-cat {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      background: var(--color-chip-bg);
+      padding: 2px 7px;
+      border-radius: 8px;
+    }
+    .timeline__item-note {
+      margin-top: 6px;
+      font-size: 12.5px;
+      color: var(--color-text-muted);
+      background: var(--color-surface-hover);
+      border-radius: 8px;
+      padding: 6px 10px;
+      line-height: 1.5;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--color-normal-bg);
+      color: var(--color-normal-text);
+      margin-left: 5px;
+    }
+
+    /* ─── Footer summary ─────────────────── */
+    .footer-summary {
+      position: fixed;
+      bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 390px;
+      padding: 10px var(--page-pad);
+      background: var(--color-footer-bg);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 99;
+    }
+    .footer-summary__stat {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+    }
+    .footer-summary__stat strong {
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+
+    /* ─── Bottom nav ─────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 390px;
+      height: calc(56px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: stretch;
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-height: 44px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: var(--font);
+      padding: 6px 0;
+      transition: opacity 0.15s;
+    }
+    .nav-item:active { opacity: 0.65; }
+    .nav-item:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: -2px; }
+    .nav-item__label { font-size: 11px; font-weight: 500; line-height: 1; }
+    .nav-item--active   .nav-item__label, .nav-item--active   svg { color: var(--color-nav-active); }
+    .nav-item--inactive .nav-item__label, .nav-item--inactive svg { color: var(--color-nav-inactive); }
+
+    @media (min-width: 768px) {
+      body { background: #f0f0f0; }
+      .app { border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+    }
+    @media (min-width: 768px) and (prefers-color-scheme: dark) { body { background: #0a0a0a; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ── Header ── -->
+    <header class="header" role="banner">
+      <button class="header__back" aria-label="뒤로">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h1 class="header__title">정비 이력</h1>
+      <div class="header__car-chip" role="button" aria-label="선택된 차량: 아반떼 MD">
+        <span aria-hidden="true">🚗</span>
+        <span>아반떼 MD</span>
+      </div>
+    </header>
+
+    <!-- ── Filter chips ── -->
+    <div class="filters" role="tablist" aria-label="항목 필터">
+      <button class="filter-chip filter-chip--active" role="tab" aria-selected="true">전체</button>
+      <button class="filter-chip filter-chip--inactive" role="tab" aria-selected="false">🛢️ 엔진오일</button>
+      <button class="filter-chip filter-chip--inactive" role="tab" aria-selected="false">🔄 타이어</button>
+      <button class="filter-chip filter-chip--inactive" role="tab" aria-selected="false">🛑 브레이크</button>
+      <button class="filter-chip filter-chip--inactive" role="tab" aria-selected="false">💨 에어필터</button>
+    </div>
+    <div class="divider"></div>
+
+    <!-- ── Timeline ── -->
+    <main class="main" id="main-content" role="main">
+      <ul class="timeline">
+
+        <li class="timeline__date-anchor">
+          <span class="timeline__date-label">2025년 4월</span>
+          <div class="timeline__date-line"></div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot timeline__dot--accent"></div>
+            <div class="timeline__connector"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">엔진오일 교환<span class="tag">최근</span></div>
+              <div class="timeline__item-km">45,230 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2025.04.02</span>
+              <span class="timeline__item-cat">🛢️ 엔진오일</span>
+            </div>
+            <div class="timeline__item-note">합성유 5W-30, 오일필터 동시 교체</div>
+          </div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot"></div>
+            <div class="timeline__connector"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">에어필터 교환</div>
+              <div class="timeline__item-km">45,100 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2025.04.02</span>
+              <span class="timeline__item-cat">💨 에어필터</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="timeline__date-anchor">
+          <span class="timeline__date-label">2025년 1월</span>
+          <div class="timeline__date-line"></div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot"></div>
+            <div class="timeline__connector"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">타이어 위치 교환</div>
+              <div class="timeline__item-km">42,800 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2025.01.15</span>
+              <span class="timeline__item-cat">🔄 타이어</span>
+            </div>
+            <div class="timeline__item-note">앞뒤 교차 교환</div>
+          </div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot"></div>
+            <div class="timeline__connector"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">브레이크패드 교환</div>
+              <div class="timeline__item-km">42,750 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2025.01.15</span>
+              <span class="timeline__item-cat">🛑 브레이크</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="timeline__date-anchor">
+          <span class="timeline__date-label">2024년 9월</span>
+          <div class="timeline__date-line"></div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot"></div>
+            <div class="timeline__connector"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">엔진오일 교환</div>
+              <div class="timeline__item-km">38,400 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2024.09.08</span>
+              <span class="timeline__item-cat">🛢️ 엔진오일</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot"></div>
+            <div class="timeline__connector"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">에어컨 필터 교환</div>
+              <div class="timeline__item-km">38,350 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2024.09.08</span>
+              <span class="timeline__item-cat">❄️ 에어컨필터</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="timeline__date-anchor">
+          <span class="timeline__date-label">2024년 3월</span>
+          <div class="timeline__date-line"></div>
+        </li>
+
+        <li class="timeline__entry">
+          <div class="timeline__axis">
+            <div class="timeline__dot"></div>
+          </div>
+          <div class="timeline__content">
+            <div class="timeline__item-header">
+              <div class="timeline__item-name">엔진오일 교환</div>
+              <div class="timeline__item-km">33,900 km</div>
+            </div>
+            <div class="timeline__item-meta">
+              <span class="timeline__item-date">2024.03.21</span>
+              <span class="timeline__item-cat">🛢️ 엔진오일</span>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </main>
+
+    <!-- ── Footer summary ── -->
+    <div class="footer-summary" role="contentinfo">
+      <span class="footer-summary__stat">총 <strong>7건</strong></span>
+      <span class="footer-summary__stat">마지막 정비 <strong>45,230 km</strong></span>
+    </div>
+
+    <!-- ── Bottom Nav ── -->
+    <nav class="bottom-nav" role="navigation" aria-label="앱 하단 내비게이션">
+      <button class="nav-item nav-item--inactive" type="button" aria-label="홈">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" fill="currentColor"/>
+        </svg>
+        <span class="nav-item__label">홈</span>
+      </button>
+      <button class="nav-item nav-item--active" type="button" aria-current="page" aria-label="기록 (현재 페이지)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <line x1="9" y1="8"  x2="15" y2="8"  stroke="currentColor" stroke-width="1.6"/>
+          <line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.6"/>
+          <line x1="9" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="1.6"/>
+        </svg>
+        <span class="nav-item__label">기록</span>
+      </button>
+      <button class="nav-item nav-item--inactive" type="button" aria-label="설정">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                stroke="currentColor" stroke-width="1.8" fill="none"/>
+        </svg>
+        <span class="nav-item__label">설정</span>
+      </button>
+    </nav>
+
+  </div>
+</body>
+</html>

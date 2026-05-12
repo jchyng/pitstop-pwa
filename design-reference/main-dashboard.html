@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)">
+  <title>Pitstop — 소모품 현황</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg:            #ffffff;
+      --color-surface:       #ffffff;
+      --color-surface-hover: #f9fafb;
+      --color-border:        #e8e8e8;
+      --color-text-primary:  #111111;
+      --color-text-secondary:#6b7280;
+      --color-text-muted:    #9ca3af;
+
+      --urgent-text:   #d97706;
+      --overdue-text:  #b91c1c;
+      --overdue-border:rgba(185,28,28,0.2);
+
+      --color-nav-active:   #ef4444;
+      --color-nav-inactive: #9ca3af;
+
+      --radius-card: 12px;
+      --shadow-card: 0 1px 3px rgba(0,0,0,0.07);
+      --font: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --page-pad: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-bg:            #111111;
+        --color-surface:       #1e1e1e;
+        --color-surface-hover: #272727;
+        --color-border:        #333333;
+        --color-text-primary:  #f3f3f3;
+        --color-text-secondary:#a0a0a0;
+        --color-text-muted:    #666666;
+
+        --urgent-text:   #fbbf24;
+        --overdue-text:  #fca5a5;
+        --overdue-border:rgba(220,38,38,0.3);
+
+        --color-nav-active:   #f87171;
+        --color-nav-inactive: #555555;
+        --shadow-card: 0 1px 4px rgba(0,0,0,0.35);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      height: 100%;
+      background: var(--color-bg);
+      font-family: var(--font);
+      color: var(--color-text-primary);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 390px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-bg);
+    }
+
+    /* ─── Header ─────────────────────────── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px var(--page-pad) 14px;
+    }
+    .header__logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      user-select: none;
+    }
+    .header__car-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: 24px;
+      background: var(--color-surface);
+      min-height: 44px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .header__car-chip:hover { background: var(--color-surface-hover); }
+    .header__car-chip:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: 2px; }
+    .header__car-chip-divider { color: var(--color-text-muted); margin: 0 1px; }
+
+    /* ─── Main ───────────────────────────── */
+    .main {
+      flex: 1;
+      padding: 0 var(--page-pad);
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+      overflow-y: auto;
+    }
+
+    /* ─── View toggle ────────────────────── */
+    .view-toggle {
+      display: flex;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 10px;
+      padding: 3px;
+      gap: 2px;
+      margin-bottom: 18px;
+    }
+
+    .view-toggle__btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-family: var(--font);
+      color: var(--color-text-secondary);
+      transition: background 0.15s, color 0.15s;
+      min-height: 38px;
+      white-space: nowrap;
+    }
+    .view-toggle__btn:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: -2px; border-radius: 7px; }
+
+    .view-toggle__btn--active {
+      background: var(--color-text-primary);
+      color: var(--color-bg);
+    }
+
+    .view-toggle__badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      border-radius: 9px;
+      font-size: 10.5px;
+      font-weight: 700;
+      background: var(--color-nav-active);
+      color: #fff;
+      line-height: 1;
+    }
+    /* 비활성 버튼의 배지는 더 연하게 */
+    .view-toggle__btn:not(.view-toggle__btn--active) .view-toggle__badge {
+      background: var(--color-text-muted);
+    }
+
+    /* ─── Section ────────────────────────── */
+    .section + .section { margin-top: 22px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ─── Cards ──────────────────────────── */
+    .cards { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+    .card {
+      display: flex;
+      align-items: stretch;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .card:hover  { background: var(--color-surface-hover); }
+    .card:active { transform: scale(0.99); }
+    .card:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: 2px; }
+
+    /* 과기한: 테두리로만 구분, 배경은 유지 */
+    .card--overdue { border-color: var(--overdue-border); }
+
+    .card__body { flex: 1; min-width: 0; padding: 12px 6px 12px 15px; }
+
+    .card__name {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card__meta {
+      font-size: 12px;
+      line-height: 1.55;
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text-secondary);
+    }
+    .card__meta + .card__meta { margin-top: 1px; }
+    .card__meta--muted   { color: var(--color-text-muted); font-style: italic; }
+    .card__meta--urgent  { color: var(--urgent-text);  font-weight: 500; }
+    .card__meta--overdue { color: var(--overdue-text); font-weight: 500; }
+
+    /* ─── Right stat ─────────────────────── */
+    .card__stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 12px 14px 12px 6px;
+      flex-shrink: 0;
+      min-width: 72px;
+      text-align: right;
+    }
+    .card__stat-num {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      font-variant-numeric: tabular-nums;
+    }
+    .card__stat-unit {
+      font-size: 10px;
+      font-weight: 500;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .card__stat--urgent  .card__stat-num,
+    .card__stat--urgent  .card__stat-unit  { color: var(--urgent-text); }
+    .card__stat--overdue .card__stat-num,
+    .card__stat--overdue .card__stat-unit  { color: var(--overdue-text); }
+    .card__stat--normal  .card__stat-num   { color: var(--color-text-primary); }
+    .card__stat--normal  .card__stat-unit  { color: var(--color-text-muted); }
+    .card__stat--none    .card__stat-num   { color: var(--color-text-muted); font-size: 22px; font-weight: 300; }
+    .card__stat--none    .card__stat-unit  { color: var(--color-text-muted); }
+
+    /* ─── View visibility ────────────────── */
+    .view[hidden] { display: none; }
+
+    /* ─── Bottom nav ─────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; max-width: 390px;
+      height: calc(56px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--color-surface);
+      border-top: 1px solid var(--color-border);
+      display: flex; align-items: stretch;
+      z-index: 100;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; min-height: 44px; cursor: pointer;
+      border: none; background: none;
+      font-family: var(--font); padding: 6px 0;
+      transition: opacity 0.15s;
+    }
+    .nav-item:active { opacity: 0.65; }
+    .nav-item:focus-visible { outline: 2px solid var(--color-nav-active); outline-offset: -2px; }
+    .nav-item__label { font-size: 11px; font-weight: 500; line-height: 1; }
+    .nav-item--active   .nav-item__label, .nav-item--active   svg { color: var(--color-nav-active); }
+    .nav-item--inactive .nav-item__label, .nav-item--inactive svg { color: var(--color-nav-inactive); }
+
+    @media (min-width: 768px) {
+      body { background: #f0f0f0; }
+      .app { border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+    }
+    @media (min-width: 768px) and (prefers-color-scheme: dark) { body { background: #0a0a0a; } }
+  </style>
+</head>
+<body>
+<div class="app" role="application" aria-label="Pitstop 차량 관리 앱">
+
+  <header class="header" role="banner">
+    <h1 class="header__logo"><span style="color:var(--color-nav-active)">P</span>itstop</h1>
+    <a class="header__car-chip" href="#car-settings" role="button"
+       aria-label="선택된 차량: 아반떼 MD, 45,230km. 차량 변경">
+      <span aria-hidden="true">🚗</span>
+      <span>아반떼 MD</span>
+      <span class="header__car-chip-divider" aria-hidden="true">|</span>
+      <span>45,230km</span>
+    </a>
+  </header>
+
+  <main class="main" id="main-content" role="main">
+
+    <!-- ── View toggle ── -->
+    <div class="view-toggle" role="tablist" aria-label="보기 방식 선택">
+      <button class="view-toggle__btn"
+              role="tab" aria-selected="false" aria-controls="view-attention"
+              data-view="attention" type="button">
+        봐야 할 항목
+        <span class="view-toggle__badge" aria-label="7개">7</span>
+      </button>
+      <button class="view-toggle__btn view-toggle__btn--active"
+              role="tab" aria-selected="true" aria-controls="view-all"
+              data-view="all" type="button">
+        전체보기
+      </button>
+    </div>
+
+    <!-- ════════════════════════════════════ -->
+    <!-- VIEW 1: 봐야 할 항목 (기본)         -->
+    <!-- ════════════════════════════════════ -->
+    <div id="view-attention" class="view" data-view="attention" role="tabpanel" hidden>
+
+      <section class="section" aria-labelledby="attn-overdue">
+        <p class="section-label" id="attn-overdue">과기한</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-brake-fluid"
+               aria-label="브레이크액: 교체 시기 230km 초과">
+              <div class="card__body">
+                <p class="card__name">브레이크액</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음 (출고 기준)</p>
+                <p class="card__meta card__meta--overdue">권장 45,000km 도달 — 마지노선 50,000km</p>
+              </div>
+              <div class="card__stat card__stat--overdue" aria-label="230km 초과">
+                <span class="card__stat-num">230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-cabin-filter"
+               aria-label="에어컨필터: 교체 시기 2,230km 초과">
+              <div class="card__body">
+                <p class="card__name">에어컨필터</p>
+                <p class="card__meta">교체 2024.12.20 · 33,000km</p>
+                <p class="card__meta card__meta--overdue">권장 43,000km — 마지노선 48,000km</p>
+              </div>
+              <div class="card__stat card__stat--overdue" aria-label="2,230km 초과">
+                <span class="card__stat-num">2,230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-wipers"
+               aria-label="와이퍼 블레이드: 교체 시기 230km 초과">
+              <div class="card__body">
+                <p class="card__name">와이퍼 블레이드</p>
+                <p class="card__meta">교체 2025.04.10 · 35,000km</p>
+                <p class="card__meta card__meta--overdue">권장 2026.04.10 초과 · 45,000km 초과</p>
+              </div>
+              <div class="card__stat card__stat--overdue" aria-label="230km 초과">
+                <span class="card__stat-num">230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-evap"
+               aria-label="증발가스 계통: 점검 시기 5,230km 초과">
+              <div class="card__body">
+                <p class="card__name">증발가스 계통</p>
+                <p class="card__meta card__meta--muted">점검 기록 없음</p>
+                <p class="card__meta card__meta--overdue">점검 40,000km — 즉시 점검 필요</p>
+              </div>
+              <div class="card__stat card__stat--overdue" aria-label="5,230km 초과">
+                <span class="card__stat-num">5,230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-ignition-wires"
+               aria-label="점화플러그 배선·코일: 점검 시기 5,230km 초과">
+              <div class="card__body">
+                <p class="card__name">점화플러그 배선·코일</p>
+                <p class="card__meta card__meta--muted">점검 기록 없음</p>
+                <p class="card__meta card__meta--overdue">점검 40,000km — 즉시 점검 필요</p>
+              </div>
+              <div class="card__stat card__stat--overdue" aria-label="5,230km 초과">
+                <span class="card__stat-num">5,230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="attn-urgent">
+        <p class="section-label" id="attn-urgent">교체 임박</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card card--urgent" href="#detail-engine-oil"
+               aria-label="엔진오일: 권장 교체까지 1,000km 남음">
+              <div class="card__body">
+                <p class="card__name">엔진오일</p>
+                <p class="card__meta">교체 2026.01.15 · 36,230km</p>
+                <p class="card__meta card__meta--urgent">권장 46,230km — 마지노선 47,230km</p>
+              </div>
+              <div class="card__stat card__stat--urgent" aria-label="1,000km 남음">
+                <span class="card__stat-num">1,000</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--urgent" href="#detail-oil-filter"
+               aria-label="오일필터: 권장 교체까지 1,000km 남음">
+              <div class="card__body">
+                <p class="card__name">오일필터</p>
+                <p class="card__meta">교체 2026.01.15 · 36,230km</p>
+                <p class="card__meta card__meta--urgent">권장 46,230km — 마지노선 47,230km</p>
+              </div>
+              <div class="card__stat card__stat--urgent" aria-label="1,000km 남음">
+                <span class="card__stat-num">1,000</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+    </div><!-- /view-attention -->
+
+    <!-- ════════════════════════════════════ -->
+    <!-- VIEW 2: 전체보기                    -->
+    <!-- ════════════════════════════════════ -->
+    <div id="view-all" class="view" data-view="all" role="tabpanel">
+
+      <!-- 엔진·오일 -->
+      <section class="section" aria-labelledby="sec-engine">
+        <p class="section-label" id="sec-engine">엔진·오일</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card card--urgent" href="#detail-engine-oil"
+               aria-label="엔진오일: 1,000km 남음">
+              <div class="card__body">
+                <p class="card__name">엔진오일</p>
+                <p class="card__meta">교체 2026.01.15 · 36,230km</p>
+                <p class="card__meta card__meta--urgent">권장 46,230km — 마지노선 47,230km</p>
+              </div>
+              <div class="card__stat card__stat--urgent">
+                <span class="card__stat-num">1,000</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--urgent" href="#detail-oil-filter"
+               aria-label="오일필터: 1,000km 남음">
+              <div class="card__body">
+                <p class="card__name">오일필터</p>
+                <p class="card__meta">교체 2026.01.15 · 36,230km</p>
+                <p class="card__meta card__meta--urgent">권장 46,230km — 마지노선 47,230km</p>
+              </div>
+              <div class="card__stat card__stat--urgent">
+                <span class="card__stat-num">1,000</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-air-cleaner"
+               aria-label="에어크리너 필터: 9,770km 남음">
+              <div class="card__body">
+                <p class="card__name">에어크리너 필터</p>
+                <p class="card__meta">교체 2024.03.20 · 25,230km</p>
+                <p class="card__meta">권장 55,000km — 마지노선 65,230km</p>
+              </div>
+              <div class="card__stat card__stat--normal">
+                <span class="card__stat-num">9,770</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+      <!-- 연료·증발가스 -->
+      <section class="section" aria-labelledby="sec-fuel">
+        <p class="section-label" id="sec-fuel">연료·증발가스</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card" href="#detail-fuel-filter"
+               aria-label="연료필터: 14,770km 남음">
+              <div class="card__body">
+                <p class="card__name">연료필터</p>
+                <p class="card__meta">점검 2023.06.10 · 30,000km</p>
+                <p class="card__meta">교체 60,000km — 마지노선 70,000km</p>
+              </div>
+              <div class="card__stat card__stat--normal">
+                <span class="card__stat-num">14,770</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-evap"
+               aria-label="증발가스 계통: 5,230km 초과">
+              <div class="card__body">
+                <p class="card__name">증발가스 계통</p>
+                <p class="card__meta card__meta--muted">점검 기록 없음</p>
+                <p class="card__meta card__meta--overdue">점검 40,000km — 즉시 점검 필요</p>
+              </div>
+              <div class="card__stat card__stat--overdue">
+                <span class="card__stat-num">5,230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+      <!-- 공조·외부 -->
+      <section class="section" aria-labelledby="sec-cabin">
+        <p class="section-label" id="sec-cabin">공조·외부</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-cabin-filter"
+               aria-label="에어컨필터: 2,230km 초과">
+              <div class="card__body">
+                <p class="card__name">에어컨필터</p>
+                <p class="card__meta">교체 2024.12.20 · 33,000km</p>
+                <p class="card__meta card__meta--overdue">권장 43,000km — 마지노선 48,000km</p>
+              </div>
+              <div class="card__stat card__stat--overdue">
+                <span class="card__stat-num">2,230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-wipers"
+               aria-label="와이퍼 블레이드: 230km 초과">
+              <div class="card__body">
+                <p class="card__name">와이퍼 블레이드</p>
+                <p class="card__meta">교체 2025.04.10 · 35,000km</p>
+                <p class="card__meta card__meta--overdue">권장 2026.04.10 초과 · 45,000km 초과</p>
+              </div>
+              <div class="card__stat card__stat--overdue">
+                <span class="card__stat-num">230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+      <!-- 제동·냉각·변속 -->
+      <section class="section" aria-labelledby="sec-brake">
+        <p class="section-label" id="sec-brake">제동·냉각·변속</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-brake-fluid"
+               aria-label="브레이크액: 230km 초과">
+              <div class="card__body">
+                <p class="card__name">브레이크액</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음 (출고 기준)</p>
+                <p class="card__meta card__meta--overdue">권장 45,000km 도달 — 마지노선 50,000km</p>
+              </div>
+              <div class="card__stat card__stat--overdue">
+                <span class="card__stat-num">230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-brake-front"
+               aria-label="브레이크패드 전방: 기록 없음">
+              <div class="card__body">
+                <p class="card__name">브레이크패드 (전방)</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음</p>
+                <p class="card__meta">점검 50,000km — 마모 확인 후 교체</p>
+              </div>
+              <div class="card__stat card__stat--none">
+                <span class="card__stat-num">—</span>
+                <span class="card__stat-unit">미기록</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-brake-rear"
+               aria-label="브레이크패드 후방: 기록 없음">
+              <div class="card__body">
+                <p class="card__name">브레이크패드 (후방)</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음</p>
+                <p class="card__meta">점검 80,000km — 마모 확인 후 교체</p>
+              </div>
+              <div class="card__stat card__stat--none">
+                <span class="card__stat-num">—</span>
+                <span class="card__stat-unit">미기록</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-coolant"
+               aria-label="냉각수: 기록 없음">
+              <div class="card__body">
+                <p class="card__name">냉각수 (부동액)</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음</p>
+                <p class="card__meta">최초 교체 200,000km 또는 10년 — 이후 매 40,000km</p>
+              </div>
+              <div class="card__stat card__stat--none">
+                <span class="card__stat-num">—</span>
+                <span class="card__stat-unit">미기록</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-atf"
+               aria-label="변속기오일: 기록 없음">
+              <div class="card__body">
+                <p class="card__name">변속기오일 (미션오일)</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음</p>
+                <p class="card__meta">권장 80,000km — 마지노선 100,000km</p>
+              </div>
+              <div class="card__stat card__stat--none">
+                <span class="card__stat-num">—</span>
+                <span class="card__stat-unit">미기록</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+      <!-- 점화·벨트 -->
+      <section class="section" aria-labelledby="sec-ignition">
+        <p class="section-label" id="sec-ignition">점화·벨트</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card card--overdue" href="#detail-ignition-wires"
+               aria-label="점화플러그 배선·코일: 5,230km 초과">
+              <div class="card__body">
+                <p class="card__name">점화플러그 배선·코일</p>
+                <p class="card__meta card__meta--muted">점검 기록 없음</p>
+                <p class="card__meta card__meta--overdue">점검 40,000km — 즉시 점검 필요</p>
+              </div>
+              <div class="card__stat card__stat--overdue">
+                <span class="card__stat-num">5,230</span>
+                <span class="card__stat-unit">km 초과</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-spark-plugs"
+               aria-label="점화플러그: 기록 없음">
+              <div class="card__body">
+                <p class="card__name">점화플러그 (이리듐)</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음</p>
+                <p class="card__meta">권장 교체 160,000km</p>
+              </div>
+              <div class="card__stat card__stat--none">
+                <span class="card__stat-num">—</span>
+                <span class="card__stat-unit">미기록</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-timing-belt"
+               aria-label="구동벨트: 기록 없음">
+              <div class="card__body">
+                <p class="card__name">구동벨트 (타이밍벨트)</p>
+                <p class="card__meta card__meta--muted">교체 기록 없음</p>
+                <p class="card__meta">최초 교체 90,000km 또는 2027.09 — 이후 매 30,000km</p>
+              </div>
+              <div class="card__stat card__stat--none">
+                <span class="card__stat-num">—</span>
+                <span class="card__stat-unit">미기록</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+      <!-- 타이어·배터리 -->
+      <section class="section" aria-labelledby="sec-tires">
+        <p class="section-label" id="sec-tires">타이어·배터리</p>
+        <ul class="cards" role="list">
+
+          <li role="listitem">
+            <a class="card" href="#detail-tires"
+               aria-label="타이어: 다음 위치교환까지 15,000km 남음">
+              <div class="card__body">
+                <p class="card__name">타이어</p>
+                <p class="card__meta">위치교환 2025.06.10 · 40,230km</p>
+                <p class="card__meta">다음 교환 60,230km — 교체 80,000~100,000km</p>
+              </div>
+              <div class="card__stat card__stat--normal">
+                <span class="card__stat-num">15,000</span>
+                <span class="card__stat-unit">km 남음</span>
+              </div>
+            </a>
+          </li>
+
+          <li role="listitem">
+            <a class="card" href="#detail-battery"
+               aria-label="배터리: 20개월 남음">
+              <div class="card__body">
+                <p class="card__name">배터리</p>
+                <p class="card__meta">교체 2024.01.20 · 28,230km</p>
+                <p class="card__meta">점검 2027.01.20 또는 88,230km</p>
+              </div>
+              <div class="card__stat card__stat--normal">
+                <span class="card__stat-num">20</span>
+                <span class="card__stat-unit">개월 남음</span>
+              </div>
+            </a>
+          </li>
+
+        </ul>
+      </section>
+
+    </div><!-- /view-all -->
+
+  </main>
+
+  <nav class="bottom-nav" role="navigation" aria-label="앱 하단 내비게이션">
+    <button class="nav-item nav-item--active" type="button" aria-current="page" aria-label="홈">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 9.5L12 3L21 9.5V20C21 20.55 20.55 21 20 21H15V15H9V21H4C3.45 21 3 20.55 3 20V9.5Z" fill="currentColor"/>
+      </svg>
+      <span class="nav-item__label">홈</span>
+    </button>
+    <button class="nav-item nav-item--inactive" type="button" aria-label="기록">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+        <line x1="9" y1="8"  x2="15" y2="8"  stroke="currentColor" stroke-width="1.6"/>
+        <line x1="9" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.6"/>
+        <line x1="9" y1="16" x2="13" y2="16" stroke="currentColor" stroke-width="1.6"/>
+      </svg>
+      <span class="nav-item__label">기록</span>
+    </button>
+    <button class="nav-item nav-item--inactive" type="button" aria-label="설정">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              stroke="currentColor" stroke-width="1.8" fill="none"/>
+      </svg>
+      <span class="nav-item__label">설정</span>
+    </button>
+  </nav>
+
+</div>
+
+<script>
+  const btns  = document.querySelectorAll('.view-toggle__btn');
+  const views = document.querySelectorAll('.view');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.view;
+
+      btns.forEach(b => {
+        b.classList.toggle('view-toggle__btn--active', b === btn);
+        b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
+      });
+
+      views.forEach(v => {
+        v.hidden = v.dataset.view !== target;
+      });
+    });
+  });
+</script>
+</body>
+</html>
