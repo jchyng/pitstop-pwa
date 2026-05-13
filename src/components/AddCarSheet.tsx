@@ -100,7 +100,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
     : [brand, modelName].filter(Boolean).join(' · ');
 
   return (
-    <BottomSheet onClose={onClose} ariaLabel="차량 추가">
+    <BottomSheet onClose={onClose} ariaLabel="차량 등록">
       {/* 헤더 */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -322,7 +322,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
               transition: 'all 0.15s',
             }}
           >
-            {selectedCar ? `${selectedCar.name_ko} 추가하기` : '연료를 선택해주세요'}
+            {selectedCar ? `${selectedCar.name_ko} 등록하기` : '연료를 선택해주세요'}
           </button>
         </>
       )}
