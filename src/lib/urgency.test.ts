@@ -37,6 +37,19 @@ const coolant: ConsumableItem = {
   urgency_threshold_days: 60,
 };
 
+// 점검형 항목 (브레이크패드)
+const brakePad: ConsumableItem = {
+  id: 'brake-pad-front',
+  name_ko: '브레이크패드 (전방)',
+  category: '제동·냉각·변속',
+  interval_km: 10000,
+  max_km: null,
+  interval_months: null,
+  urgency_threshold_km: 2000,
+  urgency_threshold_days: null,
+  item_type: 'inspect',
+};
+
 describe('calculateUrgency', () => {
   describe('unknown — 기록 없음', () => {
     it('currentMileage도 lastLoggedDate도 null이면 unknown', () => {
@@ -180,6 +193,74 @@ describe('calculateUrgency', () => {
       });
       expect(result.status).toBe('urgent');
       expect(result.ratio).toBeCloseTo(0.5);
+    });
+  });
+
+  describe('inspect 항목 + condition 보정', () => {
+    it("'good'이면 원래 ratio 유지", () => {
+      // 5000km 전 점검, 현재 5000km 주행 → 남은 km 5000 → ratio = 5000/2000 = 2.5
+      const result = calculateUrgency({
+        item: brakePad,
+        currentMileage: 5000,
+        lastLoggedMileage: 0,
+        lastLoggedDate: '2025-05-01',
+        lastInspectCondition: 'good',
+      });
+      expect(result.status).toBe('ok');
+      expect(result.ratio).toBeCloseTo(2.5);
+    });
+
+    it("'caution'이면 ratio×0.5로 단축돼 urgent로", () => {
+      // 동일 조건: 원래 ratio 2.5 → caution이면 1.25? 아직 ok 이므로 안 끝남
+      // 더 짧게: 9500km/10000 → 남은 500 → ratio 0.25 → urgent
+      const okCase = calculateUrgency({
+        item: brakePad,
+        currentMileage: 5000,
+        lastLoggedMileage: 0,
+        lastLoggedDate: '2025-05-01',
+        lastInspectCondition: 'caution',
+      });
+      // 2.5 × 0.5 = 1.25 → still ok 경계 근처
+      expect(okCase.ratio).toBeCloseTo(1.25);
+      expect(okCase.status).toBe('ok');
+
+      const urgentCase = calculateUrgency({
+        item: brakePad,
+        currentMileage: 8000, // 남은 2000 → ratio 1
+        lastLoggedMileage: 0,
+        lastLoggedDate: '2025-05-01',
+        lastInspectCondition: 'caution',
+      });
+      // 1 × 0.5 = 0.5
+      expect(urgentCase.ratio).toBeCloseTo(0.5);
+      expect(urgentCase.status).toBe('urgent');
+    });
+
+    it("'replace_needed'면 즉시 overdue (ratio=-1, displayText='교체 필요')", () => {
+      const result = calculateUrgency({
+        item: brakePad,
+        currentMileage: 1000, // 정상 구간이지만 무관
+        lastLoggedMileage: 0,
+        lastLoggedDate: '2026-05-01',
+        lastInspectCondition: 'replace_needed',
+      });
+      expect(result.status).toBe('overdue');
+      expect(result.ratio).toBe(-1);
+      expect(result.displayText).toBe('교체 필요');
+    });
+
+    it('replace 항목에는 condition 보정이 적용되지 않음', () => {
+      // engineOil은 item_type === undefined (replace로 간주)
+      // caution을 넘겨도 ratio는 그대로 (원본 ratio = 5000/1000 = 5)
+      const result = calculateUrgency({
+        item: engineOil,
+        currentMileage: 45000,
+        lastLoggedMileage: 40000,
+        lastLoggedDate: '2025-11-01',
+        lastInspectCondition: 'caution',
+      });
+      expect(result.status).toBe('ok');
+      expect(result.ratio).toBeGreaterThan(1);
     });
   });
 });

@@ -1,9 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import type { ConsumableItem, LogType } from '@/types';
+import type { ConsumableItem, LogType, InspectCondition } from '@/types';
 import { setLastLog, setLastMileage, setLastLogType, addLog } from '@/lib/storage';
 import BottomSheet from '@/components/BottomSheet';
+
+const CONDITION_OPTIONS: { value: InspectCondition; label: string; tone: 'normal' | 'caution' | 'bad' }[] = [
+  { value: 'good', label: '양호', tone: 'normal' },
+  { value: 'caution', label: '주의 관찰', tone: 'caution' },
+  { value: 'replace_needed', label: '교체 필요', tone: 'bad' },
+];
 
 interface Props {
   item: ConsumableItem;
@@ -39,7 +45,10 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
   const [date, setDate] = useState(todayISO());
   const [mileageStr, setMileageStr] = useState(currentMileage !== null ? String(currentMileage) : '');
   const [logType, setLogType] = useState<LogType>(isInspectItem ? 'inspect' : 'replace');
+  const [condition, setCondition] = useState<InspectCondition>('good');
   const [note, setNote] = useState('');
+
+  const showCondition = logType === 'inspect';
 
   function handleSave() {
     if (!date) return;
@@ -58,6 +67,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
       date,
       mileage,
       logType,
+      condition: showCondition ? condition : undefined,
       note: note.trim() || undefined,
     });
     onSave();
@@ -116,6 +126,54 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
                 </button>
               );
             })}
+          </div>
+        )}
+
+        {/* Condition picker (점검 기록일 때만) */}
+        {showCondition && (
+          <div style={{ marginBottom: 18 }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: 'var(--color-text-muted)',
+                marginBottom: 8,
+                fontWeight: 500,
+              }}
+            >
+              점검 결과
+            </p>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {CONDITION_OPTIONS.map(opt => {
+                const active = condition === opt.value;
+                const activeBg =
+                  opt.tone === 'bad'
+                    ? 'var(--color-overdue-sub)'
+                    : opt.tone === 'caution'
+                    ? 'var(--color-urgent-text)'
+                    : 'var(--color-text-primary)';
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setCondition(opt.value)}
+                    style={{
+                      flex: 1,
+                      padding: '9px 0',
+                      borderRadius: 10,
+                      border: `1.5px solid ${active ? activeBg : 'var(--color-border)'}`,
+                      background: active ? activeBg : 'transparent',
+                      color: active ? 'var(--color-bg)' : 'var(--color-text-secondary)',
+                      fontWeight: 600,
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font)',
+                      transition: 'all 0.12s',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 

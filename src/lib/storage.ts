@@ -8,7 +8,7 @@
 //   pitstop_migrated_{car_id}           — 기존 last_log → 배열 마이그레이션 완료 여부
 //   pitstop_custom_intervals_{car_id}   — 사용자 커스텀 교체 주기
 
-import type { LogEntry, LogType, ConsumableItem } from '@/types';
+import type { LogEntry, LogType, ConsumableItem, InspectCondition } from '@/types';
 
 const key = {
   mileage: (carId: string) => `pitstop_mileage_${carId}`,
@@ -80,6 +80,25 @@ export function addLog(carId: string, entry: LogEntry): void {
   const logs = getLogs(carId);
   logs.push(entry);
   localStorage.setItem(key.logs(carId), JSON.stringify(logs));
+}
+
+// 해당 아이템의 가장 최근 점검 기록(condition 포함) 반환. 없으면 null.
+export function getLastInspectEntry(carId: string, itemId: string): LogEntry | null {
+  const logs = getLogs(carId);
+  let latest: LogEntry | null = null;
+  for (const entry of logs) {
+    if (entry.itemId !== itemId) continue;
+    if (entry.logType !== 'inspect') continue;
+    if (!latest || entry.date.localeCompare(latest.date) > 0) {
+      latest = entry;
+    }
+  }
+  return latest;
+}
+
+// 해당 아이템의 가장 최근 점검 condition만 반환 (없으면 null)
+export function getLastInspectCondition(carId: string, itemId: string): InspectCondition | null {
+  return getLastInspectEntry(carId, itemId)?.condition ?? null;
 }
 
 // 기존 last_log 단일 키 → 이력 배열 1회 이전

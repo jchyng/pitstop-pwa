@@ -80,10 +80,22 @@ export default function ItemDetailPage() {
   const lastLoggedDate = lastEntry?.date ?? null;
   const lastLoggedMileage = lastEntry?.mileage ?? null;
 
+  // 마지막 점검 기록의 condition (교체 후 점검 안 했으면 null)
+  const lastInspectCondition = useMemo(() => {
+    const lastInspect = sortedLogs.find(l => l.logType === 'inspect');
+    return lastInspect?.condition ?? null;
+  }, [sortedLogs]);
+
   const urgency = useMemo(() => {
     if (!mergedItem) return null;
-    return calculateUrgency({ item: mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate });
-  }, [mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate]);
+    return calculateUrgency({
+      item: mergedItem,
+      currentMileage,
+      lastLoggedMileage,
+      lastLoggedDate,
+      lastInspectCondition,
+    });
+  }, [mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate, lastInspectCondition]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, LogEntry[]>();
@@ -310,6 +322,22 @@ export default function ItemDetailPage() {
                   {formatDate(lastLoggedDate)}
                   {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
                 </span>
+                {lastEntry?.logType === 'inspect' && lastEntry.condition && (
+                  <span
+                    style={{
+                      marginLeft: 6,
+                      fontWeight: 600,
+                      color:
+                        lastEntry.condition === 'replace_needed'
+                          ? 'var(--color-overdue-sub)'
+                          : lastEntry.condition === 'caution'
+                          ? 'var(--color-urgent-text)'
+                          : 'var(--color-normal-text)',
+                    }}
+                  >
+                    · {lastEntry.condition === 'good' ? '양호' : lastEntry.condition === 'caution' ? '주의' : '교체 필요'}
+                  </span>
+                )}
               </p>
             )}
             {item.notes && (

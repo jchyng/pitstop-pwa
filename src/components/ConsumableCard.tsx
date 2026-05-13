@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { ConsumableItem, UrgencyResult, LogType } from '@/types';
+import type { ConsumableItem, UrgencyResult, LogType, InspectCondition } from '@/types';
 import { ITEM_EMOJI } from '@/lib/icons';
 
 interface Props {
@@ -11,9 +11,16 @@ interface Props {
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
+  lastInspectCondition?: InspectCondition | null;
   isCustom?: boolean;
   onClick: () => void;
 }
+
+const CONDITION_LABEL: Record<InspectCondition, string> = {
+  good: '양호',
+  caution: '주의',
+  replace_needed: '교체 필요',
+};
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -54,6 +61,7 @@ export default function ConsumableCard({
   lastLoggedDate,
   lastLoggedMileage,
   lastLogType,
+  lastInspectCondition,
   isCustom,
   onClick,
 }: Props) {
@@ -149,6 +157,22 @@ export default function ConsumableCard({
             <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
               {lastLogType === 'inspect' ? '점검' : '교체'} {formatDate(lastLoggedDate)}
               {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
+              {lastLogType === 'inspect' && lastInspectCondition ? (
+                <span
+                  style={{
+                    marginLeft: 6,
+                    fontWeight: 600,
+                    color:
+                      lastInspectCondition === 'replace_needed'
+                        ? 'var(--color-overdue-sub)'
+                        : lastInspectCondition === 'caution'
+                        ? 'var(--color-urgent-text)'
+                        : 'var(--color-normal-text)',
+                  }}
+                >
+                  · {CONDITION_LABEL[lastInspectCondition]}
+                </span>
+              ) : null}
             </p>
           ) : (
             <p

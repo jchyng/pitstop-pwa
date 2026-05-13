@@ -1,6 +1,9 @@
 // 정비 기록 유형: 교체 or 점검
 export type LogType = 'replace' | 'inspect';
 
+// 점검 결과 상태 (logType === 'inspect'일 때만 의미 있음)
+export type InspectCondition = 'good' | 'caution' | 'replace_needed';
+
 // 소모품 항목 하나의 정적 데이터 (JSON에서 읽어오는 원본 구조)
 export interface ConsumableItem {
   id: string;
@@ -38,6 +41,13 @@ export interface ItemWithUrgency {
   urgency: UrgencyResult;
 }
 
+// 차량 목록 인덱스 항목 (index.json)
+export interface CarIndex {
+  car_id: string;
+  name_ko: string;
+  file: string;
+}
+
 // 정비 이력 한 건
 export interface LogEntry {
   id: string;           // Date.now().toString()
@@ -47,5 +57,6 @@ export interface LogEntry {
   date: string;         // YYYY-MM-DD
   mileage: number | null;
   logType: LogType;
+  condition?: InspectCondition; // logType === 'inspect'일 때 기록되는 점검 결과
   note?: string;
 }

@@ -53,6 +53,20 @@ export default function Timeline({
             const actionLabel = entry.logType === 'inspect'
               ? (showItemName ? `${entry.itemName} 점검` : '점검 완료')
               : (showItemName ? `${entry.itemName} 교환` : '교환');
+            const conditionLabel =
+              entry.logType === 'inspect' && entry.condition
+                ? entry.condition === 'good'
+                  ? '양호'
+                  : entry.condition === 'caution'
+                  ? '주의'
+                  : '교체 필요'
+                : null;
+            const conditionColor =
+              entry.condition === 'replace_needed'
+                ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-overdue-sub)' }
+                : entry.condition === 'caution'
+                ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-urgent-text)' }
+                : { bg: 'var(--color-normal-bg)', fg: 'var(--color-normal-text)' };
             const clickable = !!onEntryClick;
 
             return (
@@ -151,6 +165,23 @@ export default function Timeline({
                           }}
                         >
                           최근
+                        </span>
+                      )}
+                      {conditionLabel && (
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '2px 7px',
+                            borderRadius: 8,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            background: conditionColor.bg,
+                            color: conditionColor.fg,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {conditionLabel}
                         </span>
                       )}
                     </div>
