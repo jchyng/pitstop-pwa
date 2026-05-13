@@ -1,0 +1,174 @@
+{
+  "car_id": "sorento-mq4-diesel",
+  "name_ko": "쏘렌토 MQ4 디젤",
+  "items": [
+    {
+      "id": "engine-oil",
+      "name_ko": "엔진오일",
+      "category": "엔진·오일",
+      "interval_km": 15000,
+      "max_km": null,
+      "interval_months": 12,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": 30,
+      "notes": "가혹 조건 시 10,000km로 단축"
+    },
+    {
+      "id": "oil-filter",
+      "name_ko": "오일필터",
+      "category": "엔진·오일",
+      "interval_km": 15000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": null,
+      "notes": "엔진오일 교환 시 동시 교체"
+    },
+    {
+      "id": "air-cleaner",
+      "name_ko": "에어크리너 필터",
+      "category": "엔진·오일",
+      "interval_km": 20000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 3000,
+      "urgency_threshold_days": null,
+      "notes": "오염 심한 도로 운행 시 조기 교체"
+    },
+    {
+      "id": "fuel-filter",
+      "name_ko": "연료필터",
+      "category": "연료·증발가스",
+      "interval_km": 50000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 5000,
+      "urgency_threshold_days": null,
+      "notes": "수분 분리기 20,000km마다 점검"
+    },
+    {
+      "id": "cabin-filter",
+      "name_ko": "에어컨(히터) 필터",
+      "category": "공조·외부",
+      "interval_km": 10000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": null,
+      "notes": null
+    },
+    {
+      "id": "wipers",
+      "name_ko": "와이퍼 블레이드",
+      "category": "공조·외부",
+      "interval_km": 10000,
+      "max_km": null,
+      "interval_months": 12,
+      "urgency_threshold_km": 1000,
+      "urgency_threshold_days": 30,
+      "notes": null
+    },
+    {
+      "id": "brake-fluid",
+      "name_ko": "브레이크액",
+      "category": "제동·냉각·변속",
+      "interval_km": null,
+      "max_km": null,
+      "interval_months": 24,
+      "urgency_threshold_km": null,
+      "urgency_threshold_days": 60,
+      "notes": "수시 점검"
+    },
+    {
+      "id": "brake-pad-front",
+      "name_ko": "브레이크패드 (전방)",
+      "category": "제동·냉각·변속",
+      "interval_km": 40000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 5000,
+      "urgency_threshold_days": null,
+      "item_type": "inspect",
+      "notes": "마모 확인 후 교체"
+    },
+    {
+      "id": "brake-pad-rear",
+      "name_ko": "브레이크패드 (후방)",
+      "category": "제동·냉각·변속",
+      "interval_km": 60000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 10000,
+      "urgency_threshold_days": null,
+      "item_type": "inspect",
+      "notes": "마모 확인 후 교체"
+    },
+    {
+      "id": "coolant",
+      "name_ko": "냉각수 (부동액)",
+      "category": "제동·냉각·변속",
+      "interval_km": 200000,
+      "max_km": null,
+      "interval_months": 60,
+      "urgency_threshold_km": 20000,
+      "urgency_threshold_days": 180,
+      "notes": "수시 보충"
+    },
+    {
+      "id": "atf",
+      "name_ko": "변속기오일 (미션오일)",
+      "category": "제동·냉각·변속",
+      "interval_km": 60000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 10000,
+      "urgency_threshold_days": null,
+      "notes": "가혹 조건 시 단축"
+    },
+    {
+      "id": "drive-belt",
+      "name_ko": "구동벨트",
+      "category": "점화·벨트",
+      "interval_km": 15000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": null,
+      "item_type": "inspect",
+      "notes": "마모·균열 시 교환"
+    },
+    {
+      "id": "tires",
+      "name_ko": "타이어 위치교환",
+      "category": "타이어·배터리",
+      "interval_km": 10000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 1000,
+      "urgency_threshold_days": null,
+      "notes": "위치교환(로테이션) 주기"
+    },
+    {
+      "id": "tire-replacement",
+      "name_ko": "타이어 교체",
+      "category": "타이어·배터리",
+      "interval_km": 60000,
+      "max_km": null,
+      "interval_months": 60,
+      "urgency_threshold_km": 10000,
+      "urgency_threshold_days": 180,
+      "notes": "마모 한계선 기준"
+    },
+    {
+      "id": "battery",
+      "name_ko": "배터리",
+      "category": "타이어·배터리",
+      "interval_km": 60000,
+      "max_km": null,
+      "interval_months": 36,
+      "urgency_threshold_km": 10000,
+      "urgency_threshold_days": 90,
+      "notes": null
+    }
+  ]
+}
