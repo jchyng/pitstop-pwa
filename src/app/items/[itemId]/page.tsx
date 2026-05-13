@@ -4,8 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import type { CarData, ConsumableItem, LogEntry } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, getLogs, migrateLogsIfNeeded } from '@/lib/storage';
+import { getMileage, getLogs, migrateLogsIfNeeded, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
 import LogSheet from '@/components/LogSheet';
+import IntervalEditSheet from '@/components/IntervalEditSheet';
 import Timeline from '@/components/Timeline';
 
 function formatDate(iso: string): string {
@@ -34,6 +35,8 @@ export default function ItemDetailPage() {
   const [currentMileage, setCurrentMileage] = useState<number | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showLogSheet, setShowLogSheet] = useState(false);
+  const [showIntervalSheet, setShowIntervalSheet] = useState(false);
+  const [customVersion, setCustomVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +60,16 @@ export default function ItemDetailPage() {
     [carData, itemId],
   );
 
+  const mergedItem = useMemo(() => {
+    if (!item || !carId) return null;
+    return mergeItemWithCustom(carId, item);
+  }, [item, carId, customVersion]);
+
+  const isCustom = useMemo(() => {
+    if (!item || !carId) return false;
+    return !!getCustomInterval(carId, item.id);
+  }, [item, carId, customVersion]);
+
   const sortedLogs = useMemo(
     () => [...logs].sort((a, b) => b.date.localeCompare(a.date)),
     [logs],
@@ -67,9 +80,9 @@ export default function ItemDetailPage() {
   const lastLoggedMileage = lastEntry?.mileage ?? null;
 
   const urgency = useMemo(() => {
-    if (!item) return null;
-    return calculateUrgency({ item, currentMileage, lastLoggedMileage, lastLoggedDate });
-  }, [item, currentMileage, lastLoggedMileage, lastLoggedDate]);
+    if (!mergedItem) return null;
+    return calculateUrgency({ item: mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate });
+  }, [mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, LogEntry[]>();
@@ -85,7 +98,11 @@ export default function ItemDetailPage() {
     setLogs(getLogs(carId).filter(l => l.itemId === itemId));
   }
 
-  const intervalText = item ? buildIntervalText(item) : '';
+  function handleIntervalSave() {
+    setCustomVersion(v => v + 1);
+  }
+
+  const intervalText = mergedItem ? buildIntervalText(mergedItem) : '';
 
   const statusColor =
     urgency?.status === 'overdue'
@@ -225,12 +242,61 @@ export default function ItemDetailPage() {
                 </p>
               </div>
               {intervalText && (
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 2 }}>교체 주기</p>
+                <button
+                  onClick={() => setShowIntervalSheet(true)}
+                  aria-label="교체 주기 편집"
+                  style={{
+                    textAlign: 'right',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '2px 0',
+                    fontFamily: 'var(--font)',
+                    flexShrink: 0,
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 12,
+                      color: 'var(--color-text-muted)',
+                      marginBottom: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: 4,
+                    }}
+                  >
+                    교체 주기
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path
+                        d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </p>
                   <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-secondary)' }}>
                     {intervalText}
                   </p>
-                </div>
+                  {isCustom && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        marginTop: 4,
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '2px 7px',
+                        borderRadius: 10,
+                        background: 'var(--color-urgent-bg)',
+                        color: 'var(--color-urgent-text)',
+                      }}
+                    >
+                      커스텀
+                    </span>
+                  )}
+                </button>
               )}
             </div>
             {lastLoggedDate && (
@@ -430,6 +496,15 @@ export default function ItemDetailPage() {
           currentMileage={currentMileage}
           onSave={handleSave}
           onClose={() => setShowLogSheet(false)}
+        />
+      )}
+
+      {showIntervalSheet && item && (
+        <IntervalEditSheet
+          item={item}
+          carId={carId}
+          onSave={handleIntervalSave}
+          onClose={() => setShowIntervalSheet(false)}
         />
       )}
     </div>

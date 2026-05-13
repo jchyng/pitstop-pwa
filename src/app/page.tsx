@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CarData, ItemWithUrgency, LogType } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarChip from '@/components/CarChip';
 import CarHero from '@/components/CarHero';
@@ -23,6 +23,7 @@ interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
+  isCustom: boolean;
 }
 
 const CATEGORIES = [
@@ -43,6 +44,14 @@ export default function Home() {
   const [view, setView] = useState<'attention' | 'full'>('full');
   const [showMileageSheet, setShowMileageSheet] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [customVersion, setCustomVersion] = useState(0);
+
+  // 커스텀 주기 변경 시 대시보드 갱신
+  useEffect(() => {
+    const refresh = () => setCustomVersion(v => v + 1);
+    window.addEventListener('pitstop_custom_changed', refresh);
+    return () => window.removeEventListener('pitstop_custom_changed', refresh);
+  }, []);
 
   // 차종 목록 로드
   useEffect(() => {
@@ -86,13 +95,15 @@ export default function Home() {
   const itemsWithLog = useMemo<ItemWithLog[]>(() => {
     if (!carData) return [];
     return carData.items.map(item => {
+      const mergedItem = mergeItemWithCustom(selectedCarId, item);
       const lastLoggedDate = getLastLog(selectedCarId, item.id);
       const lastLoggedMileage = getLastMileage(selectedCarId, item.id);
       const lastLogType = getLastLogType(selectedCarId, item.id);
-      const urgency = calculateUrgency({ item, currentMileage, lastLoggedMileage, lastLoggedDate });
-      return { item, urgency, lastLoggedDate, lastLoggedMileage, lastLogType };
+      const isCustom = !!getCustomInterval(selectedCarId, item.id);
+      const urgency = calculateUrgency({ item: mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate });
+      return { item: mergedItem, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, isCustom };
     });
-  }, [carData, currentMileage, selectedCarId]);
+  }, [carData, currentMileage, selectedCarId, customVersion]);
 
   const overdueItems = useMemo(
     () => itemsWithLog.filter(x => x.urgency.status === 'overdue'),
@@ -287,6 +298,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
+                          isCustom={x.isCustom}
                           onClick={() => router.push(`/items/${x.item.id}`)}
                         />
                       ))}
@@ -319,6 +331,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
+                          isCustom={x.isCustom}
                           onClick={() => router.push(`/items/${x.item.id}`)}
                         />
                       ))}

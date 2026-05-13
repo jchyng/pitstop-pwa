@@ -5,6 +5,7 @@ interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
+  isCustom: boolean;
 }
 
 interface Props {
@@ -42,6 +43,7 @@ export default function CategorySection({ category, items, currentMileage, onCar
             lastLoggedDate={x.lastLoggedDate}
             lastLoggedMileage={x.lastLoggedMileage}
             lastLogType={x.lastLogType}
+            isCustom={x.isCustom}
             onClick={() => onCardClick(x)}
           />
         ))}

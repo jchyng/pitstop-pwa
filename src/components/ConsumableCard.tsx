@@ -10,6 +10,7 @@ interface Props {
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
+  isCustom?: boolean;
   onClick: () => void;
 }
 
@@ -52,6 +53,7 @@ export default function ConsumableCard({
   lastLoggedDate,
   lastLoggedMileage,
   lastLogType,
+  isCustom,
   onClick,
 }: Props) {
   const [pressed, setPressed] = useState(false);
@@ -105,20 +107,38 @@ export default function ConsumableCard({
       >
         {/* Body */}
         <div style={{ flex: 1, minWidth: 0, padding: '12px 6px 12px 15px' }}>
-          <p
-            style={{
-              fontSize: 16,
-              fontWeight: 600,
-              lineHeight: 1.3,
-              marginBottom: 5,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            {item.name_ko}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, minWidth: 0 }}>
+            <p
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                lineHeight: 1.3,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                color: 'var(--color-text-primary)',
+                minWidth: 0,
+              }}
+            >
+              {item.name_ko}
+            </p>
+            {isCustom && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: 8,
+                  background: 'var(--color-urgent-bg)',
+                  color: 'var(--color-urgent-text)',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                커스텀
+              </span>
+            )}
+          </div>
 
           {/* Last service line */}
           {lastLoggedDate ? (
@@ -161,7 +181,7 @@ export default function ConsumableCard({
             flexDirection: 'column',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '12px 0 12px 6px',
+            padding: '12px 15px 12px 6px',
             flexShrink: 0,
             minWidth: 80,
             textAlign: 'right',
@@ -194,23 +214,6 @@ export default function ConsumableCard({
           )}
         </div>
 
-        {/* Chevron */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            paddingRight: 10,
-            paddingLeft: 4,
-            color: 'var(--color-text-muted)',
-            opacity: 0.5,
-            flexShrink: 0,
-          }}
-          aria-hidden="true"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
       </div>
     </li>
   );

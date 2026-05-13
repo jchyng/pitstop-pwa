@@ -4,8 +4,9 @@
 //   pitstop_last_log_{car_id}_{item_id}
 //   pitstop_last_mileage_{car_id}_{item_id}
 //   pitstop_last_log_type_{car_id}_{item_id}
-//   pitstop_logs_{car_id}          — 정비 이력 배열 (LogEntry[])
-//   pitstop_migrated_{car_id}      — 기존 last_log → 배열 마이그레이션 완료 여부
+//   pitstop_logs_{car_id}               — 정비 이력 배열 (LogEntry[])
+//   pitstop_migrated_{car_id}           — 기존 last_log → 배열 마이그레이션 완료 여부
+//   pitstop_custom_intervals_{car_id}   — 사용자 커스텀 교체 주기
 
 import type { LogEntry, LogType, ConsumableItem } from '@/types';
 
@@ -16,6 +17,7 @@ const key = {
   lastLogType: (carId: string, itemId: string) => `pitstop_last_log_type_${carId}_${itemId}`,
   logs: (carId: string) => `pitstop_logs_${carId}`,
   migrated: (carId: string) => `pitstop_migrated_${carId}`,
+  customIntervals: (carId: string) => `pitstop_custom_intervals_${carId}`,
 };
 
 // 현재 주행거리 (숫자, 없으면 null)
@@ -108,4 +110,58 @@ export function migrateLogsIfNeeded(carId: string, items: ConsumableItem[]): voi
     localStorage.setItem(key.logs(carId), JSON.stringify(migrated));
   }
   localStorage.setItem(key.migrated(carId), '1');
+}
+
+// 커스텀 교체 주기
+
+type CustomIntervalData = { interval_km?: number; interval_months?: number };
+
+function readCustomIntervalsMap(carId: string): Record<string, CustomIntervalData> {
+  const raw = localStorage.getItem(key.customIntervals(carId));
+  if (!raw) return {};
+  try { return JSON.parse(raw) as Record<string, CustomIntervalData>; } catch { return {}; }
+}
+
+export function getCustomInterval(carId: string, itemId: string): CustomIntervalData | null {
+  return readCustomIntervalsMap(carId)[itemId] ?? null;
+}
+
+export function setCustomInterval(carId: string, itemId: string, data: CustomIntervalData): void {
+  const all = readCustomIntervalsMap(carId);
+  all[itemId] = data;
+  localStorage.setItem(key.customIntervals(carId), JSON.stringify(all));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pitstop_custom_changed'));
+  }
+}
+
+export function resetCustomInterval(carId: string, itemId: string): void {
+  const all = readCustomIntervalsMap(carId);
+  delete all[itemId];
+  localStorage.setItem(key.customIntervals(carId), JSON.stringify(all));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pitstop_custom_changed'));
+  }
+}
+
+// official item + custom override → 병합된 item 반환 (urgency threshold 비례 조정 포함)
+export function mergeItemWithCustom(carId: string, item: ConsumableItem): ConsumableItem {
+  const custom = readCustomIntervalsMap(carId)[item.id];
+  if (!custom) return item;
+  const merged = { ...item };
+  if (custom.interval_km !== undefined && custom.interval_km > 0) {
+    merged.interval_km = custom.interval_km;
+    if (item.interval_km && item.urgency_threshold_km) {
+      const ratio = item.urgency_threshold_km / item.interval_km;
+      merged.urgency_threshold_km = Math.max(1, Math.round(custom.interval_km * ratio));
+    }
+  }
+  if (custom.interval_months !== undefined && custom.interval_months > 0) {
+    merged.interval_months = custom.interval_months;
+    if (item.interval_months && item.urgency_threshold_days) {
+      const ratio = item.urgency_threshold_days / (item.interval_months * 30);
+      merged.urgency_threshold_days = Math.max(1, Math.round(custom.interval_months * 30 * ratio));
+    }
+  }
+  return merged;
 }
