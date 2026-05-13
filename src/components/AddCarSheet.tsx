@@ -93,7 +93,10 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
 
   const stepTitle = step === 1 ? '브랜드 선택' : step === 2 ? '차종 선택' : step === 3 ? '세대 선택' : '연료 선택';
 
-  const breadcrumb = [brand, modelName, model].filter(Boolean).join(' · ');
+  // 세대(model)가 선택되면 model_name은 model에 포함되므로 생략
+  const breadcrumb = model
+    ? [brand, model].filter(Boolean).join(' · ')
+    : [brand, modelName].filter(Boolean).join(' · ');
 
   return (
     <BottomSheet onClose={onClose} ariaLabel="차량 추가">
