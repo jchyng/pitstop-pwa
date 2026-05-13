@@ -27,16 +27,23 @@ export default function LogPage() {
   const [carName, setCarName] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterCategory, setFilterCategory] = useState('전체');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const carId = localStorage.getItem('pitstop_selected_car') ?? '';
-    if (!carId) return;
+    if (!carId) {
+      setIsLoading(false);
+      return;
+    }
 
     async function load() {
       const idxRes = await fetch('/cars/index.json');
       const idx: { car_id: string; name_ko: string; file: string }[] = await idxRes.json();
       const meta = idx.find(c => c.car_id === carId);
-      if (!meta) return;
+      if (!meta) {
+        setIsLoading(false);
+        return;
+      }
       setCarName(meta.name_ko);
 
       const dataRes = await fetch(meta.file);
@@ -45,6 +52,7 @@ export default function LogPage() {
 
       migrateLogsIfNeeded(carId, data.items);
       setLogs(getLogs(carId));
+      setIsLoading(false);
     }
 
     load();
@@ -184,7 +192,27 @@ export default function LogPage() {
           overflowY: 'auto',
         }}
       >
-        {sorted.length === 0 ? (
+        {isLoading ? (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '40vh',
+            }}
+          >
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                border: '2.5px solid var(--color-border)',
+                borderTop: '2.5px solid var(--color-nav-active)',
+                borderRadius: '50%',
+                animation: 'pitstop-spin 0.75s linear infinite',
+              }}
+            />
+          </div>
+        ) : sorted.length === 0 ? (
           <div
             style={{
               display: 'flex',

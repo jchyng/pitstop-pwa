@@ -172,7 +172,6 @@ export default function Home() {
             animation: 'pitstop-spin 0.75s linear infinite',
           }}
         />
-        <style>{`@keyframes pitstop-spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }

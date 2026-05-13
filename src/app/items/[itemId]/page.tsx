@@ -34,6 +34,7 @@ export default function ItemDetailPage() {
   const [currentMileage, setCurrentMileage] = useState<number | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showLogSheet, setShowLogSheet] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const savedCarId = localStorage.getItem('pitstop_selected_car') ?? 'avante-md-gasoline';
@@ -47,6 +48,7 @@ export default function ItemDetailPage() {
         setCurrentMileage(mileage);
         setCarData(data);
         setLogs(getLogs(savedCarId).filter(l => l.itemId === itemId));
+        setIsLoading(false);
       });
   }, [itemId]);
 
@@ -298,7 +300,27 @@ export default function ItemDetailPage() {
           )}
         </div>
 
-        {sortedLogs.length === 0 ? (
+        {isLoading ? (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingTop: 56,
+            }}
+          >
+            <div
+              style={{
+                width: 24,
+                height: 24,
+                border: '2.5px solid var(--color-border)',
+                borderTop: '2.5px solid var(--color-nav-active)',
+                borderRadius: '50%',
+                animation: 'pitstop-spin 0.75s linear infinite',
+              }}
+            />
+          </div>
+        ) : sortedLogs.length === 0 ? (
           <div
             style={{
               display: 'flex',
