@@ -8,6 +8,7 @@ import { getMileage, getLogs, migrateLogsIfNeeded, mergeItemWithCustom, getCusto
 import LogSheet from '@/components/LogSheet';
 import IntervalEditSheet from '@/components/IntervalEditSheet';
 import Timeline from '@/components/Timeline';
+import { ITEM_EMOJI } from '@/lib/icons';
 
 function formatDate(iso: string): string {
   return iso.replace(/-/g, '.');
@@ -185,6 +186,9 @@ export default function ItemDetailPage() {
             whiteSpace: 'nowrap',
           }}
         >
+          {ITEM_EMOJI[itemId] && (
+            <span aria-hidden="true" style={{ marginRight: 4, flexShrink: 0 }}>{ITEM_EMOJI[itemId]}</span>
+          )}
           {item?.name_ko ?? '로딩 중...'}
         </h1>
         {urgency && (

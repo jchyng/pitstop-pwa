@@ -6,15 +6,7 @@ import BottomNav from '@/components/BottomNav';
 import Timeline from '@/components/Timeline';
 import type { CarData, LogEntry } from '@/types';
 import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  '엔진·오일': '🛢️',
-  '연료·증발가스': '⛽',
-  '공조·외부': '❄️',
-  '제동·냉각·변속': '🛑',
-  '점화·벨트': '⚡',
-  '타이어·배터리': '🔄',
-};
+import { CATEGORY_EMOJI } from '@/lib/icons';
 
 function toMonthLabel(iso: string): string {
   const [y, m] = iso.split('-');

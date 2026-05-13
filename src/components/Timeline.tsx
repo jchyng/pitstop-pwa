@@ -1,13 +1,5 @@
 import type { LogEntry } from '@/types';
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  '엔진·오일': '🛢️',
-  '연료·증발가스': '⛽',
-  '공조·외부': '❄️',
-  '제동·냉각·변속': '🛑',
-  '점화·벨트': '⚡',
-  '타이어·배터리': '🔄',
-};
+import { CATEGORY_EMOJI, ITEM_EMOJI } from '@/lib/icons';
 
 function formatDate(iso: string): string {
   return iso.replace(/-/g, '.');
@@ -139,6 +131,9 @@ export default function Timeline({
                       }}
                     >
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {showItemName && ITEM_EMOJI[entry.itemId] && (
+                          <span aria-hidden="true" style={{ marginRight: 4 }}>{ITEM_EMOJI[entry.itemId]}</span>
+                        )}
                         {actionLabel}
                       </span>
                       {isRecent && (

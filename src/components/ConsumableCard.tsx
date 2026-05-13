@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { ConsumableItem, UrgencyResult, LogType } from '@/types';
+import { ITEM_EMOJI } from '@/lib/icons';
 
 interface Props {
   item: ConsumableItem;
@@ -120,6 +121,9 @@ export default function ConsumableCard({
                 minWidth: 0,
               }}
             >
+              {ITEM_EMOJI[item.id] && (
+                <span aria-hidden="true" style={{ marginRight: 4, flexShrink: 0 }}>{ITEM_EMOJI[item.id]}</span>
+              )}
               {item.name_ko}
             </p>
             {isCustom && (
