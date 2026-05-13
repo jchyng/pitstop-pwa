@@ -31,15 +31,42 @@ function formatDate(iso: string): string {
   return `${y}.${m}.${day}`;
 }
 
-function buildNextKmText(item: ConsumableItem, lastKm: number | null): string {
-  if (item.interval_km === null) return '';
-  if (lastKm === null) return `권장 ${item.interval_km.toLocaleString()}km 주기`;
-  const next = lastKm + item.interval_km;
-  const max = lastKm + (item.max_km ?? item.interval_km);
-  if (item.max_km && item.max_km !== item.interval_km) {
-    return `권장 ${next.toLocaleString()}km — 마지노선 ${max.toLocaleString()}km`;
+function addMonths(dateStr: string, months: number): string {
+  const d = new Date(dateStr);
+  d.setMonth(d.getMonth() + months);
+  return formatDate(d.toISOString());
+}
+
+function buildRecentValue(lastKm: number | null, lastDate: string | null): string | null {
+  if (lastKm === null && lastDate === null) return null;
+  const parts: string[] = [];
+  if (lastKm !== null) parts.push(`${lastKm.toLocaleString()}km`);
+  if (lastDate) parts.push(formatDate(lastDate));
+  return parts.join(' · ');
+}
+
+function buildNextValue(item: ConsumableItem, lastKm: number | null, lastDate: string | null): string | null {
+  const parts: string[] = [];
+  if (item.interval_km !== null && lastKm !== null) {
+    const nextKm = lastKm + item.interval_km;
+    if (item.max_km && item.max_km !== item.interval_km) {
+      const maxKm = lastKm + item.max_km;
+      parts.push(`${nextKm.toLocaleString()}km (마지노선 ${maxKm.toLocaleString()}km)`);
+    } else {
+      parts.push(`${nextKm.toLocaleString()}km`);
+    }
   }
-  return `권장 ${next.toLocaleString()}km`;
+  if (item.interval_months !== null && lastDate) {
+    parts.push(addMonths(lastDate, item.interval_months));
+  }
+  return parts.length > 0 ? parts.join(' · ') : null;
+}
+
+function buildIntervalValue(item: ConsumableItem): string | null {
+  const parts: string[] = [];
+  if (item.interval_km !== null) parts.push(`${item.interval_km.toLocaleString()}km`);
+  if (item.interval_months !== null) parts.push(`${item.interval_months}개월`);
+  return parts.length > 0 ? parts.join(' · ') : null;
 }
 
 function parseStatDisplay(displayText: string): { num: string; unit: string } {
@@ -48,7 +75,6 @@ function parseStatDisplay(displayText: string): { num: string; unit: string } {
 
   const spaceIdx = displayText.search(/\s/);
   if (spaceIdx === -1) {
-    // "N개월 남음" / "N개월 초과" — no leading space
     const m = displayText.match(/^(\d+)(개월.+)$/);
     if (m) return { num: m[1], unit: m[2] };
     return { num: displayText, unit: '' };
@@ -95,13 +121,15 @@ export default function ConsumableCard({
     ? 'var(--color-text-muted)'
     : 'var(--color-text-primary)';
 
-  const metaColor = isOverdue
+  const nextColor = isOverdue
     ? 'var(--color-overdue-sub)'
     : isUrgent
     ? 'var(--color-urgent-text)'
     : 'var(--color-text-secondary)';
 
-  const nextKmText = buildNextKmText(item, lastLoggedMileage);
+  const recentValue = buildRecentValue(lastLoggedMileage, lastLoggedDate);
+  const nextValue = buildNextValue(item, lastLoggedMileage, lastLoggedDate);
+  const intervalValue = buildIntervalValue(item);
 
   return (
     <li style={{ listStyle: 'none' }}>
@@ -131,7 +159,7 @@ export default function ConsumableCard({
         {/* Body */}
         <div style={{ flex: 1, minWidth: 0, padding: '12px 6px 12px 15px' }}>
           {/* Name row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5, flexWrap: 'wrap', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap', minWidth: 0 }}>
             <p
               style={{
                 fontSize: 16,
@@ -196,46 +224,50 @@ export default function ConsumableCard({
             )}
           </div>
 
-          {/* Last service line */}
-          {lastLoggedDate ? (
-            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
-              {lastLogType === 'inspect' ? '점검' : '교체'} {formatDate(lastLoggedDate)}
-              {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
-            </p>
-          ) : (
-            <p
-              style={{
-                fontSize: 13,
-                color: 'var(--color-text-muted)',
-                fontStyle: 'italic',
-                lineHeight: 1.55,
-              }}
-            >
-              기록 없음
-            </p>
-          )}
+          {/* Info rows: 최근 / 다음 / 권장 주기 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* 최근 */}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>최근</span>
+              <span
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  color: recentValue ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
+                  fontStyle: recentValue ? 'normal' : 'italic',
+                }}
+              >
+                {recentValue ?? '기록 없음'}
+              </span>
+            </div>
 
-          {/* Last replace line (inspect items only) */}
-          {isInspectItem && lastReplaceDate && (
-            <p style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-              마지막 교체 {formatDate(lastReplaceDate)}
-              {lastReplaceMileage != null ? ` · ${lastReplaceMileage.toLocaleString()}km` : ''}
-            </p>
-          )}
+            {/* 다음 */}
+            {nextValue && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>다음</span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1.5,
+                    color: nextColor,
+                    fontWeight: (isOverdue || isUrgent) ? 500 : 400,
+                  }}
+                >
+                  {nextValue}
+                </span>
+              </div>
+            )}
 
-          {/* Next service line */}
-          {nextKmText ? (
-            <p
-              style={{
-                fontSize: 13,
-                color: metaColor,
-                lineHeight: 1.55,
-                fontWeight: (isOverdue || isUrgent) ? 500 : 400,
-              }}
-            >
-              {nextKmText}
-            </p>
-          ) : null}
+            {/* 권장 주기 */}
+            {intervalValue && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>권장 주기</span>
+                <span style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
+                  {intervalValue}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stat */}
