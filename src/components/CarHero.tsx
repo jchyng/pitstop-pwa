@@ -116,36 +116,29 @@ export default function CarHero({ carId, carName, currentMileage, onEditClick }:
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <p
-                style={{
-                  fontSize: 15,
-                  color: 'var(--color-text-muted)',
-                  fontFamily: 'var(--font)',
-                  lineHeight: 1.3,
-                }}
-              >
-                주행거리 미입력
-              </p>
-              <button
-                type="button"
-                onClick={onEditClick}
-                aria-label="주행거리 입력"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 4,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  color: 'var(--color-text-muted)',
-                  flexShrink: 0,
-                }}
-              >
-                <PencilIcon />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={onEditClick}
+              aria-label="주행거리 입력"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                marginTop: 2,
+                padding: '7px 12px',
+                border: '1.5px solid var(--color-nav-active)',
+                borderRadius: 8,
+                background: 'transparent',
+                cursor: 'pointer',
+                color: 'var(--color-nav-active)',
+                fontFamily: 'var(--font)',
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              <PencilIcon />
+              주행거리 입력하기
+            </button>
           )}
         </div>
 

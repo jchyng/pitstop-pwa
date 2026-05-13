@@ -6,7 +6,7 @@ import type { CarData, ConsumableItem, LogEntry } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
 import { getMileage, getLogs, migrateLogsIfNeeded } from '@/lib/storage';
 import LogSheet from '@/components/LogSheet';
-import BottomNav from '@/components/BottomNav';
+import Timeline from '@/components/Timeline';
 
 function formatDate(iso: string): string {
   return iso.replace(/-/g, '.');
@@ -266,7 +266,7 @@ export default function ItemDetailPage() {
         style={{
           flex: 1,
           padding: '16px var(--page-pad) 0',
-          paddingBottom: 'calc(140px + env(safe-area-inset-bottom, 0px))',
+          paddingBottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
           overflowY: 'auto',
         }}
       >
@@ -318,157 +318,10 @@ export default function ItemDetailPage() {
             </p>
           </div>
         ) : (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {grouped.map(([monthLabel, entries], groupIdx) => (
-              <li key={monthLabel}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: groupIdx === 0 ? '2px 0 10px' : '18px 0 10px',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--color-nav-active)',
-                      letterSpacing: '0.04em',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {monthLabel}
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
-                </div>
-
-                {entries.map((entry, entryIdx) => {
-                  const isLast = groupIdx === grouped.length - 1 && entryIdx === entries.length - 1;
-                  const isRecent = entry.id === sortedLogs[0]?.id;
-                  return (
-                    <div
-                      key={entry.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: 14,
-                        paddingBottom: 18,
-                      }}
-                    >
-                      {/* Timeline axis */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          flexShrink: 0,
-                          width: 20,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            background: isRecent ? 'var(--color-nav-active)' : 'var(--color-border)',
-                            border: '2px solid var(--color-surface)',
-                            boxShadow: `0 0 0 1.5px ${isRecent ? 'var(--color-nav-active)' : 'var(--color-border)'}`,
-                            marginTop: 5,
-                            flexShrink: 0,
-                          }}
-                        />
-                        {!isLast && (
-                          <div
-                            style={{
-                              width: 1.5,
-                              flex: 1,
-                              background: 'var(--color-border)',
-                              minHeight: 18,
-                              marginTop: 4,
-                            }}
-                          />
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 8,
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 15,
-                              fontWeight: 600,
-                              color: 'var(--color-text-primary)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 6,
-                            }}
-                          >
-                            {entry.logType === 'inspect' ? '점검 완료' : '교환'}
-                            {isRecent && (
-                              <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  padding: '2px 7px',
-                                  borderRadius: 8,
-                                  fontSize: 11,
-                                  fontWeight: 600,
-                                  background: 'var(--color-normal-bg)',
-                                  color: 'var(--color-normal-text)',
-                                }}
-                              >
-                                최근
-                              </span>
-                            )}
-                          </div>
-                          {entry.mileage !== null && (
-                            <span
-                              style={{
-                                fontSize: 14,
-                                fontWeight: 600,
-                                color: 'var(--color-text-primary)',
-                                fontVariantNumeric: 'tabular-nums',
-                                whiteSpace: 'nowrap',
-                                flexShrink: 0,
-                              }}
-                            >
-                              {entry.mileage.toLocaleString()} km
-                            </span>
-                          )}
-                        </div>
-                        <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginTop: 3 }}>
-                          {formatDate(entry.date)}
-                        </p>
-                        {entry.note && (
-                          <p
-                            style={{
-                              marginTop: 6,
-                              fontSize: 12.5,
-                              color: 'var(--color-text-muted)',
-                              background: 'var(--color-surface-hover)',
-                              borderRadius: 8,
-                              padding: '6px 10px',
-                              lineHeight: 1.5,
-                            }}
-                          >
-                            {entry.note}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </li>
-            ))}
-          </ul>
+          <Timeline
+            grouped={grouped}
+            mostRecentId={sortedLogs[0]?.id ?? null}
+          />
         )}
       </main>
 
@@ -477,12 +330,13 @@ export default function ItemDetailPage() {
         <div
           style={{
             position: 'fixed',
-            bottom: 'calc(56px + env(safe-area-inset-bottom, 0px))',
+            bottom: 0,
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
             maxWidth: 390,
             padding: '12px var(--page-pad)',
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
             background: 'var(--color-bg)',
             borderTop: '1px solid var(--color-border)',
             zIndex: 10,
@@ -508,8 +362,6 @@ export default function ItemDetailPage() {
           </button>
         </div>
       )}
-
-      <BottomNav activeTab="home" />
 
       {showLogSheet && item && (
         <LogSheet

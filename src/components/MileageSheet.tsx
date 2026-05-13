@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import BottomSheet from '@/components/BottomSheet';
 
 interface Props {
   currentMileage: number | null;
@@ -40,108 +41,74 @@ export default function MileageSheet({ currentMileage, onSave, onClose }: Props)
   }
 
   return (
-    <>
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.45)',
-          zIndex: 100,
-        }}
-      />
-
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="주행거리 업데이트"
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: 390,
-          background: 'var(--color-surface)',
-          borderRadius: '20px 20px 0 0',
-          zIndex: 101,
-          padding: '20px var(--page-pad)',
-          paddingBottom: 'calc(28px + env(safe-area-inset-bottom, 0px))',
-        }}
-      >
-        {/* Handle bar */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--color-border)' }} />
-        </div>
-
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-            주행거리 업데이트
-          </p>
-          <button
-            onClick={onClose}
-            aria-label="닫기"
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: 22,
-              lineHeight: 1,
-              color: 'var(--color-text-muted)',
-              padding: '0 2px',
-              fontFamily: 'var(--font)',
-            }}
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Input */}
-        <div style={{ marginBottom: error ? 8 : 24 }}>
-          <label
-            htmlFor="mileage-sheet-input"
-            style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
-          >
-            현재 주행거리 (km)
-          </label>
-          <input
-            id="mileage-sheet-input"
-            type="number"
-            inputMode="numeric"
-            min="0"
-            value={value}
-            onChange={e => { setValue(e.target.value); setError(''); }}
-            placeholder="예: 99000"
-            autoFocus
-            style={{ ...inputStyle, borderColor: error ? 'var(--color-urgent-text)' : 'var(--color-border)' }}
-          />
-        </div>
-
-        {error && (
-          <p role="alert" style={{ fontSize: 12, color: 'var(--color-urgent-text)', marginBottom: 16 }}>
-            {error}
-          </p>
-        )}
-
+    <BottomSheet onClose={onClose} ariaLabel="주행거리 업데이트">
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
+          주행거리 업데이트
+        </p>
         <button
-          onClick={handleSave}
+          onClick={onClose}
+          aria-label="닫기"
           style={{
-            width: '100%',
-            padding: '15px 0',
-            borderRadius: 12,
+            background: 'none',
             border: 'none',
-            background: 'var(--color-text-primary)',
-            color: 'var(--color-bg)',
-            fontSize: 16,
-            fontWeight: 700,
             cursor: 'pointer',
+            fontSize: 22,
+            lineHeight: 1,
+            color: 'var(--color-text-muted)',
+            padding: '0 2px',
             fontFamily: 'var(--font)',
           }}
         >
-          저장
+          ×
         </button>
       </div>
-    </>
+
+      {/* Input */}
+      <div style={{ marginBottom: error ? 8 : 24 }}>
+        <label
+          htmlFor="mileage-sheet-input"
+          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
+        >
+          현재 주행거리 (km)
+        </label>
+        <input
+          id="mileage-sheet-input"
+          type="number"
+          inputMode="numeric"
+          min="0"
+          value={value}
+          onChange={e => { setValue(e.target.value); setError(''); }}
+          placeholder="예: 99000"
+          autoFocus
+          style={{ ...inputStyle, borderColor: error ? 'var(--color-urgent-text)' : 'var(--color-border)' }}
+        />
+      </div>
+
+      {error && (
+        <p role="alert" style={{ fontSize: 12, color: 'var(--color-urgent-text)', marginBottom: 16 }}>
+          {error}
+        </p>
+      )}
+
+      <button
+        onClick={handleSave}
+        style={{
+          width: '100%',
+          padding: '15px 0',
+          borderRadius: 12,
+          border: 'none',
+          background: 'var(--color-text-primary)',
+          color: 'var(--color-bg)',
+          fontSize: 16,
+          fontWeight: 700,
+          cursor: 'pointer',
+          fontFamily: 'var(--font)',
+        }}
+      >
+        저장
+      </button>
+    </BottomSheet>
   );
 }

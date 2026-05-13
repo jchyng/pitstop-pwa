@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import type { ConsumableItem, UrgencyResult, LogType } from '@/types';
 
 interface Props {
@@ -51,18 +54,13 @@ export default function ConsumableCard({
   lastLogType,
   onClick,
 }: Props) {
+  const [pressed, setPressed] = useState(false);
   const { status, displayText } = urgency;
   const { num, unit } = parseStatDisplay(displayText);
 
   const isOverdue = status === 'overdue';
   const isUrgent = status === 'urgent';
   const isUnknown = status === 'unknown';
-
-  const accentColor = isOverdue
-    ? 'var(--color-overdue-sub)'
-    : isUrgent
-    ? 'var(--color-urgent-text)'
-    : null;
 
   const statColor = isOverdue
     ? 'var(--color-overdue-sub)'
@@ -84,16 +82,21 @@ export default function ConsumableCard({
     <li style={{ listStyle: 'none' }}>
       <div
         onClick={onClick}
+        onMouseDown={() => setPressed(true)}
+        onMouseUp={() => setPressed(false)}
+        onMouseLeave={() => setPressed(false)}
+        onTouchStart={() => setPressed(true)}
+        onTouchEnd={() => setPressed(false)}
         style={{
           display: 'flex',
           alignItems: 'stretch',
-          background: 'var(--color-surface)',
+          background: pressed ? 'var(--color-surface-hover)' : 'var(--color-surface)',
           border: '1px solid var(--color-border)',
           borderRadius: 'var(--radius-card)',
           boxShadow: 'var(--shadow-card)',
           overflow: 'hidden',
           cursor: 'pointer',
-          transition: 'background 0.15s',
+          transition: 'background 0.1s',
         }}
         role="button"
         tabIndex={0}
@@ -158,7 +161,7 @@ export default function ConsumableCard({
             flexDirection: 'column',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '12px 14px 12px 6px',
+            padding: '12px 0 12px 6px',
             flexShrink: 0,
             minWidth: 80,
             textAlign: 'right',
@@ -189,6 +192,24 @@ export default function ConsumableCard({
               {unit}
             </span>
           )}
+        </div>
+
+        {/* Chevron */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            paddingRight: 10,
+            paddingLeft: 4,
+            color: 'var(--color-text-muted)',
+            opacity: 0.5,
+            flexShrink: 0,
+          }}
+          aria-hidden="true"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
       </div>
     </li>

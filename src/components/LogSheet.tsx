@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ConsumableItem, LogType } from '@/types';
 import { setLastLog, setLastMileage, setLastLogType, addLog } from '@/lib/storage';
+import BottomSheet from '@/components/BottomSheet';
 
 interface Props {
   item: ConsumableItem;
@@ -64,42 +65,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
   }
 
   return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.45)',
-          zIndex: 100,
-        }}
-      />
-
-      {/* Sheet */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label={`${item.name_ko} 기록`}
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: 390,
-          background: 'var(--color-surface)',
-          borderRadius: '20px 20px 0 0',
-          zIndex: 101,
-          padding: '20px var(--page-pad)',
-          paddingBottom: 'calc(28px + env(safe-area-inset-bottom, 0px))',
-        }}
-      >
-        {/* Handle bar */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--color-border)' }} />
-        </div>
-
+    <BottomSheet onClose={onClose} ariaLabel={`${item.name_ko} 기록`}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
@@ -227,7 +193,6 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         >
           저장
         </button>
-      </div>
-    </>
+    </BottomSheet>
   );
 }

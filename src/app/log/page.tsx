@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
+import Timeline from '@/components/Timeline';
 import type { CarData, LogEntry } from '@/types';
 import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
 
@@ -14,10 +15,6 @@ const CATEGORY_EMOJI: Record<string, string> = {
   '점화·벨트': '⚡',
   '타이어·배터리': '🔄',
 };
-
-function formatDate(iso: string): string {
-  return iso.replace(/-/g, '.');
-}
 
 function toMonthLabel(iso: string): string {
   const [y, m] = iso.split('-');
@@ -99,56 +96,32 @@ export default function LogPage() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          justifyContent: 'space-between',
           padding: '20px var(--page-pad) 14px',
         }}
       >
-        <button
-          onClick={() => router.push('/')}
-          aria-label="홈으로"
-          style={{
-            width: 44,
-            height: 44,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-            color: 'var(--color-text-primary)',
-            marginLeft: -8,
-            borderRadius: 8,
-          }}
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <h1 style={{ flex: 1, fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px' }}>정비 이력</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px' }}>정비 이력</h1>
         {carName && (
-          <button
-            onClick={() => router.push('/')}
+          <span
             aria-label={`선택된 차량: ${carName}`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 5,
-              padding: '8px 12px',
+              padding: '6px 12px',
               border: '1.5px solid var(--color-border)',
               borderRadius: 24,
               background: 'var(--color-surface)',
-              minHeight: 44,
               fontSize: 13,
               fontWeight: 500,
-              color: 'var(--color-text-primary)',
+              color: 'var(--color-text-secondary)',
               whiteSpace: 'nowrap',
-              cursor: 'pointer',
               fontFamily: 'var(--font)',
             }}
           >
             <span aria-hidden="true">🚗</span>
             <span>{carName}</span>
-          </button>
+          </span>
         )}
       </header>
 
@@ -231,182 +204,13 @@ export default function LogPage() {
             </p>
           </div>
         ) : (
-          <ul style={{ listStyle: 'none' }}>
-            {grouped.map(([monthLabel, entries], groupIdx) => (
-              <li key={monthLabel}>
-                {/* Month anchor */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: groupIdx === 0 ? '2px 0 10px' : '18px 0 10px',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 600,
-                      color: 'var(--color-nav-active)',
-                      letterSpacing: '0.04em',
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {monthLabel}
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
-                </div>
-
-                {/* Entries */}
-                {entries.map((entry, entryIdx) => {
-                  const isLast = groupIdx === grouped.length - 1 && entryIdx === entries.length - 1;
-                  const isRecent = entry.id === mostRecentId;
-                  const emoji = CATEGORY_EMOJI[entry.category] ?? '';
-                  return (
-                    <div
-                      key={entry.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: 14,
-                        paddingBottom: 18,
-                        cursor: 'default',
-                      }}
-                    >
-                      {/* Axis */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          flexShrink: 0,
-                          width: 20,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            background: isRecent ? 'var(--color-nav-active)' : 'var(--color-border)',
-                            border: '2px solid var(--color-surface)',
-                            boxShadow: `0 0 0 1.5px ${isRecent ? 'var(--color-nav-active)' : 'var(--color-border)'}`,
-                            marginTop: 5,
-                            flexShrink: 0,
-                          }}
-                        />
-                        {!isLast && (
-                          <div
-                            style={{
-                              width: 1.5,
-                              flex: 1,
-                              background: 'var(--color-border)',
-                              minHeight: 18,
-                              marginTop: 4,
-                            }}
-                          />
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div style={{ flex: 1, minWidth: 0, paddingTop: 1 }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 8,
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 16,
-                              fontWeight: 600,
-                              color: 'var(--color-text-primary)',
-                              lineHeight: 1.3,
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 4,
-                              minWidth: 0,
-                            }}
-                          >
-                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {entry.logType === 'inspect' ? `${entry.itemName} 점검` : `${entry.itemName} 교환`}
-                            </span>
-                            {isRecent && (
-                              <span
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  padding: '2px 7px',
-                                  borderRadius: 8,
-                                  fontSize: 11,
-                                  fontWeight: 600,
-                                  background: 'var(--color-normal-bg)',
-                                  color: 'var(--color-normal-text)',
-                                  flexShrink: 0,
-                                }}
-                              >
-                                최근
-                              </span>
-                            )}
-                          </div>
-                          {entry.mileage !== null && (
-                            <div
-                              style={{
-                                fontSize: 13.5,
-                                fontWeight: 600,
-                                color: 'var(--color-text-primary)',
-                                fontVariantNumeric: 'tabular-nums',
-                                whiteSpace: 'nowrap',
-                                flexShrink: 0,
-                              }}
-                            >
-                              {entry.mileage.toLocaleString()} km
-                            </div>
-                          )}
-                        </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
-                          <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
-                            {formatDate(entry.date)}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: 11,
-                              fontWeight: 500,
-                              color: 'var(--color-text-muted)',
-                              background: 'var(--color-surface-hover)',
-                              padding: '2px 7px',
-                              borderRadius: 8,
-                            }}
-                          >
-                            {emoji} {entry.category}
-                          </span>
-                        </div>
-
-                        {entry.note && (
-                          <div
-                            style={{
-                              marginTop: 6,
-                              fontSize: 12.5,
-                              color: 'var(--color-text-muted)',
-                              background: 'var(--color-surface-hover)',
-                              borderRadius: 8,
-                              padding: '6px 10px',
-                              lineHeight: 1.5,
-                            }}
-                          >
-                            {entry.note}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </li>
-            ))}
-          </ul>
+          <Timeline
+            grouped={grouped}
+            mostRecentId={mostRecentId}
+            showItemName
+            showCategory
+            onEntryClick={entry => router.push(`/items/${entry.itemId}`)}
+          />
         )}
       </main>
 
