@@ -45,6 +45,9 @@ export interface ItemWithUrgency {
 export interface CarIndex {
   car_id: string;
   name_ko: string;
+  brand: string;
+  model: string;
+  fuel: string;
   file: string;
 }
 
