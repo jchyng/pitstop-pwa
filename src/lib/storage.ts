@@ -145,6 +145,25 @@ export function migrateLogsIfNeeded(carId: string, items: ConsumableItem[]): voi
   localStorage.setItem(key.migrated(carId), '1');
 }
 
+// 내 차량 목록 (car_id 배열)
+
+const MY_CARS_KEY = 'pitstop_my_car_ids';
+
+export function getMyCars(): string[] {
+  if (typeof window === 'undefined') return [];
+  const raw = localStorage.getItem(MY_CARS_KEY);
+  if (!raw) return [];
+  try { return JSON.parse(raw) as string[]; } catch { return []; }
+}
+
+export function addMyCar(carId: string): void {
+  const cars = getMyCars();
+  if (!cars.includes(carId)) {
+    cars.push(carId);
+    localStorage.setItem(MY_CARS_KEY, JSON.stringify(cars));
+  }
+}
+
 // 커스텀 교체 주기
 
 type CustomIntervalData = { interval_km?: number; interval_months?: number };

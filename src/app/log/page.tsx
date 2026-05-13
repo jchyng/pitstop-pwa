@@ -21,13 +21,13 @@ export default function LogPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const carId = localStorage.getItem('pitstop_selected_car') ?? '';
-    if (!carId) {
-      setIsLoading(false);
-      return;
-    }
-
     async function load() {
+      const carId = localStorage.getItem('pitstop_selected_car') ?? '';
+      if (!carId) {
+        setIsLoading(false);
+        return;
+      }
+
       const idxRes = await fetch('/cars/index.json');
       const idx: { car_id: string; name_ko: string; file: string }[] = await idxRes.json();
       const meta = idx.find(c => c.car_id === carId);

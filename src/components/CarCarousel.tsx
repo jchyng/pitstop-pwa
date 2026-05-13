@@ -111,8 +111,6 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
     scrollToIndex(idx);
   }
 
-  if (carList.length === 0) return null;
-
   // 총 카드 수 = 차량 + Add Car 1개
   const totalCards = carList.length + 1;
 
@@ -317,7 +315,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           onClick={onAddCar}
           onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') onAddCar();
-            if (e.key === 'ArrowLeft') scrollToIndex(carList.length - 1);
+            if (e.key === 'ArrowLeft' && carList.length > 0) scrollToIndex(carList.length - 1);
           }}
           style={{
             flexShrink: 0,
