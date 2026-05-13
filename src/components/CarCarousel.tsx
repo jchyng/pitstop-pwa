@@ -18,6 +18,22 @@ function getCarImagePath(carId: string): string {
   return `/cars/images/${base}.png`;
 }
 
+const FUEL_LABEL: Record<string, string> = {
+  gasoline: '가솔린',
+  diesel: '디젤',
+  lpg: 'LPG',
+  hybrid: '하이브리드',
+  electric: '전기',
+};
+
+function formatCarName(nameKo: string, carId: string): string {
+  const match = carId.match(/-?(gasoline|diesel|lpg|hybrid|electric)$/);
+  if (!match) return nameKo;
+  const fuelKo = FUEL_LABEL[match[1]];
+  const base = nameKo.replace(new RegExp(`\\s*${fuelKo}$`), '');
+  return `${base} - ${fuelKo}`;
+}
+
 const CAR_IMAGE_TUNING: Record<string, { scale: number; offsetX: number; offsetY: number }> = {
   'avante-md-gasoline': { scale: 0.97, offsetX: 0, offsetY: 1 },
   'grandeur-hg-gasoline': { scale: 0.95, offsetX: 0, offsetY: 2 },
@@ -57,7 +73,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
     const card = cardRefs.current[targetIdx];
     if (!card) return;
     const el = scrollRef.current;
-    el.scrollLeft = card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2;
+    el.scrollLeft = card.offsetLeft;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carList]);
 
@@ -86,7 +102,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
     const card = cardRefs.current[idx];
     if (!card || !scrollRef.current) return;
     const el = scrollRef.current;
-    el.scrollTo({ left: card.offsetLeft - (el.clientWidth - card.offsetWidth) / 2, behavior: 'smooth' });
+    el.scrollTo({ left: card.offsetLeft, behavior: 'smooth' });
   }
 
   function selectCard(idx: number, carId: string) {
@@ -114,8 +130,8 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           overflowX: 'auto',
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
-          gap: 12,
-          padding: '8px 20px',
+          gap: 0,
+          padding: '8px 0',
           position: 'relative',
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
@@ -142,47 +158,45 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
               }}
               style={{
                 flexShrink: 0,
-                width: 'calc(100% - 40px)',
-                scrollSnapAlign: 'center',
-                overflow: 'hidden',
-                minHeight: 168,
-                padding: '20px 18px 18px',
+                width: '100%',
+                scrollSnapAlign: 'start',
+                padding: '0 16px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 0,
-                background: 'var(--color-surface)',
-                borderRadius: 20,
-                border: isActive ? '2px solid rgba(17, 17, 17, 0.78)' : '1px solid var(--color-border)',
-                boxShadow: isActive ? '0 8px 22px rgba(17,17,17,0.08)' : '0 6px 16px rgba(17,17,17,0.04)',
-                opacity: isActive ? 1 : 0.74,
-                transform: isActive ? 'scale(1)' : 'scale(0.985)',
-                transition: 'opacity 0.2s ease, transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease',
-                cursor: 'pointer',
+                cursor: 'default',
                 userSelect: 'none',
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', minHeight: 128 }}>
+              <div style={{
+                overflow: 'hidden',
+                minHeight: 136,
+                padding: '14px 16px 14px',
+                background: 'var(--color-surface)',
+                borderRadius: 'var(--radius-card)',
+                border: '1px solid var(--color-border)',
+                boxShadow: 'var(--shadow-card)',
+              }}>
+              <div style={{ display: 'flex', flexDirection: 'column', minHeight: 100 }}>
                 <p style={{
                   maxWidth: '100%',
-                  minHeight: 46,
                   fontSize: 17,
                   fontWeight: 700,
                   color: 'var(--color-text-primary)',
                   lineHeight: 1.35,
-                  letterSpacing: '-0.3px',
+                  letterSpacing: '-0.4px',
                   fontFamily: 'var(--font)',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                 }}>
-                  {car.name_ko}
+                  {formatCarName(car.name_ko, car.car_id)}
                 </p>
 
-                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 10, marginTop: 'auto' }}>
-                  <div style={{ flex: '1 1 auto', minWidth: 0, paddingRight: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between', gap: 8, marginTop: 'auto' }}>
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 5 }}>
                     <p style={{
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: 700,
                       color: 'var(--color-text-secondary)',
                       lineHeight: 1.2,
@@ -192,85 +206,81 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                       주행거리
                     </p>
 
-                    <div style={{ display: 'flex', alignItems: cardMileage !== null ? 'flex-end' : 'center', flexWrap: 'wrap', columnGap: 8, rowGap: 8, marginTop: 8 }}>
-                      {cardMileage !== null ? (
-                        <p
-                          aria-label={`현재 주행거리 ${cardMileage.toLocaleString()}킬로미터`}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'flex-end',
-                            gap: 4,
-                            fontSize: 'clamp(28px, 8vw, 34px)',
-                            fontWeight: 700,
-                            color: 'var(--color-text-primary)',
-                            lineHeight: 1,
-                            letterSpacing: '-0.9px',
-                            fontVariantNumeric: 'tabular-nums',
-                            fontFamily: 'var(--font)',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          {cardMileage.toLocaleString()}
-                          <span style={{ display: 'inline-block', fontSize: 'clamp(14px, 3.8vw, 16px)', fontWeight: 600, letterSpacing: 0, color: 'var(--color-text-secondary)' }}>
-                            km
-                          </span>
-                        </p>
-                      ) : (
-                        <p
-                          aria-label="주행거리 미입력"
-                          style={{
-                            fontSize: 'clamp(26px, 7vw, 30px)',
-                            fontWeight: 700,
-                            color: 'var(--color-text-primary)',
-                            lineHeight: 1,
-                            letterSpacing: '-0.7px',
-                            fontFamily: 'var(--font)',
-                            whiteSpace: 'nowrap',
-                          }}
-                        >
-                          미입력
-                        </p>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          if (!isActive) {
-                            selectCard(i, car.car_id);
-                            return;
-                          }
-                          onEditMileage();
-                        }}
-                        aria-label={cardMileage === null ? '주행거리 입력' : '주행거리 수정'}
+                    {cardMileage !== null ? (
+                      <p
+                        aria-label={`현재 주행거리 ${cardMileage.toLocaleString()}킬로미터`}
                         style={{
                           display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 5,
-                          padding: '7px 11px',
-                          border: `1px solid ${isActive ? 'rgba(17, 17, 17, 0.12)' : 'var(--color-border)'}`,
-                          borderRadius: 999,
-                          background: isActive ? 'rgba(248, 250, 252, 0.92)' : 'transparent',
-                          cursor: 'pointer',
-                          color: isActive ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
-                          fontFamily: 'var(--font)',
-                          fontSize: 12,
-                          fontWeight: 600,
+                          alignItems: 'flex-end',
+                          gap: 3,
+                          fontSize: 'clamp(22px, 6vw, 26px)',
+                          fontWeight: 700,
+                          color: 'var(--color-text-primary)',
                           lineHeight: 1,
+                          letterSpacing: '-0.6px',
+                          fontVariantNumeric: 'tabular-nums',
+                          fontFamily: 'var(--font)',
                           whiteSpace: 'nowrap',
-                          flexShrink: 0,
                         }}
                       >
-                        <PencilIcon />
-                        {actionLabel}
-                      </button>
-                    </div>
+                        {cardMileage.toLocaleString()}
+                        <span style={{ display: 'inline-block', fontSize: 'clamp(11px, 2.8vw, 12px)', fontWeight: 600, letterSpacing: 0, color: 'var(--color-text-secondary)' }}>
+                          km
+                        </span>
+                      </p>
+                    ) : (
+                      <p
+                        aria-label="주행거리 미입력"
+                        style={{
+                          fontSize: 'clamp(20px, 5.5vw, 24px)',
+                          fontWeight: 700,
+                          color: 'var(--color-text-primary)',
+                          lineHeight: 1,
+                          letterSpacing: '-0.5px',
+                          fontFamily: 'var(--font)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        미입력
+                      </p>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        if (!isActive) {
+                          selectCard(i, car.car_id);
+                          return;
+                        }
+                        onEditMileage();
+                      }}
+                      aria-label={cardMileage === null ? '주행거리 입력' : '주행거리 수정'}
+                      style={{
+                        alignSelf: 'flex-start',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '5px 9px',
+                        border: `1px solid ${isActive ? 'rgba(17, 17, 17, 0.12)' : 'var(--color-border)'}`,
+                        borderRadius: 999,
+                        background: isActive ? 'rgba(248, 250, 252, 0.92)' : 'transparent',
+                        cursor: 'pointer',
+                        color: isActive ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
+                        fontFamily: 'var(--font)',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      <PencilIcon />
+                      {actionLabel}
+                    </button>
                   </div>
 
                   <div style={{
-                    flex: '0 0 clamp(118px, 33vw, 144px)',
-                    width: 'clamp(118px, 33vw, 144px)',
-                    height: 'clamp(72px, 21vw, 86px)',
+                    flex: 1,
                     display: 'flex',
                     alignItems: 'flex-end',
                     justifyContent: 'flex-end',
@@ -284,7 +294,6 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                         height: '100%',
                         objectFit: 'contain',
                         objectPosition: 'right bottom',
-                        flexShrink: 0,
                         pointerEvents: 'none',
                         userSelect: 'none',
                         transform: `translate(${imageTuning.offsetX}px, ${imageTuning.offsetY}px) scale(${imageTuning.scale})`,
@@ -293,6 +302,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                     />
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           );
@@ -311,24 +321,24 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           }}
           style={{
             flexShrink: 0,
-            width: 'calc(100% - 40px)',
-            scrollSnapAlign: 'center',
-            minHeight: 160,
+            width: '100%',
+            scrollSnapAlign: 'start',
+            padding: '0 16px',
+            cursor: 'pointer',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{
+            minHeight: 136,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
             background: 'var(--color-surface)',
-            borderRadius: 20,
+            borderRadius: 'var(--radius-card)',
             border: '2px dashed var(--color-border)',
-            opacity: activeIndex === carList.length ? 1 : 0.6,
-            transform: activeIndex === carList.length ? 'scale(1)' : 'scale(0.985)',
-            transition: 'opacity 0.2s ease, transform 0.2s ease',
-            cursor: 'pointer',
-            userSelect: 'none',
-          }}
-        >
+          }}>
           <div style={{
             width: 36,
             height: 36,
@@ -352,12 +362,13 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           }}>
             차량 추가
           </p>
+          </div>
         </div>
       </div>
 
       {/* 도트 인디케이터 */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 5, paddingTop: 6 }}>
-        {carList.map((_, i) => (
+        {Array.from({ length: totalCards }, (_, i) => (
           <div
             key={i}
             style={{

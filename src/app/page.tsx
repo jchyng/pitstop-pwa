@@ -81,7 +81,6 @@ export default function Home() {
     Promise.resolve().then(() => {
       if (!cancelled) {
         setCurrentMileage(mileage);
-        setShowMileageSheet(mileage === null);
       }
     });
 
@@ -140,7 +139,6 @@ export default function Home() {
     const nextMileage = getMileage(carId);
     setSelectedCarId(carId);
     setCurrentMileage(nextMileage);
-    setShowMileageSheet(nextMileage === null);
     localStorage.setItem('pitstop_selected_car', carId);
   }
 
