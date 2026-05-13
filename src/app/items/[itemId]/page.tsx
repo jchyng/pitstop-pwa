@@ -304,18 +304,56 @@ export default function ItemDetailPage() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: 48,
-              gap: 8,
+              gap: 16,
+              padding: '40px 12px 0',
             }}
           >
-            <span style={{ fontSize: 32 }}>🔧</span>
-            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', textAlign: 'center' }}>
-              아직 기록된 정비가 없어요
-            </p>
-            <p style={{ fontSize: 12, color: 'var(--color-text-muted)', textAlign: 'center' }}>
-              아래 버튼으로 첫 번째 기록을 남겨보세요
-            </p>
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+              style={{ color: 'var(--color-text-muted)', opacity: 0.75 }}
+            >
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', textAlign: 'center', margin: 0 }}>
+                아직 {item?.name_ko ?? '이 소모품'} 기록이 없어요
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
+                아래 버튼으로 첫 번째 기록을 남겨보세요
+              </p>
+            </div>
+            {intervalText && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  padding: '12px 20px',
+                  background: 'var(--color-surface-hover)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 10,
+                  minWidth: 180,
+                }}
+              >
+                <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+                  권장 교체 주기
+                </p>
+                <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                  {intervalText}
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <Timeline
