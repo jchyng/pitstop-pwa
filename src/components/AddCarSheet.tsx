@@ -37,6 +37,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
   const [modelName, setModelName] = useState<string | null>(null);
   const [model, setModel] = useState<string | null>(null);
   const [fuel, setFuel] = useState<string | null>(null);
+  const [modelSearch, setModelSearch] = useState('');
 
   const modelNamesForBrand = useMemo(
     () => brand ? [...new Set(catalog.filter(c => c.brand === brand).map(c => c.model_name))] : [],
@@ -65,7 +66,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
   );
 
   function selectBrand(b: string) {
-    setBrand(b); setModelName(null); setModel(null); setFuel(null);
+    setBrand(b); setModelName(null); setModel(null); setFuel(null); setModelSearch('');
     setStep(2);
   }
 
@@ -80,7 +81,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
   }
 
   function goBack() {
-    if (step === 2) { setBrand(null); setStep(1); }
+    if (step === 2) { setBrand(null); setModelSearch(''); setStep(1); }
     else if (step === 3) { setModelName(null); setStep(2); }
     else if (step === 4) { setModel(null); setFuel(null); setStep(3); }
   }
@@ -171,7 +172,27 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
       {/* Step 2: 차종(모델명) */}
       {step === 2 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {modelNamesForBrand.map(mn => {
+          <input
+            type="search"
+            placeholder="차종 검색"
+            value={modelSearch}
+            onChange={e => setModelSearch(e.target.value)}
+            autoFocus
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              border: '1px solid var(--color-border)',
+              borderRadius: 10,
+              background: 'var(--color-surface)',
+              fontSize: 15,
+              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font)',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+          <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {modelNamesForBrand.filter(mn => mn.includes(modelSearch)).map(mn => {
             const carsForModelName = catalog.filter(c => c.brand === brand && c.model_name === mn);
             const allAdded = carsForModelName.every(c => myCarIds.includes(c.car_id));
             return (
@@ -202,6 +223,12 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
               </button>
             );
           })}
+          {modelNamesForBrand.filter(mn => mn.includes(modelSearch)).length === 0 && (
+            <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14, padding: '20px 0' }}>
+              검색 결과가 없습니다
+            </p>
+          )}
+          </div>
         </div>
       )}
 
