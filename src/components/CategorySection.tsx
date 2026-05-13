@@ -6,6 +6,8 @@ interface ItemWithLog extends ItemWithUrgency {
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
   lastInspectCondition: InspectCondition | null;
+  lastReplaceDate: string | null;
+  lastReplaceMileage: number | null;
   isCustom: boolean;
 }
 
@@ -45,6 +47,8 @@ export default function CategorySection({ category, items, currentMileage, onCar
             lastLoggedMileage={x.lastLoggedMileage}
             lastLogType={x.lastLogType}
             lastInspectCondition={x.lastInspectCondition}
+            lastReplaceDate={x.lastReplaceDate}
+            lastReplaceMileage={x.lastReplaceMileage}
             isCustom={x.isCustom}
             onClick={() => onCardClick(x)}
           />

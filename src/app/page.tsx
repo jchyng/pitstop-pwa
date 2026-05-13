@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarCarousel from '@/components/CarCarousel';
 import CategorySection from '@/components/CategorySection';
@@ -17,6 +17,8 @@ interface ItemWithLog extends ItemWithUrgency {
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
   lastInspectCondition: InspectCondition | null;
+  lastReplaceDate: string | null;
+  lastReplaceMileage: number | null;
   isCustom: boolean;
 }
 
@@ -93,8 +95,12 @@ export default function Home() {
       const lastLoggedDate = getLastLog(selectedCarId, item.id);
       const lastLoggedMileage = getLastMileage(selectedCarId, item.id);
       const lastLogType = getLastLogType(selectedCarId, item.id);
-      const lastInspectCondition = getLastInspectCondition(selectedCarId, item.id);
+      // 마지막 기록이 교체면 점검 컨디션 무효화 (교체로 해결됨)
+      const lastInspectCondition = lastLogType === 'replace' ? null : getLastInspectCondition(selectedCarId, item.id);
       const isCustom = !!getCustomInterval(selectedCarId, item.id);
+      const lastReplaceEntry = item.item_type === 'inspect' ? getLastReplaceEntry(selectedCarId, item.id) : null;
+      const lastReplaceDate = lastReplaceEntry?.date ?? null;
+      const lastReplaceMileage = lastReplaceEntry?.mileage ?? null;
       const urgency = calculateUrgency({
         item: mergedItem,
         currentMileage,
@@ -102,7 +108,7 @@ export default function Home() {
         lastLoggedDate,
         lastInspectCondition,
       });
-      return { item: mergedItem, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, lastInspectCondition, isCustom };
+      return { item: mergedItem, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, lastInspectCondition, lastReplaceDate, lastReplaceMileage, isCustom };
     });
   }, [carData, currentMileage, selectedCarId, customVersion]);
 
@@ -297,6 +303,8 @@ export default function Home() {
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
                           lastInspectCondition={x.lastInspectCondition}
+                          lastReplaceDate={x.lastReplaceDate}
+                          lastReplaceMileage={x.lastReplaceMileage}
                           isCustom={x.isCustom}
                           onClick={() => router.push(`/items/${x.item.id}`)}
                         />
@@ -331,6 +339,8 @@ export default function Home() {
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
                           lastInspectCondition={x.lastInspectCondition}
+                          lastReplaceDate={x.lastReplaceDate}
+                          lastReplaceMileage={x.lastReplaceMileage}
                           isCustom={x.isCustom}
                           onClick={() => router.push(`/items/${x.item.id}`)}
                         />

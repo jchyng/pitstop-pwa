@@ -12,6 +12,8 @@ interface Props {
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
   lastInspectCondition?: InspectCondition | null;
+  lastReplaceDate?: string | null;
+  lastReplaceMileage?: number | null;
   isCustom?: boolean;
   onClick: () => void;
 }
@@ -62,16 +64,29 @@ export default function ConsumableCard({
   lastLoggedMileage,
   lastLogType,
   lastInspectCondition,
+  lastReplaceDate,
+  lastReplaceMileage,
   isCustom,
   onClick,
 }: Props) {
   const [pressed, setPressed] = useState(false);
   const { status, displayText } = urgency;
-  const { num, unit } = parseStatDisplay(displayText);
+  const { num, unit: rawUnit } = parseStatDisplay(displayText);
+  const isInspectItem = item.item_type === 'inspect';
+  const unit = isInspectItem
+    ? rawUnit.replace('km 남음', 'km 후 점검').replace('개월 남음', '개월 후 점검')
+    : rawUnit;
 
   const isOverdue = status === 'overdue';
   const isUrgent = status === 'urgent';
   const isUnknown = status === 'unknown';
+
+  const conditionBadgeStyle =
+    lastInspectCondition === 'replace_needed'
+      ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-overdue-sub)' }
+      : lastInspectCondition === 'caution'
+      ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-urgent-text)' }
+      : { bg: 'var(--color-normal-bg)', fg: 'var(--color-normal-text)' };
 
   const statColor = isOverdue
     ? 'var(--color-overdue-sub)'
@@ -116,7 +131,8 @@ export default function ConsumableCard({
       >
         {/* Body */}
         <div style={{ flex: 1, minWidth: 0, padding: '12px 6px 12px 15px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5, minWidth: 0 }}>
+          {/* Name row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5, flexWrap: 'wrap', minWidth: 0 }}>
             <p
               style={{
                 fontSize: 16,
@@ -150,6 +166,38 @@ export default function ConsumableCard({
                 커스텀
               </span>
             )}
+            {isInspectItem && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  padding: '2px 6px',
+                  borderRadius: 8,
+                  background: 'var(--color-surface-hover)',
+                  color: 'var(--color-text-muted)',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                점검
+              </span>
+            )}
+            {isInspectItem && lastInspectCondition && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: 8,
+                  background: conditionBadgeStyle.bg,
+                  color: conditionBadgeStyle.fg,
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {CONDITION_LABEL[lastInspectCondition]}
+              </span>
+            )}
           </div>
 
           {/* Last service line */}
@@ -157,22 +205,6 @@ export default function ConsumableCard({
             <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
               {lastLogType === 'inspect' ? '점검' : '교체'} {formatDate(lastLoggedDate)}
               {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
-              {lastLogType === 'inspect' && lastInspectCondition ? (
-                <span
-                  style={{
-                    marginLeft: 6,
-                    fontWeight: 600,
-                    color:
-                      lastInspectCondition === 'replace_needed'
-                        ? 'var(--color-overdue-sub)'
-                        : lastInspectCondition === 'caution'
-                        ? 'var(--color-urgent-text)'
-                        : 'var(--color-normal-text)',
-                  }}
-                >
-                  · {CONDITION_LABEL[lastInspectCondition]}
-                </span>
-              ) : null}
             </p>
           ) : (
             <p
@@ -184,6 +216,14 @@ export default function ConsumableCard({
               }}
             >
               기록 없음
+            </p>
+          )}
+
+          {/* Last replace line (inspect items only) */}
+          {isInspectItem && lastReplaceDate && (
+            <p style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
+              마지막 교체 {formatDate(lastReplaceDate)}
+              {lastReplaceMileage != null ? ` · ${lastReplaceMileage.toLocaleString()}km` : ''}
             </p>
           )}
 

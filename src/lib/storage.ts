@@ -101,6 +101,20 @@ export function getLastInspectCondition(carId: string, itemId: string): InspectC
   return getLastInspectEntry(carId, itemId)?.condition ?? null;
 }
 
+// 해당 아이템의 가장 최근 교체 기록 반환. 없으면 null.
+export function getLastReplaceEntry(carId: string, itemId: string): LogEntry | null {
+  const logs = getLogs(carId);
+  let latest: LogEntry | null = null;
+  for (const entry of logs) {
+    if (entry.itemId !== itemId) continue;
+    if (entry.logType !== 'replace') continue;
+    if (!latest || entry.id > latest.id) {
+      latest = entry;
+    }
+  }
+  return latest;
+}
+
 // 기존 last_log 단일 키 → 이력 배열 1회 이전
 export function migrateLogsIfNeeded(carId: string, items: ConsumableItem[]): void {
   if (localStorage.getItem(key.migrated(carId))) return;

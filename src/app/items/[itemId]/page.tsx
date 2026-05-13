@@ -39,6 +39,7 @@ export default function ItemDetailPage() {
   const [showIntervalSheet, setShowIntervalSheet] = useState(false);
   const [customVersion, setCustomVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'inspect' | 'replace'>('all');
 
   useEffect(() => {
     const savedCarId = localStorage.getItem('pitstop_selected_car') ?? 'avante-md-gasoline';
@@ -80,11 +81,23 @@ export default function ItemDetailPage() {
   const lastLoggedDate = lastEntry?.date ?? null;
   const lastLoggedMileage = lastEntry?.mileage ?? null;
 
-  // 마지막 점검 기록의 condition (교체 후 점검 안 했으면 null)
+  // 마지막 점검 기록의 condition — 교체 기록이 더 최신이면 null (교체로 해결됨)
   const lastInspectCondition = useMemo(() => {
+    if (!sortedLogs.length) return null;
+    if (sortedLogs[0].logType === 'replace') return null;
     const lastInspect = sortedLogs.find(l => l.logType === 'inspect');
     return lastInspect?.condition ?? null;
   }, [sortedLogs]);
+
+  const lastReplaceEntry = useMemo(
+    () => sortedLogs.find(l => l.logType === 'replace') ?? null,
+    [sortedLogs],
+  );
+
+  const filteredLogs = useMemo(() => {
+    if (historyFilter === 'all') return sortedLogs;
+    return sortedLogs.filter(l => l.logType === historyFilter);
+  }, [sortedLogs, historyFilter]);
 
   const urgency = useMemo(() => {
     if (!mergedItem) return null;
@@ -99,13 +112,13 @@ export default function ItemDetailPage() {
 
   const grouped = useMemo(() => {
     const map = new Map<string, LogEntry[]>();
-    for (const entry of sortedLogs) {
+    for (const entry of filteredLogs) {
       const label = toMonthLabel(entry.date);
       if (!map.has(label)) map.set(label, []);
       map.get(label)!.push(entry);
     }
     return [...map.entries()];
-  }, [sortedLogs]);
+  }, [filteredLogs]);
 
   function handleSave() {
     setLogs(getLogs(carId).filter(l => l.itemId === itemId));
@@ -126,11 +139,13 @@ export default function ItemDetailPage() {
       ? 'var(--color-normal-text)'
       : 'var(--color-text-muted)';
 
+  const isInspectItem = item?.item_type === 'inspect';
+
   const statusLabel =
     urgency?.status === 'overdue'
-      ? '과기한'
+      ? (isInspectItem ? '점검 필요' : '과기한')
       : urgency?.status === 'urgent'
-      ? '교체 임박'
+      ? (isInspectItem ? '점검 임박' : '교체 임박')
       : urgency?.status === 'ok'
       ? '정상'
       : '미기록';
@@ -186,23 +201,41 @@ export default function ItemDetailPage() {
             <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <h1
-          style={{
-            flex: 1,
-            fontSize: 20,
-            fontWeight: 700,
-            letterSpacing: '-0.4px',
-            color: 'var(--color-text-primary)',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {ITEM_EMOJI[itemId] && (
-            <span aria-hidden="true" style={{ marginRight: 4, flexShrink: 0 }}>{ITEM_EMOJI[itemId]}</span>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h1
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: '-0.4px',
+              color: 'var(--color-text-primary)',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
+            }}
+          >
+            {ITEM_EMOJI[itemId] && (
+              <span aria-hidden="true" style={{ marginRight: 4 }}>{ITEM_EMOJI[itemId]}</span>
+            )}
+            {item?.name_ko ?? '로딩 중...'}
+          </h1>
+          {isInspectItem && (
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                padding: '3px 8px',
+                borderRadius: 8,
+                background: 'var(--color-surface-hover)',
+                color: 'var(--color-text-muted)',
+                flexShrink: 0,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              점검 항목
+            </span>
           )}
-          {item?.name_ko ?? '로딩 중...'}
-        </h1>
+        </div>
         {urgency && (
           <span
             style={{
@@ -282,7 +315,7 @@ export default function ItemDetailPage() {
                       gap: 4,
                     }}
                   >
-                    교체 주기
+                    {isInspectItem ? '점검 주기' : '교체 주기'}
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path
                         d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
@@ -316,29 +349,40 @@ export default function ItemDetailPage() {
               )}
             </div>
             {lastLoggedDate && (
-              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 8 }}>
-                마지막 {lastEntry?.logType === 'inspect' ? '점검' : '교환'}{' '}
-                <span style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                  {formatDate(lastLoggedDate)}
-                  {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
-                </span>
-                {lastEntry?.logType === 'inspect' && lastEntry.condition && (
-                  <span
-                    style={{
-                      marginLeft: 6,
-                      fontWeight: 600,
-                      color:
-                        lastEntry.condition === 'replace_needed'
-                          ? 'var(--color-overdue-sub)'
-                          : lastEntry.condition === 'caution'
-                          ? 'var(--color-urgent-text)'
-                          : 'var(--color-normal-text)',
-                    }}
-                  >
-                    · {lastEntry.condition === 'good' ? '양호' : lastEntry.condition === 'caution' ? '주의' : '교체 필요'}
+              <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+                  마지막 {lastEntry?.logType === 'inspect' ? '점검' : '교체'}{' '}
+                  <span style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                    {formatDate(lastLoggedDate)}
+                    {lastLoggedMileage !== null ? ` · ${lastLoggedMileage.toLocaleString()}km` : ''}
                   </span>
+                  {lastEntry?.logType === 'inspect' && lastEntry.condition && (
+                    <span
+                      style={{
+                        marginLeft: 6,
+                        fontWeight: 600,
+                        color:
+                          lastEntry.condition === 'replace_needed'
+                            ? 'var(--color-overdue-sub)'
+                            : lastEntry.condition === 'caution'
+                            ? 'var(--color-urgent-text)'
+                            : 'var(--color-normal-text)',
+                      }}
+                    >
+                      · {lastEntry.condition === 'good' ? '양호' : lastEntry.condition === 'caution' ? '주의' : '교체 필요'}
+                    </span>
+                  )}
+                </p>
+                {isInspectItem && lastReplaceEntry && (
+                  <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
+                    마지막 교체{' '}
+                    <span style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                      {formatDate(lastReplaceEntry.date)}
+                      {lastReplaceEntry.mileage !== null ? ` · ${lastReplaceEntry.mileage.toLocaleString()}km` : ''}
+                    </span>
+                  </p>
                 )}
-              </p>
+              </div>
             )}
             {item.notes && (
               <p
@@ -370,7 +414,7 @@ export default function ItemDetailPage() {
           overflowY: 'auto',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: isInspectItem ? 10 : 14 }}>
           <p
             style={{
               fontSize: 12,
@@ -397,6 +441,46 @@ export default function ItemDetailPage() {
             </span>
           )}
         </div>
+
+        {/* 이력 필터 탭 (점검 항목만) */}
+        {isInspectItem && sortedLogs.length > 0 && (
+          <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+            {([
+              { value: 'all', label: '전체' },
+              { value: 'inspect', label: '🔍 점검' },
+              { value: 'replace', label: '🔧 교체' },
+            ] as { value: 'all' | 'inspect' | 'replace'; label: string }[]).map(tab => {
+              const active = historyFilter === tab.value;
+              const count = tab.value === 'all'
+                ? sortedLogs.length
+                : sortedLogs.filter(l => l.logType === tab.value).length;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => setHistoryFilter(tab.value)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 20,
+                    border: `1.5px solid ${active ? 'var(--color-text-primary)' : 'var(--color-border)'}`,
+                    background: active ? 'var(--color-text-primary)' : 'transparent',
+                    color: active ? 'var(--color-bg)' : 'var(--color-text-secondary)',
+                    fontWeight: active ? 600 : 500,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font)',
+                    transition: 'all 0.12s',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {tab.label}
+                  {count > 0 && (
+                    <span style={{ marginLeft: 4, opacity: 0.75 }}>{count}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {isLoading ? (
           <div
@@ -467,7 +551,7 @@ export default function ItemDetailPage() {
                 }}
               >
                 <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                  권장 교체 주기
+                  {isInspectItem ? '권장 점검 주기' : '권장 교체 주기'}
                 </p>
                 <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
                   {intervalText}
@@ -475,10 +559,14 @@ export default function ItemDetailPage() {
               </div>
             )}
           </div>
+        ) : filteredLogs.length === 0 ? (
+          <p style={{ fontSize: 14, color: 'var(--color-text-muted)', textAlign: 'center', padding: '32px 0' }}>
+            {historyFilter === 'inspect' ? '점검 이력이 없습니다' : historyFilter === 'replace' ? '교체 이력이 없습니다' : '이력이 없습니다'}
+          </p>
         ) : (
           <Timeline
             grouped={grouped}
-            mostRecentId={sortedLogs[0]?.id ?? null}
+            mostRecentId={filteredLogs[0]?.id ?? null}
           />
         )}
       </main>

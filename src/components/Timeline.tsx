@@ -52,7 +52,7 @@ export default function Timeline({
             const isRecent = entry.id === mostRecentId;
             const actionLabel = entry.logType === 'inspect'
               ? (showItemName ? `${entry.itemName} 점검` : '점검 완료')
-              : (showItemName ? `${entry.itemName} 교환` : '교환');
+              : (showItemName ? `${entry.itemName} 교체` : '교체 완료');
             const conditionLabel =
               entry.logType === 'inspect' && entry.condition
                 ? entry.condition === 'good'
