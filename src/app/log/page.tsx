@@ -6,7 +6,6 @@ import BottomNav from '@/components/BottomNav';
 import Timeline from '@/components/Timeline';
 import type { CarData, LogEntry } from '@/types';
 import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
-import { CATEGORY_EMOJI } from '@/lib/icons';
 
 function toMonthLabel(iso: string): string {
   const [y, m] = iso.split('-');
@@ -140,7 +139,7 @@ export default function LogPage() {
       >
         {['전체', ...categories].map(cat => {
           const active = filterCategory === cat;
-          const label = cat === '전체' ? '전체' : `${CATEGORY_EMOJI[cat] ?? ''} ${cat}`;
+          const label = cat;
           return (
             <button
               key={cat}

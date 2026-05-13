@@ -1,5 +1,4 @@
 import type { LogEntry } from '@/types';
-import { CATEGORY_EMOJI, ITEM_EMOJI } from '@/lib/icons';
 
 function formatDate(iso: string): string {
   return iso.replace(/-/g, '.');
@@ -145,9 +144,6 @@ export default function Timeline({
                       }}
                     >
                       <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {showItemName && ITEM_EMOJI[entry.itemId] && (
-                          <span aria-hidden="true" style={{ marginRight: 4 }}>{ITEM_EMOJI[entry.itemId]}</span>
-                        )}
                         {actionLabel}
                       </span>
                       {isRecent && (
@@ -216,7 +212,7 @@ export default function Timeline({
                           borderRadius: 8,
                         }}
                       >
-                        {CATEGORY_EMOJI[entry.category] ?? ''} {entry.category}
+                        {entry.category}
                       </span>
                     )}
                   </div>
