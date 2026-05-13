@@ -2,27 +2,21 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { CarData, ItemWithUrgency, LogType } from '@/types';
+import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
-import CarChip from '@/components/CarChip';
-import CarHero from '@/components/CarHero';
+import CarCarousel from '@/components/CarCarousel';
 import CategorySection from '@/components/CategorySection';
 import ConsumableCard from '@/components/ConsumableCard';
 import MileageSheet from '@/components/MileageSheet';
 import ViewToggle from '@/components/ViewToggle';
 
-interface CarIndex {
-  car_id: string;
-  name_ko: string;
-  file: string;
-}
-
 interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
   lastLoggedMileage: number | null;
   lastLogType: LogType | null;
+  lastInspectCondition: InspectCondition | null;
   isCustom: boolean;
 }
 
@@ -99,9 +93,16 @@ export default function Home() {
       const lastLoggedDate = getLastLog(selectedCarId, item.id);
       const lastLoggedMileage = getLastMileage(selectedCarId, item.id);
       const lastLogType = getLastLogType(selectedCarId, item.id);
+      const lastInspectCondition = getLastInspectCondition(selectedCarId, item.id);
       const isCustom = !!getCustomInterval(selectedCarId, item.id);
-      const urgency = calculateUrgency({ item: mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate });
-      return { item: mergedItem, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, isCustom };
+      const urgency = calculateUrgency({
+        item: mergedItem,
+        currentMileage,
+        lastLoggedMileage,
+        lastLoggedDate,
+        lastInspectCondition,
+      });
+      return { item: mergedItem, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, lastInspectCondition, isCustom };
     });
   }, [carData, currentMileage, selectedCarId, customVersion]);
 
@@ -130,7 +131,10 @@ export default function Home() {
   }, [itemsWithLog]);
 
   function handleCarSelect(carId: string) {
+    const nextMileage = getMileage(carId);
     setSelectedCarId(carId);
+    setCurrentMileage(nextMileage);
+    setShowMileageSheet(nextMileage === null);
     localStorage.setItem('pitstop_selected_car', carId);
   }
 
@@ -205,7 +209,6 @@ export default function Home() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
           padding: '16px var(--page-pad) 12px',
         }}
         role="banner"
@@ -220,22 +223,17 @@ export default function Home() {
         >
           <span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop
         </h1>
-        <CarChip
-          cars={carList}
-          selectedCarId={selectedCarId}
-          onSelect={handleCarSelect}
-        />
       </header>
 
-      {/* Car hero */}
-      <div style={{ padding: '8px var(--page-pad) 4px' }}>
-        <CarHero
-          carId={selectedCarId}
-          carName={carData?.name_ko ?? carList.find(c => c.car_id === selectedCarId)?.name_ko ?? ''}
-          currentMileage={currentMileage}
-          onEditClick={() => setShowMileageSheet(true)}
-        />
-      </div>
+      {/* Car carousel */}
+      <CarCarousel
+        carList={carList}
+        selectedCarId={selectedCarId}
+        currentMileage={currentMileage}
+        onSelect={handleCarSelect}
+        onEditMileage={() => setShowMileageSheet(true)}
+        onAddCar={() => alert('차량 추가 기능은 준비 중입니다.')}
+      />
 
       {/* Main content */}
       <main
@@ -298,6 +296,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
+                          lastInspectCondition={x.lastInspectCondition}
                           isCustom={x.isCustom}
                           onClick={() => router.push(`/items/${x.item.id}`)}
                         />
@@ -331,6 +330,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
+                          lastInspectCondition={x.lastInspectCondition}
                           isCustom={x.isCustom}
                           onClick={() => router.push(`/items/${x.item.id}`)}
                         />
