@@ -98,31 +98,33 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
   return (
     <BottomSheet onClose={onClose} ariaLabel="차량 추가">
       {/* 헤더 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 20 }}>
-        {step > 1 && (
-          <button
-            type="button"
-            onClick={goBack}
-            aria-label="이전 단계"
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: '4px 8px 4px 0',
-              cursor: 'pointer',
-              color: 'var(--color-text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              flexShrink: 0,
-            }}
-          >
-            <ChevronLeft />
-          </button>
-        )}
-        <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px' }}>
-          {stepTitle}
-        </p>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={goBack}
+              aria-label="이전 단계"
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '4px 8px 4px 0',
+                cursor: 'pointer',
+                color: 'var(--color-text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <ChevronLeft />
+            </button>
+          )}
+          <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px' }}>
+            {stepTitle}
+          </p>
+        </div>
         {breadcrumb && (
-          <p style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 }}>
+          <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4, paddingLeft: step > 1 ? 26 : 0 }}>
             {breadcrumb}
           </p>
         )}
