@@ -4,13 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarCarousel from '@/components/CarCarousel';
 import CategorySection from '@/components/CategorySection';
 import ConsumableCard from '@/components/ConsumableCard';
 import MileageSheet from '@/components/MileageSheet';
 import AddCarSheet from '@/components/AddCarSheet';
+import BottomSheet from '@/components/BottomSheet';
 import ViewToggle from '@/components/ViewToggle';
 
 interface ItemWithLog extends ItemWithUrgency {
@@ -42,6 +43,7 @@ export default function Home() {
   const [view, setView] = useState<'attention' | 'full'>('full');
   const [showMileageSheet, setShowMileageSheet] = useState(false);
   const [showAddCarSheet, setShowAddCarSheet] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [customVersion, setCustomVersion] = useState(0);
 
@@ -158,6 +160,30 @@ export default function Home() {
     handleCarSelect(carId);
   }
 
+  function handleDeleteCar(carId: string) {
+    setDeleteTargetId(carId);
+  }
+
+  function handleConfirmDelete() {
+    if (!deleteTargetId) return;
+    removeMyCar(deleteTargetId);
+    const nextIds = myCarIds.filter(id => id !== deleteTargetId);
+    setMyCarIds(nextIds);
+    if (selectedCarId === deleteTargetId) {
+      const nextCar = carCatalog.find(c => nextIds.includes(c.car_id));
+      const nextId = nextCar?.car_id ?? '';
+      setSelectedCarId(nextId);
+      if (nextId) {
+        setCurrentMileage(getMileage(nextId));
+        localStorage.setItem('pitstop_selected_car', nextId);
+      } else {
+        setCurrentMileage(null);
+        localStorage.removeItem('pitstop_selected_car');
+      }
+    }
+    setDeleteTargetId(null);
+  }
+
   function handleMileageSave(mileage: number) {
     setMileage(selectedCarId, mileage);
     setCurrentMileage(mileage);
@@ -253,6 +279,7 @@ export default function Home() {
         onSelect={handleCarSelect}
         onEditMileage={() => setShowMileageSheet(true)}
         onAddCar={() => setShowAddCarSheet(true)}
+        onDeleteCar={handleDeleteCar}
       />
 
       {/* Main content */}
@@ -274,13 +301,44 @@ export default function Home() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '60px 0',
-              gap: 8,
-              color: 'var(--color-text-muted)',
+              padding: '48px 0 60px',
+              gap: 0,
             }}
           >
-            <p style={{ fontSize: 15, fontWeight: 500 }}>등록된 차량이 없습니다</p>
-            <p style={{ fontSize: 13 }}>위의 + 카드를 눌러 차량을 추가하세요</p>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true" style={{ marginBottom: 16, opacity: 0.18 }}>
+              <rect x="6" y="22" width="52" height="26" rx="8" stroke="var(--color-text-primary)" strokeWidth="3" />
+              <path d="M14 22l6-12h24l6 12" stroke="var(--color-text-primary)" strokeWidth="3" strokeLinejoin="round" />
+              <circle cx="18" cy="48" r="6" stroke="var(--color-text-primary)" strokeWidth="3" />
+              <circle cx="46" cy="48" r="6" stroke="var(--color-text-primary)" strokeWidth="3" />
+              <path d="M6 34h52" stroke="var(--color-text-primary)" strokeWidth="2" strokeDasharray="4 3" />
+            </svg>
+            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px', marginBottom: 6 }}>
+              등록된 차량이 없습니다
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 24 }}>
+              내 차량을 등록하면 소모품 교체 주기를 관리할 수 있어요
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowAddCarSheet(true)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '12px 24px',
+                background: 'var(--color-nav-active)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 999,
+                fontSize: 14,
+                fontWeight: 700,
+                fontFamily: 'var(--font)',
+                cursor: 'pointer',
+                letterSpacing: '-0.2px',
+              }}
+            >
+              + 차량 등록
+            </button>
           </div>
         )}
 
@@ -423,6 +481,58 @@ export default function Home() {
           onClose={() => setShowAddCarSheet(false)}
         />
       )}
+
+      {deleteTargetId && (() => {
+        const targetCar = carList.find(c => c.car_id === deleteTargetId);
+        return (
+          <BottomSheet onClose={() => setDeleteTargetId(null)} ariaLabel="차량 삭제 확인">
+            <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px', marginBottom: 8 }}>
+              차량을 삭제할까요?
+            </p>
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', marginBottom: 28, lineHeight: 1.5 }}>
+              {targetCar?.name_ko ?? ''} 차량과 관련된 정비 이력이 모두 삭제됩니다.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setDeleteTargetId(null)}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 12,
+                  background: 'var(--color-surface)',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: 'var(--color-text-primary)',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font)',
+                }}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDelete}
+                style={{
+                  flex: 1,
+                  padding: '14px',
+                  border: 'none',
+                  borderRadius: 12,
+                  background: 'var(--color-overdue-sub)',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font)',
+                }}
+              >
+                삭제
+              </button>
+            </div>
+          </BottomSheet>
+        );
+      })()}
 
     </div>
   );

@@ -164,6 +164,11 @@ export function addMyCar(carId: string): void {
   }
 }
 
+export function removeMyCar(carId: string): void {
+  const cars = getMyCars().filter(id => id !== carId);
+  localStorage.setItem(MY_CARS_KEY, JSON.stringify(cars));
+}
+
 // 커스텀 교체 주기
 
 type CustomIntervalData = { interval_km?: number; interval_months?: number };

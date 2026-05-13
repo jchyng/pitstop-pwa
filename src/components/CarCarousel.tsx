@@ -11,6 +11,7 @@ interface Props {
   onSelect: (carId: string) => void;
   onEditMileage: () => void;
   onAddCar: () => void;
+  onDeleteCar: (carId: string) => void;
 }
 
 function getCarImagePath(carId: string): string {
@@ -53,7 +54,18 @@ function PencilIcon() {
   );
 }
 
-export default function CarCarousel({ carList, selectedCarId, currentMileage, onSelect, onEditMileage, onAddCar }: Props) {
+function TrashIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export default function CarCarousel({ carList, selectedCarId, currentMileage, onSelect, onEditMileage, onAddCar, onDeleteCar }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,18 +76,22 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
     return idx < 0 ? 0 : idx;
   });
 
-  // 마운트 시 selectedCarId 카드로 초기 스크롤 (애니메이션 없음, setState 생략)
+  const isFirstRender = useRef(true);
+
+  // carList 또는 selectedCarId 변경 시 해당 카드로 스크롤
   useEffect(() => {
     if (!scrollRef.current || carList.length === 0) return;
     const idx = carList.findIndex(c => c.car_id === selectedCarId);
-    const targetIdx = idx < 0 ? 0 : idx;
-    if (targetIdx === 0) return;
-    const card = cardRefs.current[targetIdx];
+    if (idx < 0) return;
+    const card = cardRefs.current[idx];
     if (!card) return;
     const el = scrollRef.current;
-    el.scrollLeft = card.offsetLeft;
+    const behavior = isFirstRender.current ? 'instant' : 'smooth';
+    isFirstRender.current = false;
+    el.scrollTo({ left: card.offsetLeft, behavior: behavior as ScrollBehavior });
+    setActiveIndex(idx);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carList]);
+  }, [carList, selectedCarId]);
 
   function handleScroll() {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -175,21 +191,42 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                 boxShadow: 'var(--shadow-card)',
               }}>
               <div style={{ display: 'flex', flexDirection: 'column', minHeight: 100 }}>
-                <p style={{
-                  maxWidth: '100%',
-                  fontSize: 17,
-                  fontWeight: 700,
-                  color: 'var(--color-text-primary)',
-                  lineHeight: 1.35,
-                  letterSpacing: '-0.4px',
-                  fontFamily: 'var(--font)',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden',
-                }}>
-                  {formatCarName(car.name_ko, car.car_id)}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+                  <p style={{
+                    flex: 1,
+                    fontSize: 17,
+                    fontWeight: 700,
+                    color: 'var(--color-text-primary)',
+                    lineHeight: 1.35,
+                    letterSpacing: '-0.4px',
+                    fontFamily: 'var(--font)',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
+                    {formatCarName(car.name_ko, car.car_id)}
+                  </p>
+                  {isActive && (
+                    <button
+                      type="button"
+                      onClick={e => { e.stopPropagation(); onDeleteCar(car.car_id); }}
+                      aria-label={`${car.name_ko} 삭제`}
+                      style={{
+                        flexShrink: 0,
+                        background: 'none',
+                        border: 'none',
+                        padding: '2px 0 2px 4px',
+                        cursor: 'pointer',
+                        color: 'var(--color-text-muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <TrashIcon />
+                    </button>
+                  )}
+                </div>
 
                 <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between', gap: 8, marginTop: 'auto' }}>
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 5 }}>
@@ -311,7 +348,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           ref={el => { cardRefs.current[carList.length] = el; }}
           role="button"
           tabIndex={activeIndex === carList.length ? 0 : -1}
-          aria-label="차량 추가"
+          aria-label="차량 등록"
           onClick={onAddCar}
           onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') onAddCar();
@@ -358,7 +395,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
             color: 'var(--color-text-muted)',
             fontFamily: 'var(--font)',
           }}>
-            차량 추가
+            차량 등록
           </p>
           </div>
         </div>
