@@ -12,10 +12,18 @@ function toMonthLabel(iso: string): string {
   return `${y}년 ${Number(m)}월`;
 }
 
+const FUEL_LABEL: Record<string, string> = {
+  gasoline: '가솔린',
+  diesel: '디젤',
+  ev: 'EV',
+  hev: 'HEV',
+};
+
 export default function LogPage() {
   const router = useRouter();
   const [carData, setCarData] = useState<CarData | null>(null);
   const [carName, setCarName] = useState('');
+  const [carChipLabel, setCarChipLabel] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterCategory, setFilterCategory] = useState('전체');
   const [isLoading, setIsLoading] = useState(true);
@@ -29,13 +37,15 @@ export default function LogPage() {
       }
 
       const idxRes = await fetch('/cars/index.json');
-      const idx: { car_id: string; name_ko: string; file: string }[] = await idxRes.json();
+      const idx: { car_id: string; name_ko: string; model: string; fuel: string; file: string }[] = await idxRes.json();
       const meta = idx.find(c => c.car_id === carId);
       if (!meta) {
         setIsLoading(false);
         return;
       }
       setCarName(meta.name_ko);
+      const fuelLabel = FUEL_LABEL[meta.fuel] ?? meta.fuel;
+      setCarChipLabel(`${meta.model} - ${fuelLabel}`);
 
       const dataRes = await fetch(meta.file);
       const data: CarData = await dataRes.json();
@@ -100,13 +110,12 @@ export default function LogPage() {
         }}
       >
         <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px' }}>정비 이력</h1>
-        {carName && (
+        {carChipLabel && (
           <span
             aria-label={`선택된 차량: ${carName}`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 5,
               padding: '6px 12px',
               border: '1.5px solid var(--color-border)',
               borderRadius: 24,
@@ -118,8 +127,7 @@ export default function LogPage() {
               fontFamily: 'var(--font)',
             }}
           >
-            <span aria-hidden="true">🚗</span>
-            <span>{carName}</span>
+            {carChipLabel}
           </span>
         )}
       </header>
