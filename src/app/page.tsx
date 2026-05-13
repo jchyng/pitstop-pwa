@@ -42,6 +42,7 @@ export default function Home() {
   const [currentMileage, setCurrentMileage] = useState<number | null>(null);
   const [view, setView] = useState<'attention' | 'full'>('full');
   const [showMileageSheet, setShowMileageSheet] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 차종 목록 로드
   useEffect(() => {
@@ -63,7 +64,12 @@ export default function Home() {
     let cancelled = false;
     fetch(`/cars/${selectedCarId}.json`)
       .then(r => r.json())
-      .then(data => { if (!cancelled) setCarData(data); });
+      .then(data => {
+        if (!cancelled) {
+          setCarData(data);
+          setIsLoading(false);
+        }
+      });
 
     const mileage = getMileage(selectedCarId);
     // 두 setState를 비동기 마이크로태스크로 묶어 연속 렌더링 방지
@@ -130,6 +136,46 @@ export default function Home() {
     () => [...urgentItems].sort((a, b) => (a.urgency.ratio ?? Infinity) - (b.urgency.ratio ?? Infinity)),
     [urgentItems],
   );
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          maxWidth: 390,
+          margin: '0 auto',
+          minHeight: '100dvh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--color-bg)',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: '-0.5px',
+            userSelect: 'none',
+          }}
+        >
+          <span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop
+        </h1>
+        <div
+          style={{
+            marginTop: 24,
+            width: 26,
+            height: 26,
+            border: '2.5px solid var(--color-border)',
+            borderTop: '2.5px solid var(--color-nav-active)',
+            borderRadius: '50%',
+            animation: 'pitstop-spin 0.75s linear infinite',
+          }}
+        />
+        <style>{`@keyframes pitstop-spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   return (
     <div
