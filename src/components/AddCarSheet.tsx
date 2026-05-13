@@ -14,6 +14,8 @@ const FUEL_LABEL: Record<string, string> = {
 
 const BRANDS = ['현대', '기아', 'KGM'] as const;
 
+type Step = 1 | 2 | 3 | 4;
+
 interface Props {
   catalog: CarIndex[];
   myCarIds: string[];
@@ -30,42 +32,57 @@ function ChevronLeft() {
 }
 
 export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<Step>(1);
   const [brand, setBrand] = useState<string | null>(null);
+  const [modelName, setModelName] = useState<string | null>(null);
   const [model, setModel] = useState<string | null>(null);
   const [fuel, setFuel] = useState<string | null>(null);
 
-  const modelsForBrand = useMemo(
-    () => brand ? [...new Set(catalog.filter(c => c.brand === brand).map(c => c.model))] : [],
+  const modelNamesForBrand = useMemo(
+    () => brand ? [...new Set(catalog.filter(c => c.brand === brand).map(c => c.model_name))] : [],
     [catalog, brand],
   );
 
+  const modelsForModelName = useMemo(
+    () => (brand && modelName)
+      ? [...new Set(catalog.filter(c => c.brand === brand && c.model_name === modelName).map(c => c.model))]
+      : [],
+    [catalog, brand, modelName],
+  );
+
   const fuelsForModel = useMemo(
-    () => (brand && model) ? catalog.filter(c => c.brand === brand && c.model === model).map(c => c.fuel) : [],
-    [catalog, brand, model],
+    () => (brand && modelName && model)
+      ? catalog.filter(c => c.brand === brand && c.model_name === modelName && c.model === model).map(c => c.fuel)
+      : [],
+    [catalog, brand, modelName, model],
   );
 
   const selectedCar = useMemo(
-    () => (brand && model && fuel) ? (catalog.find(c => c.brand === brand && c.model === model && c.fuel === fuel) ?? null) : null,
-    [catalog, brand, model, fuel],
+    () => (brand && modelName && model && fuel)
+      ? (catalog.find(c => c.brand === brand && c.model_name === modelName && c.model === model && c.fuel === fuel) ?? null)
+      : null,
+    [catalog, brand, modelName, model, fuel],
   );
 
   function selectBrand(b: string) {
-    setBrand(b);
-    setModel(null);
-    setFuel(null);
+    setBrand(b); setModelName(null); setModel(null); setFuel(null);
     setStep(2);
   }
 
-  function selectModel(m: string) {
-    setModel(m);
-    setFuel(null);
+  function selectModelName(mn: string) {
+    setModelName(mn); setModel(null); setFuel(null);
     setStep(3);
+  }
+
+  function selectModel(m: string) {
+    setModel(m); setFuel(null);
+    setStep(4);
   }
 
   function goBack() {
     if (step === 2) { setBrand(null); setStep(1); }
-    else if (step === 3) { setModel(null); setFuel(null); setStep(2); }
+    else if (step === 3) { setModelName(null); setStep(2); }
+    else if (step === 4) { setModel(null); setFuel(null); setStep(3); }
   }
 
   function handleAdd() {
@@ -74,7 +91,9 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
     onClose();
   }
 
-  const stepTitle = step === 1 ? '브랜드 선택' : step === 2 ? '차종 선택' : '연료 선택';
+  const stepTitle = step === 1 ? '브랜드 선택' : step === 2 ? '차종 선택' : step === 3 ? '세대 선택' : '연료 선택';
+
+  const breadcrumb = [brand, modelName, model].filter(Boolean).join(' · ');
 
   return (
     <BottomSheet onClose={onClose} ariaLabel="차량 추가">
@@ -102,10 +121,9 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
         <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px' }}>
           {stepTitle}
         </p>
-        {/* 브레드크럼 */}
-        {step > 1 && (
-          <p style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
-            {brand}{step === 3 ? ` · ${model}` : ''}
+        {breadcrumb && (
+          <p style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--color-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160 }}>
+            {breadcrumb}
           </p>
         )}
       </div>
@@ -133,14 +151,11 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
                   color: hasModels ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
                   fontFamily: 'var(--font)',
                   opacity: hasModels ? 1 : 0.4,
-                  transition: 'background 0.1s',
                 }}
               >
                 {b}
                 {!hasModels && (
-                  <span style={{ fontSize: 12, fontWeight: 400, marginLeft: 8, color: 'var(--color-text-muted)' }}>
-                    준비 중
-                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 400, marginLeft: 8 }}>준비 중</span>
                 )}
               </button>
             );
@@ -148,11 +163,48 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
         </div>
       )}
 
-      {/* Step 2: 차종 */}
+      {/* Step 2: 차종(모델명) */}
       {step === 2 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {modelsForBrand.map(m => {
-            const carsForModel = catalog.filter(c => c.brand === brand && c.model === m);
+          {modelNamesForBrand.map(mn => {
+            const carsForModelName = catalog.filter(c => c.brand === brand && c.model_name === mn);
+            const allAdded = carsForModelName.every(c => myCarIds.includes(c.car_id));
+            return (
+              <button
+                key={mn}
+                type="button"
+                onClick={() => !allAdded && selectModelName(mn)}
+                disabled={allAdded}
+                style={{
+                  padding: '14px 16px',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 12,
+                  background: 'var(--color-surface)',
+                  cursor: allAdded ? 'default' : 'pointer',
+                  textAlign: 'left',
+                  fontSize: 15,
+                  fontWeight: 600,
+                  color: allAdded ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
+                  fontFamily: 'var(--font)',
+                  opacity: allAdded ? 0.4 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span>{mn}</span>
+                {allAdded && <span style={{ fontSize: 12, fontWeight: 400 }}>추가됨</span>}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Step 3: 세대 */}
+      {step === 3 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {modelsForModelName.map(m => {
+            const carsForModel = catalog.filter(c => c.brand === brand && c.model_name === modelName && c.model === m);
             const allAdded = carsForModel.every(c => myCarIds.includes(c.car_id));
             return (
               <button
@@ -172,28 +224,25 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
                   color: allAdded ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
                   fontFamily: 'var(--font)',
                   opacity: allAdded ? 0.4 : 1,
-                  transition: 'background 0.1s',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}
               >
                 <span>{m}</span>
-                {allAdded && (
-                  <span style={{ fontSize: 12, fontWeight: 400, color: 'var(--color-text-muted)' }}>추가됨</span>
-                )}
+                {allAdded && <span style={{ fontSize: 12, fontWeight: 400 }}>추가됨</span>}
               </button>
             );
           })}
         </div>
       )}
 
-      {/* Step 3: 연료 */}
-      {step === 3 && (
+      {/* Step 4: 연료 */}
+      {step === 4 && (
         <>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 24 }}>
             {fuelsForModel.map(f => {
-              const carForFuel = catalog.find(c => c.brand === brand && c.model === model && c.fuel === f);
+              const carForFuel = catalog.find(c => c.brand === brand && c.model_name === modelName && c.model === model && c.fuel === f);
               const alreadyAdded = carForFuel ? myCarIds.includes(carForFuel.car_id) : false;
               const isSelected = fuel === f;
               return (

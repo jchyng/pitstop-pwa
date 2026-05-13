@@ -46,7 +46,8 @@ export interface CarIndex {
   car_id: string;
   name_ko: string;
   brand: string;
-  model: string;
+  model_name: string; // 모델명 (예: 아반떼)
+  model: string;      // 세대/트림 (예: 아반떼 MD)
   fuel: string;
   file: string;
 }
