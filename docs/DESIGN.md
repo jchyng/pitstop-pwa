@@ -24,11 +24,15 @@ Extracted from main-dashboard finalized HTML (2026-05-11). Use these tokens in a
 ### Status
 | Token | Light | Dark | Usage |
 |-------|-------|------|-------|
-| `--color-urgent-bg` | `#fee2e2` | `#3d1515` | 위급 chip background |
-| `--color-urgent-text` | `#ef4444` | `#f87171` | 위급 chip text, km remaining |
-| `--color-overdue-bg` | `#dc2626` | `#b91c1c` | 과기한 chip background (solid red — same family as 위급, solid fill = more severe) |
+| `--color-warning-bg` | `#fef3c7` | `#2d1f00` | 교체 임박 chip background (노랑) |
+| `--color-warning-text` | `#d97706` | `#fbbf24` | 교체 임박 chip text |
+| `--color-caution-bg` | `#fff7ed` | `#2a1500` | 주의 chip background (주황) |
+| `--color-caution-text` | `#ea580c` | `#fb923c` | 주의 chip text |
+| `--color-urgent-bg` | `#fef3c7` | `#2d1f00` | (legacy alias = warning-bg) |
+| `--color-urgent-text` | `#d97706` | `#fbbf24` | (legacy alias = warning-text) |
+| `--color-overdue-bg` | `#dc2626` | `#b91c1c` | 과기한 chip background (빨강) |
 | `--color-overdue-text` | `#ffffff` | `#ffffff` | 과기한 chip text |
-| `--color-overdue-sub` | `#b91c1c` | `#f87171` | 과기한 card subtitle text |
+| `--color-overdue-sub` | `#b91c1c` | `#f87171` | 과기한 card stat text |
 | `--color-normal-bg` | `#dcfce7` | `#0d2b19` | 정상 chip background |
 | `--color-normal-text` | `#16a34a` | `#4ade80` | 정상 chip text |
 
@@ -130,11 +134,17 @@ min-height: 44px;
 
 | Status | Korean | Color key | Condition |
 |--------|--------|-----------|-----------|
-| Normal | 정상 | `--color-normal-*` | Life > threshold |
-| Urgent | 위급 | `--color-urgent-*` | Life ≤ 20% or ≤ 30 days |
-| Overdue | 과기한 | `--color-overdue-*` | Past replacement interval |
+| ok | 정상 | `--color-normal-*` | ratio > 1 |
+| warning | 교체 임박 | `--color-warning-*` | 0 < ratio ≤ 1 (urgency_threshold 진입, 노랑) |
+| caution | 주의 | `--color-caution-*` | caution_boundary < ratio ≤ 0 (0~20% 초과, 주황) |
+| overdue | 과기한 | `--color-overdue-*` | ratio ≤ caution_boundary (20% 이상 초과, 빨강) |
+| unknown | 미기록 | surface-hover / text-muted | 계산 불가 |
 
-Subtitle text color mirrors chip status:
-- 정상 → `--color-text-secondary`
-- 위급 → `--color-urgent-text`
-- 과기한 → `#b91c1c` (light) / `#f87171` (dark)
+caution_boundary = -(0.2 × interval) / urgency_threshold
+
+Stat text color per status:
+- ok → `--color-text-primary`
+- warning → `--color-warning-text`
+- caution → `--color-caution-text`
+- overdue → `--color-overdue-sub`
+- unknown → `--color-text-muted`

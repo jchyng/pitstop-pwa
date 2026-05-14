@@ -20,6 +20,7 @@
       "id": "engine-oil",
       "name_ko": "엔진오일",
       "category": "엔진·오일",
+      "behavior": "replace_only",
       "interval_km": 10000,
       "max_km": 11000,
       "interval_months": 12,
@@ -28,25 +29,33 @@
       "notes": "합성유 기준. 광유는 7,500km"
     },
     {
-      "id": "coolant",
-      "name_ko": "냉각수 (부동액)",
+      "id": "brake-pad-front",
+      "name_ko": "브레이크패드 (전방)",
       "category": "제동·냉각·변속",
-      "interval_km": null,
+      "behavior": "inspect_only",
+      "interval_km": 50000,
       "max_km": null,
-      "interval_months": 24,
-      "urgency_threshold_km": null,
-      "urgency_threshold_days": 60,
-      "notes": "주행거리 무관, 2년마다 교환"
+      "interval_months": null,
+      "urgency_threshold_km": 5000,
+      "urgency_threshold_days": null,
+      "notes": "마모 확인 후 교체"
     }
   ]
 }
 ```
 
-**필드 설명:**
-- `interval_km`: 권장 교체 주기 km ("권장 N km")
-- `max_km`: 마지노선 km — 절대 넘기면 안 되는 상한 ("마지노선 N km"). `null`이면 interval_km과 동일하게 처리.
-- `category`: 전체보기 섹션 그룹명 (6개: 엔진·오일 / 연료·증발가스 / 공조·외부 / 제동·냉각·변속 / 점화·벨트 / 타이어·배터리)
-- `interval_km: null` → 시간 기준만 적용. 둘 다 있으면 먼저 도달하는 조건으로 알림.
+**`behavior` 필드 (필수):**
+- `replace_only`: 교체 주기만 있음. 로그는 교체 기록.
+- `inspect_only`: 점검 주기 기반. 로그는 점검(상태 기록) 또는 교체. 브레이크패드처럼 정기 점검 후 마모 시 교체.
+- `both`: 점검 주기와 교체 주기가 별도로 존재. `inspect_interval_km` / `inspect_interval_months` 필드 사용 (차량 설명서 데이터 수집 후 채움).
+
+**기타 필드:**
+- `interval_km`: 교체(또는 점검) 권장 주기 km
+- `max_km`: 마지노선 km. `null`이면 interval_km과 동일하게 처리.
+- `interval_months`: 기간 기준 주기
+- `inspect_interval_km` / `inspect_interval_months`: `both` 항목의 점검 전용 주기 (optional)
+- `manual_spec`: 공식 차량 설명서 발췌 (optional, 나중에 채움)
+- `interval_km: null` → 시간 기준만 적용. 둘 다 있으면 먼저 도달하는 조건 적용.
 
 ### localStorage 키 (Phase 1)
 - `pitstop_mileage_{car_id}` — 현재 주행거리
@@ -68,10 +77,11 @@ days_ratio = days_remaining / urgency_threshold_days
 // 최종 ratio: 둘 중 작은 값 (interval_km이 null이면 해당 ratio 제외)
 ratio = min(km_ratio, days_ratio)
 
-// 상태 판정
-overdue  → ratio ≤ 0
-urgent   → 0 < ratio ≤ 1
-ok       → ratio > 1
+// 상태 판정 (caution_boundary = -(0.2 × interval) / urgency_threshold)
+overdue  → ratio ≤ caution_boundary   // 인터벌의 20% 이상 초과 (빨강)
+caution  → caution_boundary < ratio ≤ 0 // 0~20% 초과 (주황)
+warning  → 0 < ratio ≤ 1             // urgency_threshold 진입 (노랑)
+ok       → ratio > 1                  // 정상 (초록)
 unknown  → 계산 불가
 ```
 

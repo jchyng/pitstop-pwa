@@ -97,13 +97,14 @@ export default function ConsumableCard({
   const [pressed, setPressed] = useState(false);
   const { status, displayText } = urgency;
   const { num, unit: rawUnit } = parseStatDisplay(displayText);
-  const isInspectItem = item.item_type === 'inspect';
+  const isInspectItem = item.behavior !== 'replace_only';
   const unit = isInspectItem
     ? rawUnit.replace('km 남음', 'km 후 점검').replace('개월 남음', '개월 후 점검')
     : rawUnit;
 
   const isOverdue = status === 'overdue';
-  const isUrgent = status === 'urgent';
+  const isCaution = status === 'caution';
+  const isWarning = status === 'warning';
   const isUnknown = status === 'unknown';
 
   const conditionBadgeStyle =
@@ -115,16 +116,20 @@ export default function ConsumableCard({
 
   const statColor = isOverdue
     ? 'var(--color-overdue-sub)'
-    : isUrgent
-    ? 'var(--color-urgent-text)'
+    : isCaution
+    ? 'var(--color-caution-text)'
+    : isWarning
+    ? 'var(--color-warning-text)'
     : isUnknown
     ? 'var(--color-text-muted)'
     : 'var(--color-text-primary)';
 
   const nextColor = isOverdue
     ? 'var(--color-overdue-sub)'
-    : isUrgent
-    ? 'var(--color-urgent-text)'
+    : isCaution
+    ? 'var(--color-caution-text)'
+    : isWarning
+    ? 'var(--color-warning-text)'
     : 'var(--color-text-secondary)';
 
   const recentValue = buildRecentValue(lastLoggedMileage, lastLoggedDate);
@@ -250,7 +255,7 @@ export default function ConsumableCard({
                     fontSize: 13,
                     lineHeight: 1.5,
                     color: nextColor,
-                    fontWeight: (isOverdue || isUrgent) ? 500 : 400,
+                    fontWeight: (isOverdue || isCaution || isWarning) ? 500 : 400,
                   }}
                 >
                   {nextValue}

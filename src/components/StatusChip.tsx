@@ -5,9 +5,10 @@ interface Props {
 }
 
 const config: Record<UrgencyStatus, { label: string; bg: string; text: string }> = {
-  overdue:  { label: '과기한',   bg: 'var(--color-overdue-bg)',  text: 'var(--color-overdue-text)' },
-  urgent:   { label: '위급',     bg: 'var(--color-urgent-bg)',   text: 'var(--color-urgent-text)' },
-  ok:       { label: '정상',     bg: 'var(--color-normal-bg)',   text: 'var(--color-normal-text)' },
+  overdue:  { label: '과기한',   bg: 'var(--color-overdue-bg)',    text: 'var(--color-overdue-text)' },
+  caution:  { label: '주의',     bg: 'var(--color-caution-bg)',    text: 'var(--color-caution-text)' },
+  warning:  { label: '교체 임박', bg: 'var(--color-warning-bg)',   text: 'var(--color-warning-text)' },
+  ok:       { label: '정상',     bg: 'var(--color-normal-bg)',     text: 'var(--color-normal-text)' },
   unknown:  { label: '알수없음', bg: 'var(--color-surface-hover)', text: 'var(--color-text-muted)' },
 };
 

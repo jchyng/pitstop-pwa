@@ -41,7 +41,7 @@ const sheetInputStyle: React.CSSProperties = {
 };
 
 export default function LogSheet({ item, carId, currentMileage, onSave, onClose }: Props) {
-  const isInspectItem = item.item_type === 'inspect';
+  const isInspectItem = item.behavior !== 'replace_only';
   const [date, setDate] = useState(todayISO());
   const [mileageStr, setMileageStr] = useState(currentMileage !== null ? String(currentMileage) : '');
   const [logType, setLogType] = useState<LogType>(isInspectItem ? 'inspect' : 'replace');

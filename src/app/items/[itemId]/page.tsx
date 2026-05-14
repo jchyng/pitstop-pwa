@@ -132,18 +132,22 @@ export default function ItemDetailPage() {
   const statusColor =
     urgency?.status === 'overdue'
       ? 'var(--color-overdue-sub)'
-      : urgency?.status === 'urgent'
-      ? 'var(--color-urgent-text)'
+      : urgency?.status === 'caution'
+      ? 'var(--color-caution-text)'
+      : urgency?.status === 'warning'
+      ? 'var(--color-warning-text)'
       : urgency?.status === 'ok'
       ? 'var(--color-normal-text)'
       : 'var(--color-text-muted)';
 
-  const isInspectItem = item?.item_type === 'inspect';
+  const isInspectItem = item?.behavior !== 'replace_only';
 
   const statusLabel =
     urgency?.status === 'overdue'
       ? (isInspectItem ? '점검 필요' : '과기한')
-      : urgency?.status === 'urgent'
+      : urgency?.status === 'caution'
+      ? (isInspectItem ? '점검 주의' : '주의')
+      : urgency?.status === 'warning'
       ? (isInspectItem ? '점검 임박' : '교체 임박')
       : urgency?.status === 'ok'
       ? '정상'
@@ -152,8 +156,10 @@ export default function ItemDetailPage() {
   const statusBg =
     urgency?.status === 'overdue'
       ? 'var(--color-urgent-bg)'
-      : urgency?.status === 'urgent'
-      ? 'var(--color-urgent-bg)'
+      : urgency?.status === 'caution'
+      ? 'var(--color-caution-bg)'
+      : urgency?.status === 'warning'
+      ? 'var(--color-warning-bg)'
       : urgency?.status === 'ok'
       ? 'var(--color-normal-bg)'
       : 'var(--color-surface-hover)';
@@ -311,7 +317,7 @@ export default function ItemDetailPage() {
                       gap: 4,
                     }}
                   >
-                    {isInspectItem ? '점검 주기' : '교체 주기'}
+                    {isInspectItem ? '점검·교체 주기' : '교체 주기'}
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path
                         d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"

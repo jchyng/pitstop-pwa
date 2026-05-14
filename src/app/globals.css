@@ -10,6 +10,10 @@
   --color-text-secondary: #6b7280;
   --color-text-muted:     #9ca3af;
 
+  --color-warning-bg:     #fef3c7;
+  --color-warning-text:   #d97706;
+  --color-caution-bg:     #fff7ed;
+  --color-caution-text:   #ea580c;
   --color-urgent-bg:      #fef3c7;
   --color-urgent-text:    #d97706;
   --color-overdue-bg:     #dc2626;
@@ -47,6 +51,10 @@
     --color-text-secondary: #a0a0a0;
     --color-text-muted:     #666666;
 
+    --color-warning-bg:     #2d1f00;
+    --color-warning-text:   #fbbf24;
+    --color-caution-bg:     #2a1500;
+    --color-caution-text:   #fb923c;
     --color-urgent-bg:      #2d1f00;
     --color-urgent-text:    #fbbf24;
     --color-overdue-bg:     #b91c1c;

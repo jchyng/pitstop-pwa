@@ -127,18 +127,22 @@ export default function Home() {
     () => itemsWithLog.filter(x => x.urgency.status === 'overdue'),
     [itemsWithLog],
   );
-  const urgentItems = useMemo(
-    () => itemsWithLog.filter(x => x.urgency.status === 'urgent'),
+  const cautionItems = useMemo(
+    () => itemsWithLog.filter(x => x.urgency.status === 'caution'),
+    [itemsWithLog],
+  );
+  const warningItems = useMemo(
+    () => itemsWithLog.filter(x => x.urgency.status === 'warning'),
     [itemsWithLog],
   );
 
   const attentionItems = useMemo(() => {
-    return [...overdueItems, ...urgentItems].sort((a, b) => {
+    return [...overdueItems, ...cautionItems, ...warningItems].sort((a, b) => {
       const ra = a.urgency.ratio ?? Infinity;
       const rb = b.urgency.ratio ?? Infinity;
       return ra - rb;
     });
-  }, [overdueItems, urgentItems]);
+  }, [overdueItems, cautionItems, warningItems]);
 
   const byCategory = useMemo(() => {
     return CATEGORIES.map(cat => ({
@@ -193,9 +197,13 @@ export default function Home() {
     () => [...overdueItems].sort((a, b) => (a.urgency.ratio ?? -Infinity) - (b.urgency.ratio ?? -Infinity)),
     [overdueItems],
   );
-  const urgentSorted = useMemo(
-    () => [...urgentItems].sort((a, b) => (a.urgency.ratio ?? Infinity) - (b.urgency.ratio ?? Infinity)),
-    [urgentItems],
+  const cautionSorted = useMemo(
+    () => [...cautionItems].sort((a, b) => (a.urgency.ratio ?? -Infinity) - (b.urgency.ratio ?? -Infinity)),
+    [cautionItems],
+  );
+  const warningSorted = useMemo(
+    () => [...warningItems].sort((a, b) => (a.urgency.ratio ?? Infinity) - (b.urgency.ratio ?? Infinity)),
+    [warningItems],
   );
 
   if (isLoading) {
@@ -405,14 +413,50 @@ export default function Home() {
                       </section>
                     )}
 
-                    {urgentSorted.length > 0 && (
-                      <section style={{ marginTop: overdueSorted.length > 0 ? 22 : 0 }} aria-labelledby="attn-urgent">
+                    {cautionSorted.length > 0 && (
+                      <section style={{ marginTop: overdueSorted.length > 0 ? 22 : 0 }} aria-labelledby="attn-caution">
                         <p
-                          id="attn-urgent"
+                          id="attn-caution"
                           style={{
                             fontSize: 11,
                             fontWeight: 600,
-                            color: 'var(--color-urgent-text)',
+                            color: 'var(--color-caution-text)',
+                            letterSpacing: '0.07em',
+                            textTransform: 'uppercase',
+                            marginBottom: 8,
+                          }}
+                        >
+                          주의
+                        </p>
+                        <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
+                          {cautionSorted.map(x => (
+                            <ConsumableCard
+                              key={x.item.id}
+                              item={x.item}
+                              urgency={x.urgency}
+                              currentMileage={currentMileage}
+                              lastLoggedDate={x.lastLoggedDate}
+                              lastLoggedMileage={x.lastLoggedMileage}
+                              lastLogType={x.lastLogType}
+                              lastInspectCondition={x.lastInspectCondition}
+                              lastReplaceDate={x.lastReplaceDate}
+                              lastReplaceMileage={x.lastReplaceMileage}
+                              isCustom={x.isCustom}
+                              onClick={() => router.push(`/items/${x.item.id}`)}
+                            />
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+
+                    {warningSorted.length > 0 && (
+                      <section style={{ marginTop: (overdueSorted.length > 0 || cautionSorted.length > 0) ? 22 : 0 }} aria-labelledby="attn-warning">
+                        <p
+                          id="attn-warning"
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: 'var(--color-warning-text)',
                             letterSpacing: '0.07em',
                             textTransform: 'uppercase',
                             marginBottom: 8,
@@ -421,7 +465,7 @@ export default function Home() {
                           교체 임박
                         </p>
                         <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
-                          {urgentSorted.map(x => (
+                          {warningSorted.map(x => (
                             <ConsumableCard
                               key={x.item.id}
                               item={x.item}
