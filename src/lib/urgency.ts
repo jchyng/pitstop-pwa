@@ -1,16 +1,22 @@
-import type { ConsumableItem, UrgencyResult, InspectCondition } from '@/types';
+import type { ConsumableItem, UrgencyResult, UrgencyStatus, InspectCondition } from '@/types';
 
 interface UrgencyInput {
   item: ConsumableItem;
   currentMileage: number | null;
   lastLoggedMileage: number | null;
-  lastLoggedDate: string | null; // ISO 날짜 문자열 (YYYY-MM-DD)
+  lastLoggedDate: string | null;
   /**
-   * inspect 항목의 마지막 점검 결과. 'caution'이면 ratio×0.5로 단축,
-   * 'replace_needed'이면 즉시 과기한(ratio=-1)으로 격상.
-   * 교체형(replace) 항목 또는 점검 이력 없음일 때는 null/undefined.
+   * inspect 항목의 마지막 점검 결과.
+   * 'caution'이면 ratio×0.5로 단축, 'replace_needed'이면 즉시 overdue.
+   * replace_only 항목 또는 점검 이력 없음일 때는 null/undefined.
    */
   lastInspectCondition?: InspectCondition | null;
+}
+
+interface DimensionResult {
+  ratio: number;
+  // 20% of interval / urgency_threshold — caution과 overdue의 경계 ratio
+  cautionBoundary: number;
 }
 
 export function calculateUrgency({
@@ -20,53 +26,63 @@ export function calculateUrgency({
   lastLoggedDate,
   lastInspectCondition,
 }: UrgencyInput): UrgencyResult {
-  // 점검형 항목 + 마지막 점검에서 '교체 필요'면 즉시 과기한 카드로
-  const isInspectItem = item.item_type === 'inspect';
+  const isInspectItem = item.behavior
+    ? item.behavior !== 'replace_only'
+    : item.item_type === 'inspect';
+
   if (isInspectItem && lastInspectCondition === 'replace_needed') {
-    return {
-      status: 'overdue',
-      ratio: -1,
-      displayText: '교체 필요',
-    };
+    return { status: 'overdue', ratio: -1, displayText: '교체 필요' };
   }
 
-  const kmRatio = calcKmRatio(item, currentMileage, lastLoggedMileage);
-  const daysRatio = calcDaysRatio(item, lastLoggedDate);
+  const kmResult = calcKmResult(item, currentMileage, lastLoggedMileage);
+  const daysResult = calcDaysResult(item, lastLoggedDate);
 
-  // 유효한 ratio만 모아서 min() 계산
-  const validRatios = [kmRatio, daysRatio].filter((r): r is number => r !== null);
+  const validResults = [kmResult, daysResult].filter((r): r is DimensionResult => r !== null);
 
-  if (validRatios.length === 0) {
+  if (validResults.length === 0) {
     return { status: 'unknown', ratio: null, displayText: '미기록' };
   }
 
-  let ratio = Math.min(...validRatios);
+  // 가장 긴급한 차원(ratio가 낮은 쪽)이 상태를 결정
+  const winning = validResults.reduce((min, r) => r.ratio < min.ratio ? r : min);
+  let ratio = winning.ratio;
 
-  // 점검형 + '주의 관찰'이면 ratio를 절반으로 압축해 더 빨리 위급으로
+  // inspect 항목 + '주의 관찰'이면 ratio를 절반으로 압축해 더 빨리 위급으로
   if (isInspectItem && lastInspectCondition === 'caution' && ratio > 0) {
     ratio = ratio * 0.5;
   }
 
-  const status = ratio <= 0 ? 'overdue' : ratio <= 1 ? 'urgent' : 'ok';
+  const status = determineStatus(ratio, winning.cautionBoundary);
   const displayText = buildDisplayText(item, ratio, currentMileage, lastLoggedMileage, lastLoggedDate);
 
   return { status, ratio, displayText };
 }
 
-function calcKmRatio(
+function determineStatus(ratio: number, cautionBoundary: number): UrgencyStatus {
+  if (ratio > 1) return 'ok';
+  if (ratio > 0) return 'warning';
+  if (ratio > cautionBoundary) return 'caution';
+  return 'overdue';
+}
+
+function calcKmResult(
   item: ConsumableItem,
   currentMileage: number | null,
   lastLoggedMileage: number | null,
-): number | null {
+): DimensionResult | null {
   if (item.interval_km === null || item.urgency_threshold_km === null) return null;
   if (currentMileage === null) return null;
 
   const baseMileage = lastLoggedMileage ?? 0;
   const kmRemaining = item.interval_km - (currentMileage - baseMileage);
-  return kmRemaining / item.urgency_threshold_km;
+  const ratio = kmRemaining / item.urgency_threshold_km;
+  // 인터벌의 20%를 초과했을 때 caution → overdue
+  const cautionBoundary = -(0.2 * item.interval_km) / item.urgency_threshold_km;
+
+  return { ratio, cautionBoundary };
 }
 
-function calcDaysRatio(item: ConsumableItem, lastLoggedDate: string | null): number | null {
+function calcDaysResult(item: ConsumableItem, lastLoggedDate: string | null): DimensionResult | null {
   if (item.interval_months === null || item.urgency_threshold_days === null) return null;
   if (lastLoggedDate === null) return null;
 
@@ -74,8 +90,10 @@ function calcDaysRatio(item: ConsumableItem, lastLoggedDate: string | null): num
   const logged = new Date(lastLoggedDate);
   const daysElapsed = Math.floor((today.getTime() - logged.getTime()) / (1000 * 60 * 60 * 24));
   const daysRemaining = item.interval_months * 30 - daysElapsed;
+  const ratio = daysRemaining / item.urgency_threshold_days;
+  const cautionBoundary = -(0.2 * item.interval_months * 30) / item.urgency_threshold_days;
 
-  return daysRemaining / item.urgency_threshold_days;
+  return { ratio, cautionBoundary };
 }
 
 function buildDisplayText(
@@ -85,7 +103,6 @@ function buildDisplayText(
   lastLoggedMileage: number | null,
   lastLoggedDate: string | null,
 ): string {
-  // km 기준 항목이 있고 현재 주행거리가 있을 때 (미기록이면 0km 기준)
   if (item.interval_km !== null && currentMileage !== null) {
     const baseMileage = lastLoggedMileage ?? 0;
     const kmRemaining = item.interval_km - (currentMileage - baseMileage);
@@ -95,7 +112,6 @@ function buildDisplayText(
     return `${kmRemaining.toLocaleString()} km 남음`;
   }
 
-  // 시간 기준만 있을 때
   if (item.interval_months !== null && lastLoggedDate !== null) {
     const today = new Date();
     const logged = new Date(lastLoggedDate);
@@ -110,7 +126,6 @@ function buildDisplayText(
     return `${monthsLeft}개월 남음`;
   }
 
-  // ratio는 있으나 표시 불가 (이론상 도달 안 함)
   void ratio;
   return '—';
 }
