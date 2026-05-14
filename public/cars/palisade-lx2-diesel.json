@@ -11,7 +11,8 @@
       "interval_months": 12,
       "urgency_threshold_km": 2000,
       "urgency_threshold_days": 30,
-      "notes": "가혹 조건 시 10,000km로 단축"
+      "notes": "가혹 조건 시 10,000km로 단축",
+      "behavior": "replace_only"
     },
     {
       "id": "oil-filter",
@@ -22,7 +23,8 @@
       "interval_months": null,
       "urgency_threshold_km": 2000,
       "urgency_threshold_days": null,
-      "notes": "엔진오일 교환 시 동시 교체"
+      "notes": "엔진오일 교환 시 동시 교체",
+      "behavior": "replace_only"
     },
     {
       "id": "air-cleaner",
@@ -33,7 +35,8 @@
       "interval_months": null,
       "urgency_threshold_km": 3000,
       "urgency_threshold_days": null,
-      "notes": "오염 심한 도로 운행 시 조기 교체"
+      "notes": "오염 심한 도로 운행 시 조기 교체",
+      "behavior": "replace_only"
     },
     {
       "id": "fuel-filter",
@@ -44,7 +47,8 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
-      "notes": "수분 분리기 20,000km마다 점검"
+      "notes": "수분 분리기 20,000km마다 점검",
+      "behavior": "replace_only"
     },
     {
       "id": "cabin-filter",
@@ -55,7 +59,8 @@
       "interval_months": null,
       "urgency_threshold_km": 2000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "wipers",
@@ -66,7 +71,8 @@
       "interval_months": 12,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": 30,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "brake-fluid",
@@ -77,7 +83,8 @@
       "interval_months": 24,
       "urgency_threshold_km": null,
       "urgency_threshold_days": 60,
-      "notes": "수시 점검"
+      "notes": "수시 점검",
+      "behavior": "replace_only"
     },
     {
       "id": "brake-pad-front",
@@ -88,8 +95,8 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
-      "item_type": "inspect",
-      "notes": "마모 확인 후 교체"
+      "notes": "마모 확인 후 교체",
+      "behavior": "inspect_only"
     },
     {
       "id": "brake-pad-rear",
@@ -100,8 +107,8 @@
       "interval_months": null,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": null,
-      "item_type": "inspect",
-      "notes": "마모 확인 후 교체"
+      "notes": "마모 확인 후 교체",
+      "behavior": "inspect_only"
     },
     {
       "id": "coolant",
@@ -112,7 +119,8 @@
       "interval_months": 60,
       "urgency_threshold_km": 20000,
       "urgency_threshold_days": 180,
-      "notes": "수시 보충"
+      "notes": "수시 보충",
+      "behavior": "replace_only"
     },
     {
       "id": "atf",
@@ -123,7 +131,8 @@
       "interval_months": null,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": null,
-      "notes": "가혹 조건 시 단축"
+      "notes": "가혹 조건 시 단축",
+      "behavior": "replace_only"
     },
     {
       "id": "drive-belt",
@@ -134,8 +143,8 @@
       "interval_months": null,
       "urgency_threshold_km": 2000,
       "urgency_threshold_days": null,
-      "item_type": "inspect",
-      "notes": "마모·균열 시 교환"
+      "notes": "마모·균열 시 교환",
+      "behavior": "inspect_only"
     },
     {
       "id": "tires",
@@ -146,7 +155,8 @@
       "interval_months": null,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": "위치교환(로테이션) 주기"
+      "notes": "위치교환(로테이션) 주기",
+      "behavior": "replace_only"
     },
     {
       "id": "tire-replacement",
@@ -157,7 +167,8 @@
       "interval_months": 60,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": 180,
-      "notes": "마모 한계선 기준"
+      "notes": "마모 한계선 기준",
+      "behavior": "replace_only"
     },
     {
       "id": "battery",
@@ -168,7 +179,8 @@
       "interval_months": 36,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": 90,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     }
   ]
 }

@@ -11,7 +11,8 @@
       "interval_months": 12,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": 30,
-      "notes": "합성유 기준. 엔진 정지 구간이 많아 오염 적을 수 있음"
+      "notes": "합성유 기준. 엔진 정지 구간이 많아 오염 적을 수 있음",
+      "behavior": "replace_only"
     },
     {
       "id": "oil-filter",
@@ -22,7 +23,8 @@
       "interval_months": null,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": "엔진오일 교환 시 동시 교체"
+      "notes": "엔진오일 교환 시 동시 교체",
+      "behavior": "replace_only"
     },
     {
       "id": "air-cleaner",
@@ -33,7 +35,8 @@
       "interval_months": null,
       "urgency_threshold_km": 3000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "fuel-filter",
@@ -44,7 +47,8 @@
       "interval_months": 24,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": 60,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "evap-system",
@@ -55,8 +59,8 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
-      "item_type": "inspect",
-      "notes": "점검"
+      "notes": "점검",
+      "behavior": "inspect_only"
     },
     {
       "id": "cabin-filter",
@@ -67,7 +71,8 @@
       "interval_months": null,
       "urgency_threshold_km": 2000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "wipers",
@@ -78,7 +83,8 @@
       "interval_months": 12,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": 30,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "brake-fluid",
@@ -89,7 +95,8 @@
       "interval_months": 24,
       "urgency_threshold_km": null,
       "urgency_threshold_days": 60,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "brake-pad-front",
@@ -100,8 +107,8 @@
       "interval_months": null,
       "urgency_threshold_km": 8000,
       "urgency_threshold_days": null,
-      "item_type": "inspect",
-      "notes": "회생제동으로 마모 적음"
+      "notes": "회생제동으로 마모 적음",
+      "behavior": "inspect_only"
     },
     {
       "id": "brake-pad-rear",
@@ -112,8 +119,8 @@
       "interval_months": null,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": null,
-      "item_type": "inspect",
-      "notes": null
+      "notes": null,
+      "behavior": "inspect_only"
     },
     {
       "id": "coolant",
@@ -124,7 +131,8 @@
       "interval_months": 120,
       "urgency_threshold_km": 20000,
       "urgency_threshold_days": 180,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "coolant-hv",
@@ -135,7 +143,8 @@
       "interval_months": 120,
       "urgency_threshold_km": 20000,
       "urgency_threshold_days": 180,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "atf",
@@ -146,7 +155,8 @@
       "interval_months": null,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "spark-plugs",
@@ -157,7 +167,8 @@
       "interval_months": null,
       "urgency_threshold_km": 15000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "tires",
@@ -168,7 +179,8 @@
       "interval_months": null,
       "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "tire-replacement",
@@ -179,7 +191,8 @@
       "interval_months": 60,
       "urgency_threshold_km": 10000,
       "urgency_threshold_days": 180,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     },
     {
       "id": "battery-12v",
@@ -190,7 +203,8 @@
       "interval_months": 48,
       "urgency_threshold_km": null,
       "urgency_threshold_days": 120,
-      "notes": null
+      "notes": null,
+      "behavior": "replace_only"
     }
   ]
 }
