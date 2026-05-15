@@ -23,6 +23,15 @@ const CONDITION_LABEL: Record<InspectCondition, string> = {
   replace_needed: '교체 필요',
 };
 
+const BADGE_BASE: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 700,
+  padding: '2px 6px',
+  borderRadius: 8,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+};
+
 function formatDate(iso: string): string {
   const d = new Date(iso);
   const y = d.getFullYear();
@@ -195,38 +204,27 @@ export default function ConsumableCard({
                 커스텀
               </span>
             )}
-            {isInspectItem && (
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  padding: '2px 6px',
-                  borderRadius: 8,
-                  background: 'var(--color-surface-hover)',
-                  color: 'var(--color-text-muted)',
-                  flexShrink: 0,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                점검
-              </span>
-            )}
-            {isInspectItem && lastInspectCondition && (
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  padding: '2px 6px',
-                  borderRadius: 8,
-                  background: conditionBadgeStyle.bg,
-                  color: conditionBadgeStyle.fg,
-                  flexShrink: 0,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {CONDITION_LABEL[lastInspectCondition]}
-              </span>
-            )}
+            {isInspectItem && (() => {
+              if (lastLogType === 'replace') {
+                return (
+                  <span style={{ ...BADGE_BASE, background: 'var(--color-normal-bg)', color: 'var(--color-normal-text)' }}>
+                    교체 완료
+                  </span>
+                );
+              }
+              if (lastInspectCondition) {
+                return (
+                  <span style={{ ...BADGE_BASE, background: conditionBadgeStyle.bg, color: conditionBadgeStyle.fg }}>
+                    {CONDITION_LABEL[lastInspectCondition]}
+                  </span>
+                );
+              }
+              return (
+                <span style={{ ...BADGE_BASE, fontWeight: 600, background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }}>
+                  점검
+                </span>
+              );
+            })()}
           </div>
 
           {/* Info rows: 최근 / 다음 / 권장 주기 */}
