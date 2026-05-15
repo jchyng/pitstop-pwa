@@ -82,6 +82,18 @@ export function addLog(carId: string, entry: LogEntry): void {
   localStorage.setItem(key.logs(carId), JSON.stringify(logs));
 }
 
+export function updateLog(
+  carId: string,
+  id: string,
+  patch: Pick<LogEntry, 'date' | 'mileage' | 'note'>,
+): void {
+  const logs = getLogs(carId);
+  const idx = logs.findIndex(l => l.id === id);
+  if (idx === -1) return;
+  logs[idx] = { ...logs[idx], ...patch };
+  localStorage.setItem(key.logs(carId), JSON.stringify(logs));
+}
+
 // 해당 아이템의 가장 최근 점검 기록(condition 포함) 반환. 없으면 null.
 export function getLastInspectEntry(carId: string, itemId: string): LogEntry | null {
   const logs = getLogs(carId);

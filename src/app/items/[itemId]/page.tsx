@@ -7,6 +7,7 @@ import { calculateUrgency } from '@/lib/urgency';
 import { getMileage, getLogs, migrateLogsIfNeeded, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
 import LogSheet from '@/components/LogSheet';
 import IntervalEditSheet from '@/components/IntervalEditSheet';
+import EditLogSheet from '@/components/EditLogSheet';
 import Timeline from '@/components/Timeline';
 
 function formatDate(iso: string): string {
@@ -36,6 +37,7 @@ export default function ItemDetailPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [showLogSheet, setShowLogSheet] = useState(false);
   const [showIntervalSheet, setShowIntervalSheet] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [customVersion, setCustomVersion] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [historyFilter, setHistoryFilter] = useState<'all' | 'inspect' | 'replace'>('all');
@@ -569,6 +571,7 @@ export default function ItemDetailPage() {
           <Timeline
             grouped={grouped}
             mostRecentId={filteredLogs[0]?.id ?? null}
+            onEditEntry={entry => setEditingEntry(entry)}
           />
         )}
       </main>
@@ -627,6 +630,18 @@ export default function ItemDetailPage() {
           carId={carId}
           onSave={handleIntervalSave}
           onClose={() => setShowIntervalSheet(false)}
+        />
+      )}
+
+      {editingEntry && (
+        <EditLogSheet
+          entry={editingEntry}
+          carId={carId}
+          onSave={() => {
+            setLogs(getLogs(carId).filter(l => l.itemId === itemId));
+            setEditingEntry(null);
+          }}
+          onClose={() => setEditingEntry(null)}
         />
       )}
     </div>

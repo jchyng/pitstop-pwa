@@ -10,6 +10,7 @@ interface Props {
   showItemName?: boolean;
   showCategory?: boolean;
   onEntryClick?: (entry: LogEntry) => void;
+  onEditEntry?: (entry: LogEntry) => void;
 }
 
 export default function Timeline({
@@ -18,6 +19,7 @@ export default function Timeline({
   showItemName = false,
   showCategory = false,
   onEntryClick,
+  onEditEntry,
 }: Props) {
   return (
     <ul style={{ listStyle: 'none', padding: 0 }}>
@@ -181,20 +183,46 @@ export default function Timeline({
                         </span>
                       )}
                     </div>
-                    {entry.mileage !== null && (
-                      <span
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: 'var(--color-text-primary)',
-                          fontVariantNumeric: 'tabular-nums',
-                          whiteSpace: 'nowrap',
-                          flexShrink: 0,
-                        }}
-                      >
-                        {entry.mileage.toLocaleString()} km
-                      </span>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                      {entry.mileage !== null && (
+                        <span
+                          style={{
+                            fontSize: 14,
+                            fontWeight: 600,
+                            color: 'var(--color-text-primary)',
+                            fontVariantNumeric: 'tabular-nums',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {entry.mileage.toLocaleString()} km
+                        </span>
+                      )}
+                      {!!onEditEntry && (
+                        <button
+                          onClick={e => { e.stopPropagation(); onEditEntry(entry); }}
+                          aria-label={`${entry.itemName} 기록 수정`}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            color: 'var(--color-text-muted)',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path
+                              d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
