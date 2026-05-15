@@ -571,7 +571,7 @@ export default function ItemDetailPage() {
           <Timeline
             grouped={grouped}
             mostRecentId={filteredLogs[0]?.id ?? null}
-            onEditEntry={entry => setEditingEntry(entry)}
+            onEntryClick={entry => setEditingEntry(entry)}
           />
         )}
       </main>
