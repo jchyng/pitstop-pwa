@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
 import Timeline from '@/components/Timeline';
-import EditLogSheet from '@/components/EditLogSheet';
 import type { CarData, LogEntry } from '@/types';
 import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
 
@@ -29,8 +28,6 @@ export default function LogPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterCategory, setFilterCategory] = useState('전체');
   const [isLoading, setIsLoading] = useState(true);
-  const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
-
   useEffect(() => {
     async function load() {
       const id = localStorage.getItem('pitstop_selected_car') ?? '';
@@ -275,7 +272,6 @@ export default function LogPage() {
             showItemName
             showCategory
             onEntryClick={entry => router.push(`/items/${entry.itemId}`)}
-            onEditEntry={entry => setEditingEntry(entry)}
           />
         )}
       </main>
@@ -319,14 +315,6 @@ export default function LogPage() {
 
       <BottomNav activeTab="log" />
 
-      {editingEntry && (
-        <EditLogSheet
-          entry={editingEntry}
-          carId={carId}
-          onSave={() => { setLogs(getLogs(carId)); setEditingEntry(null); }}
-          onClose={() => setEditingEntry(null)}
-        />
-      )}
     </div>
   );
 }
