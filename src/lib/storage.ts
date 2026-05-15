@@ -94,6 +94,11 @@ export function updateLog(
   localStorage.setItem(key.logs(carId), JSON.stringify(logs));
 }
 
+export function deleteLog(carId: string, id: string): void {
+  const logs = getLogs(carId).filter(l => l.id !== id);
+  localStorage.setItem(key.logs(carId), JSON.stringify(logs));
+}
+
 // 해당 아이템의 가장 최근 점검 기록(condition 포함) 반환. 없으면 null.
 export function getLastInspectEntry(carId: string, itemId: string): LogEntry | null {
   const logs = getLogs(carId);

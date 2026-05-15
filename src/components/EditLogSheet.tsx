@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { LogEntry, InspectCondition } from '@/types';
-import { updateLog } from '@/lib/storage';
+import { updateLog, deleteLog } from '@/lib/storage';
 import BottomSheet from '@/components/BottomSheet';
 
 interface Props {
@@ -43,12 +43,19 @@ export default function EditLogSheet({ entry, carId, onSave, onClose }: Props) {
     entry.mileage !== null ? String(entry.mileage) : '',
   );
   const [note, setNote] = useState(entry.note ?? '');
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   function handleSave() {
     if (!date) return;
     const km = Number(mileageStr);
     const mileage = Number.isFinite(km) && km > 0 ? km : null;
     updateLog(carId, entry.id, { date, mileage, note: note.trim() || undefined });
+    onSave();
+    onClose();
+  }
+
+  function handleDelete() {
+    deleteLog(carId, entry.id);
     onSave();
     onClose();
   }
@@ -183,6 +190,78 @@ export default function EditLogSheet({ entry, carId, onSave, onClose }: Props) {
       >
         저장
       </button>
+
+      {/* Delete */}
+      {!confirmDelete ? (
+        <button
+          onClick={() => setConfirmDelete(true)}
+          style={{
+            width: '100%',
+            marginTop: 10,
+            padding: '12px 0',
+            borderRadius: 12,
+            border: '1.5px solid var(--color-border)',
+            background: 'transparent',
+            color: 'var(--color-overdue-sub)',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: 'var(--font)',
+          }}
+        >
+          기록 삭제
+        </button>
+      ) : (
+        <div
+          style={{
+            marginTop: 10,
+            padding: '14px',
+            borderRadius: 12,
+            border: '1.5px solid var(--color-overdue-sub)',
+            background: 'var(--color-urgent-bg)',
+          }}
+        >
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 10, textAlign: 'center' }}>
+            이 기록을 삭제할까요?
+          </p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => setConfirmDelete(false)}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: 10,
+                border: '1.5px solid var(--color-border)',
+                background: 'transparent',
+                color: 'var(--color-text-secondary)',
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              취소
+            </button>
+            <button
+              onClick={handleDelete}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: 10,
+                border: 'none',
+                background: 'var(--color-overdue-sub)',
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              삭제
+            </button>
+          </div>
+        </div>
+      )}
     </BottomSheet>
   );
 }
