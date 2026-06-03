@@ -3,21 +3,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
+import PageHeader from '@/components/PageHeader';
 import Timeline from '@/components/Timeline';
 import type { CarData, LogEntry } from '@/types';
 import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
-
-function toMonthLabel(iso: string): string {
-  const [y, m] = iso.split('-');
-  return `${y}년 ${Number(m)}월`;
-}
-
-const FUEL_LABEL: Record<string, string> = {
-  gasoline: '가솔린',
-  diesel: '디젤',
-  ev: 'EV',
-  hev: 'HEV',
-};
+import { FUEL_LABEL } from '@/lib/labels';
+import { groupByMonth } from '@/lib/itemUtils';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function LogPage() {
   const router = useRouter();
@@ -71,15 +63,7 @@ export default function LogPage() {
     return [...filtered].sort((a, b) => b.date.localeCompare(a.date));
   }, [logs, filterCategory]);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, LogEntry[]>();
-    for (const entry of sorted) {
-      const label = toMonthLabel(entry.date);
-      if (!map.has(label)) map.set(label, []);
-      map.get(label)!.push(entry);
-    }
-    return [...map.entries()];
-  }, [sorted]);
+  const grouped = useMemo(() => groupByMonth(sorted), [sorted]);
 
   const mostRecentId = sorted[0]?.id ?? null;
 
@@ -101,37 +85,7 @@ export default function LogPage() {
         background: 'var(--color-bg)',
       }}
     >
-      {/* Header */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '20px var(--page-pad) 14px',
-        }}
-      >
-        <h1 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.4px' }}>정비 이력</h1>
-        {carChipLabel && (
-          <span
-            aria-label={`선택된 차량: ${carName}`}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              padding: '6px 12px',
-              border: '1.5px solid var(--color-border)',
-              borderRadius: 24,
-              background: 'var(--color-surface)',
-              fontSize: 13,
-              fontWeight: 500,
-              color: 'var(--color-text-secondary)',
-              whiteSpace: 'nowrap',
-              fontFamily: 'var(--font)',
-            }}
-          >
-            {carChipLabel}
-          </span>
-        )}
-      </header>
+      <PageHeader title="정비 이력" carLabel={carChipLabel || undefined} />
 
       {/* Filter chips */}
       <div
@@ -194,24 +148,8 @@ export default function LogPage() {
         }}
       >
         {isLoading ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '40vh',
-            }}
-          >
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                border: '2.5px solid var(--color-border)',
-                borderTop: '2.5px solid var(--color-nav-active)',
-                borderRadius: '50%',
-                animation: 'pitstop-spin 0.75s linear infinite',
-              }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '40vh' }}>
+            <LoadingSpinner />
           </div>
         ) : sorted.length === 0 ? (
           <div

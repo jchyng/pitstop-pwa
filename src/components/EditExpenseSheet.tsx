@@ -8,6 +8,9 @@ import BottomSheet from '@/components/BottomSheet';
 import SheetHeader from '@/components/SheetHeader';
 import PrimaryButton from '@/components/PrimaryButton';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
+import FormField from '@/components/FormField';
+import CurrencyInput from '@/components/CurrencyInput';
+import { sheetInputStyle } from '@/lib/sheetStyles';
 
 interface Props {
   entry: ExpenseEntry;
@@ -15,19 +18,6 @@ interface Props {
   onSave: () => void;
   onClose: () => void;
 }
-
-const sheetInputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '11px 12px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 10,
-  fontSize: 15,
-  background: 'var(--color-surface-hover)',
-  color: 'var(--color-text-primary)',
-  fontFamily: 'var(--font)',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
 
 export default function EditExpenseSheet({ entry, carId, onSave, onClose }: Props) {
   const [category, setCategory] = useState<ExpenseCategory>(entry.category);
@@ -91,36 +81,17 @@ export default function EditExpenseSheet({ entry, carId, onSave, onClose }: Prop
 
       <div style={{ height: 1, background: 'var(--color-border)', marginBottom: 20 }} />
 
-      <div style={{ marginBottom: 14 }}>
-        <label htmlFor="edit-exp-amount" style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>금액</label>
-        <div style={{ position: 'relative' }}>
-          <input
-            id="edit-exp-amount"
-            type="number"
-            value={amountStr}
-            onChange={e => setAmountStr(e.target.value)}
-            inputMode="numeric"
-            style={{ ...sheetInputStyle, paddingRight: 36 }}
-          />
-          <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)', fontSize: 14, pointerEvents: 'none' }}>원</span>
-        </div>
-      </div>
+      <FormField id="edit-exp-amount" label="금액">
+        <CurrencyInput id="edit-exp-amount" value={amountStr} onChange={setAmountStr} />
+      </FormField>
 
-      <div style={{ marginBottom: 14 }}>
-        <label htmlFor="edit-exp-date" style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>날짜</label>
+      <FormField id="edit-exp-date" label="날짜">
         <input id="edit-exp-date" type="date" value={date} onChange={e => setDate(e.target.value)} style={sheetInputStyle} />
-      </div>
+      </FormField>
 
-      <div style={{ marginBottom: 24 }}>
-        <label htmlFor="edit-exp-note" style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>메모 (선택)</label>
-        <textarea
-          id="edit-exp-note"
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          rows={2}
-          style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }}
-        />
-      </div>
+      <FormField id="edit-exp-note" label="메모 (선택)" marginBottom={24}>
+        <textarea id="edit-exp-note" value={note} onChange={e => setNote(e.target.value)} rows={2} style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }} />
+      </FormField>
 
       <PrimaryButton onClick={handleSave} disabled={!canSave}>저장</PrimaryButton>
       <ConfirmDeleteDialog onDelete={handleDelete} confirmMessage="이 지출을 삭제할까요?" />

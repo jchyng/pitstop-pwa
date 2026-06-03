@@ -3,14 +3,7 @@
 import { useState, useMemo } from 'react';
 import type { CarIndex } from '@/types';
 import BottomSheet from '@/components/BottomSheet';
-
-const FUEL_LABEL: Record<string, string> = {
-  gasoline: '가솔린',
-  diesel: '디젤',
-  lpg: 'LPG',
-  hev: 'HEV',
-  ev: 'EV',
-};
+import { FUEL_LABEL } from '@/lib/labels';
 
 const BRANDS = ['현대', '기아', 'KGM'] as const;
 

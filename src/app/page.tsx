@@ -6,13 +6,15 @@ import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } fr
 import { calculateUrgency } from '@/lib/urgency';
 import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
-import CarCarousel from '@/components/CarCarousel';
+import CarHero from '@/components/CarHero';
 import CategorySection from '@/components/CategorySection';
 import ConsumableCard from '@/components/ConsumableCard';
 import MileageSheet from '@/components/MileageSheet';
 import AddCarSheet from '@/components/AddCarSheet';
 import BottomSheet from '@/components/BottomSheet';
+import PageHeader from '@/components/PageHeader';
 import ViewToggle from '@/components/ViewToggle';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
@@ -45,6 +47,7 @@ export default function Home() {
   const [showAddCarSheet, setShowAddCarSheet] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCarSheet, setShowCarSheet] = useState(false);
   const [customVersion, setCustomVersion] = useState(0);
 
   const carList = useMemo(
@@ -230,17 +233,9 @@ export default function Home() {
         >
           <span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop
         </h1>
-        <div
-          style={{
-            marginTop: 24,
-            width: 26,
-            height: 26,
-            border: '2.5px solid var(--color-border)',
-            borderTop: '2.5px solid var(--color-nav-active)',
-            borderRadius: '50%',
-            animation: 'pitstop-spin 0.75s linear infinite',
-          }}
-        />
+        <div style={{ marginTop: 24 }}>
+          <LoadingSpinner size={26} />
+        </div>
       </div>
     );
   }
@@ -258,42 +253,26 @@ export default function Home() {
         borderRight: '1px solid transparent',
       }}
     >
-      {/* Header */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '16px var(--page-pad) 12px',
-        }}
-        role="banner"
-      >
-        <h1
-          style={{
-            fontSize: 22,
-            fontWeight: 700,
-            letterSpacing: '-0.5px',
-            userSelect: 'none',
-          }}
-        >
-          <span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop
-        </h1>
-      </header>
-
-      {/* Car carousel */}
-      <CarCarousel
-        carList={carList}
-        selectedCarId={selectedCarId}
-        currentMileage={currentMileage}
-        onSelect={handleCarSelect}
-        onEditMileage={() => setShowMileageSheet(true)}
-        onAddCar={() => setShowAddCarSheet(true)}
-        onDeleteCar={handleDeleteCar}
+      <PageHeader
+        title={<><span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop</>}
+        carLabel={carList.find(c => c.car_id === selectedCarId)?.name_ko}
+        onCarClick={selectedCarId ? () => setShowCarSheet(true) : undefined}
       />
 
       {selectedCarId && (
-        <div style={{ padding: '0 var(--page-pad)' }}>
-          <ViewToggle view={view} attentionCount={attentionItems.length} onChange={setView} />
-        </div>
+        <>
+          <div style={{ padding: '0 var(--page-pad) 12px' }}>
+            <CarHero
+              carId={selectedCarId}
+              carName={carList.find(c => c.car_id === selectedCarId)?.name_ko ?? ''}
+              currentMileage={currentMileage}
+              onEditClick={() => setShowMileageSheet(true)}
+            />
+          </div>
+          <div style={{ padding: '0 var(--page-pad)' }}>
+            <ViewToggle view={view} attentionCount={attentionItems.length} onChange={setView} />
+          </div>
+        </>
       )}
 
       {/* Main content */}
@@ -508,6 +487,74 @@ export default function Home() {
       </main>
 
       <BottomNav activeTab="home" />
+
+      {showCarSheet && (
+        <BottomSheet onClose={() => setShowCarSheet(false)} ariaLabel="차량 관리">
+          <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px', marginBottom: 16 }}>
+            차량
+          </p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {carList.map(car => (
+              <li key={car.car_id}>
+                <button
+                  type="button"
+                  onClick={() => { handleCarSelect(car.car_id); setShowCarSheet(false); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 12,
+                    background: car.car_id === selectedCarId ? 'var(--color-surface-hover)' : 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font)',
+                    textAlign: 'left',
+                  }}
+                >
+                  <span style={{ fontSize: 15, fontWeight: car.car_id === selectedCarId ? 700 : 400, color: 'var(--color-text-primary)' }}>
+                    {car.name_ko}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); setShowCarSheet(false); handleDeleteCar(car.car_id); }}
+                    style={{
+                      padding: '4px 8px',
+                      border: 'none',
+                      background: 'none',
+                      color: 'var(--color-text-muted)',
+                      fontSize: 13,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font)',
+                    }}
+                  >
+                    삭제
+                  </button>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={() => { setShowCarSheet(false); setShowAddCarSheet(true); }}
+            style={{
+              width: '100%',
+              padding: '13px',
+              border: '1px dashed var(--color-border)',
+              borderRadius: 12,
+              background: 'none',
+              color: 'var(--color-text-secondary)',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontFamily: 'var(--font)',
+            }}
+          >
+            + 차량 추가
+          </button>
+        </BottomSheet>
+      )}
 
       {showMileageSheet && (
         <MileageSheet

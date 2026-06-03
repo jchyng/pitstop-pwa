@@ -6,6 +6,10 @@ import { setLastLog, setLastMileage, setLastLogType, addLog } from '@/lib/storag
 import BottomSheet from '@/components/BottomSheet';
 import SheetHeader from '@/components/SheetHeader';
 import PrimaryButton from '@/components/PrimaryButton';
+import FormField from '@/components/FormField';
+import CurrencyInput from '@/components/CurrencyInput';
+import { todayISO } from '@/lib/dateUtils';
+import { sheetInputStyle } from '@/lib/sheetStyles';
 
 const CONDITION_OPTIONS: { value: InspectCondition; label: string; tone: 'normal' | 'caution' | 'bad' }[] = [
   { value: 'good', label: '양호', tone: 'normal' },
@@ -21,26 +25,6 @@ interface Props {
   onClose: () => void;
 }
 
-function todayISO(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-const sheetInputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '11px 12px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 10,
-  fontSize: 15,
-  background: 'var(--color-surface-hover)',
-  color: 'var(--color-text-primary)',
-  fontFamily: 'var(--font)',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
 
 export default function LogSheet({ item, carId, currentMileage, onSave, onClose }: Props) {
   const isInspectItem = item.behavior !== 'replace_only';
@@ -214,93 +198,21 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         </div>
       )}
 
-      {/* Date */}
-      <div style={{ marginBottom: 14 }}>
-        <label
-          htmlFor="log-date"
-          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
-        >
-          날짜
-        </label>
-        <input
-          id="log-date"
-          type="date"
-          value={date}
-          onChange={e => setDate(e.target.value)}
-          style={sheetInputStyle}
-        />
-      </div>
+      <FormField id="log-date" label="날짜">
+        <input id="log-date" type="date" value={date} onChange={e => setDate(e.target.value)} style={sheetInputStyle} />
+      </FormField>
 
-      {/* Mileage */}
-      <div style={{ marginBottom: 14 }}>
-        <label
-          htmlFor="log-mileage"
-          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
-        >
-          주행거리 (km)
-        </label>
-        <input
-          id="log-mileage"
-          type="number"
-          value={mileageStr}
-          onChange={e => setMileageStr(e.target.value)}
-          placeholder="예: 50000"
-          inputMode="numeric"
-          style={sheetInputStyle}
-        />
-      </div>
+      <FormField id="log-mileage" label="주행거리 (km)">
+        <input id="log-mileage" type="number" value={mileageStr} onChange={e => setMileageStr(e.target.value)} placeholder="예: 50000" inputMode="numeric" style={sheetInputStyle} />
+      </FormField>
 
-      {/* Cost */}
-      <div style={{ marginBottom: 14 }}>
-        <label
-          htmlFor="log-cost"
-          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
-        >
-          비용 (선택)
-        </label>
-        <div style={{ position: 'relative' }}>
-          <input
-            id="log-cost"
-            type="number"
-            value={costStr}
-            onChange={e => setCostStr(e.target.value)}
-            placeholder="0"
-            inputMode="numeric"
-            style={{ ...sheetInputStyle, paddingRight: 36 }}
-          />
-          <span
-            style={{
-              position: 'absolute',
-              right: 12,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: 'var(--color-text-muted)',
-              fontSize: 14,
-              pointerEvents: 'none',
-            }}
-          >
-            원
-          </span>
-        </div>
-      </div>
+      <FormField id="log-cost" label="비용 (선택)">
+        <CurrencyInput id="log-cost" value={costStr} onChange={setCostStr} />
+      </FormField>
 
-      {/* Note */}
-      <div style={{ marginBottom: showSmartReplace ? 16 : 24 }}>
-        <label
-          htmlFor="log-note"
-          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
-        >
-          메모 (선택)
-        </label>
-        <textarea
-          id="log-note"
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          placeholder={logType === 'inspect' ? '예: 패드 두께 약 5mm 남음' : '예: 합성유 5W-30, 오일필터 동시 교체'}
-          rows={2}
-          style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }}
-        />
-      </div>
+      <FormField id="log-note" label="메모 (선택)" marginBottom={showSmartReplace ? 16 : 24}>
+        <textarea id="log-note" value={note} onChange={e => setNote(e.target.value)} placeholder={logType === 'inspect' ? '예: 패드 두께 약 5mm 남음' : '예: 합성유 5W-30, 오일필터 동시 교체'} rows={2} style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }} />
+      </FormField>
 
       {/* Smart prompt: 교체 필요 시 교체도 진행했는지 */}
       {showSmartReplace && (

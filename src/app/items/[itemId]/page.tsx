@@ -2,29 +2,16 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import type { CarData, ConsumableItem, LogEntry } from '@/types';
+import type { CarData, LogEntry } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
 import { getMileage, getLogs, migrateLogsIfNeeded, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
 import LogSheet from '@/components/LogSheet';
 import IntervalEditSheet from '@/components/IntervalEditSheet';
 import EditLogSheet from '@/components/EditLogSheet';
 import Timeline from '@/components/Timeline';
-
-function formatDate(iso: string): string {
-  return iso.replace(/-/g, '.');
-}
-
-function toMonthLabel(iso: string): string {
-  const [y, m] = iso.split('-');
-  return `${y}년 ${Number(m)}월`;
-}
-
-function buildIntervalText(item: ConsumableItem): string {
-  const parts: string[] = [];
-  if (item.interval_km) parts.push(`${item.interval_km.toLocaleString()}km`);
-  if (item.interval_months) parts.push(`${item.interval_months}개월`);
-  return parts.join(' / ');
-}
+import { formatDate } from '@/lib/dateUtils';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import { buildIntervalText, groupByMonth } from '@/lib/itemUtils';
 
 export default function ItemDetailPage() {
   const params = useParams();
@@ -111,15 +98,7 @@ export default function ItemDetailPage() {
     });
   }, [mergedItem, currentMileage, lastLoggedMileage, lastLoggedDate, lastInspectCondition]);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, LogEntry[]>();
-    for (const entry of filteredLogs) {
-      const label = toMonthLabel(entry.date);
-      if (!map.has(label)) map.set(label, []);
-      map.get(label)!.push(entry);
-    }
-    return [...map.entries()];
-  }, [filteredLogs]);
+  const grouped = useMemo(() => groupByMonth(filteredLogs), [filteredLogs]);
 
   function handleSave() {
     setLogs(getLogs(carId).filter(l => l.itemId === itemId));
@@ -487,24 +466,8 @@ export default function ItemDetailPage() {
         )}
 
         {isLoading ? (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              paddingTop: 56,
-            }}
-          >
-            <div
-              style={{
-                width: 24,
-                height: 24,
-                border: '2.5px solid var(--color-border)',
-                borderTop: '2.5px solid var(--color-nav-active)',
-                borderRadius: '50%',
-                animation: 'pitstop-spin 0.75s linear infinite',
-              }}
-            />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 56 }}>
+            <LoadingSpinner />
           </div>
         ) : sortedLogs.length === 0 ? (
           <div

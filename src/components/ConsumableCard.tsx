@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import type { ConsumableItem, UrgencyResult, LogType, InspectCondition } from '@/types';
 import { CONDITION_COLORS, CONDITION_LABEL } from '@/lib/conditionColors';
+import { formatDate } from '@/lib/dateUtils';
+import { buildIntervalText } from '@/lib/itemUtils';
 
 interface Props {
   item: ConsumableItem;
@@ -28,18 +30,11 @@ const BADGE_BASE: React.CSSProperties = {
   whiteSpace: 'nowrap',
 };
 
-function formatDate(iso: string): string {
-  const d = new Date(iso);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}.${m}.${day}`;
-}
-
 function addMonths(dateStr: string, months: number): string {
   const d = new Date(dateStr);
   d.setMonth(d.getMonth() + months);
-  return formatDate(d.toISOString());
+  const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return formatDate(iso);
 }
 
 function buildRecentValue(lastKm: number | null, lastDate: string | null): string | null {
@@ -67,12 +62,6 @@ function buildNextValue(item: ConsumableItem, lastKm: number | null, lastDate: s
   return parts.length > 0 ? parts.join(' · ') : null;
 }
 
-function buildIntervalValue(item: ConsumableItem): string | null {
-  const parts: string[] = [];
-  if (item.interval_km !== null) parts.push(`${item.interval_km.toLocaleString()}km`);
-  if (item.interval_months !== null) parts.push(`${item.interval_months}개월`);
-  return parts.length > 0 ? parts.join(' · ') : null;
-}
 
 function parseStatDisplay(displayText: string): { num: string; unit: string } {
   if (displayText === '미기록') return { num: '—', unit: '미기록' };
@@ -136,7 +125,7 @@ export default function ConsumableCard({
 
   const recentValue = buildRecentValue(lastLoggedMileage, lastLoggedDate);
   const nextValue = buildNextValue(item, lastLoggedMileage, lastLoggedDate);
-  const intervalValue = buildIntervalValue(item);
+  const intervalValue = buildIntervalText(item);
 
   return (
     <li style={{ listStyle: 'none' }}>

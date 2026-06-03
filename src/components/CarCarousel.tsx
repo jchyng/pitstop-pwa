@@ -19,13 +19,7 @@ function getCarImagePath(carId: string): string {
   return `/cars/images/${base}.png`;
 }
 
-const FUEL_LABEL: Record<string, string> = {
-  gasoline: '가솔린',
-  diesel: '디젤',
-  lpg: 'LPG',
-  hybrid: '하이브리드',
-  electric: '전기',
-};
+import { FUEL_LABEL_BY_ID as FUEL_LABEL } from '@/lib/labels';
 
 function formatCarName(nameKo: string, carId: string): string {
   const match = carId.match(/-?(gasoline|diesel|lpg|hybrid|electric)$/);

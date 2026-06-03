@@ -7,6 +7,10 @@ import { EXPENSE_CATEGORIES } from '@/lib/expenseCategories';
 import BottomSheet from '@/components/BottomSheet';
 import SheetHeader from '@/components/SheetHeader';
 import PrimaryButton from '@/components/PrimaryButton';
+import FormField from '@/components/FormField';
+import CurrencyInput from '@/components/CurrencyInput';
+import { todayISO } from '@/lib/dateUtils';
+import { sheetInputStyle } from '@/lib/sheetStyles';
 
 interface Props {
   carId: string;
@@ -14,23 +18,6 @@ interface Props {
   onClose: () => void;
 }
 
-function todayISO(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-const sheetInputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '11px 12px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 10,
-  fontSize: 15,
-  background: 'var(--color-surface-hover)',
-  color: 'var(--color-text-primary)',
-  fontFamily: 'var(--font)',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
 
 export default function ExpenseSheet({ carId, onSave, onClose }: Props) {
   const [category, setCategory] = useState<ExpenseCategory>('fuel');
@@ -97,49 +84,17 @@ export default function ExpenseSheet({ carId, onSave, onClose }: Props) {
 
       <div style={{ height: 1, background: 'var(--color-border)', marginBottom: 20 }} />
 
-      {/* 금액 */}
-      <div style={{ marginBottom: 14 }}>
-        <label htmlFor="exp-amount" style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>
-          금액
-        </label>
-        <div style={{ position: 'relative' }}>
-          <input
-            id="exp-amount"
-            type="number"
-            value={amountStr}
-            onChange={e => setAmountStr(e.target.value)}
-            placeholder="0"
-            inputMode="numeric"
-            style={{ ...sheetInputStyle, paddingRight: 36 }}
-          />
-          <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)', fontSize: 14, pointerEvents: 'none' }}>
-            원
-          </span>
-        </div>
-      </div>
+      <FormField id="exp-amount" label="금액">
+        <CurrencyInput id="exp-amount" value={amountStr} onChange={setAmountStr} />
+      </FormField>
 
-      {/* 날짜 */}
-      <div style={{ marginBottom: 14 }}>
-        <label htmlFor="exp-date" style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>
-          날짜
-        </label>
+      <FormField id="exp-date" label="날짜">
         <input id="exp-date" type="date" value={date} onChange={e => setDate(e.target.value)} style={sheetInputStyle} />
-      </div>
+      </FormField>
 
-      {/* 메모 */}
-      <div style={{ marginBottom: 24 }}>
-        <label htmlFor="exp-note" style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}>
-          메모 (선택)
-        </label>
-        <textarea
-          id="exp-note"
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          placeholder="예: 삼성화재 갱신"
-          rows={2}
-          style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }}
-        />
-      </div>
+      <FormField id="exp-note" label="메모 (선택)" marginBottom={24}>
+        <textarea id="exp-note" value={note} onChange={e => setNote(e.target.value)} placeholder="예: 삼성화재 갱신" rows={2} style={{ ...sheetInputStyle, resize: 'none', lineHeight: 1.5 }} />
+      </FormField>
 
       <PrimaryButton onClick={handleSave} disabled={!canSave}>저장</PrimaryButton>
     </BottomSheet>

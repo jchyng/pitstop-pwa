@@ -4,25 +4,14 @@ import { useState } from 'react';
 import BottomSheet from '@/components/BottomSheet';
 import SheetHeader from '@/components/SheetHeader';
 import PrimaryButton from '@/components/PrimaryButton';
+import FormField from '@/components/FormField';
+import { sheetInputStyle } from '@/lib/sheetStyles';
 
 interface Props {
   currentMileage: number | null;
   onSave: (mileage: number) => void;
   onClose: () => void;
 }
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '11px 12px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 10,
-  fontSize: 15,
-  background: 'var(--color-surface-hover)',
-  color: 'var(--color-text-primary)',
-  fontFamily: 'var(--font)',
-  outline: 'none',
-  boxSizing: 'border-box',
-};
 
 export default function MileageSheet({ currentMileage, onSave, onClose }: Props) {
   const [value, setValue] = useState(currentMileage !== null ? String(currentMileage) : '');
@@ -46,14 +35,7 @@ export default function MileageSheet({ currentMileage, onSave, onClose }: Props)
     <BottomSheet onClose={onClose} ariaLabel="주행거리 업데이트">
       <SheetHeader title="주행거리 업데이트" onClose={onClose} marginBottom={24} />
 
-      {/* Input */}
-      <div style={{ marginBottom: error ? 8 : 24 }}>
-        <label
-          htmlFor="mileage-sheet-input"
-          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
-        >
-          현재 주행거리 (km)
-        </label>
+      <FormField id="mileage-sheet-input" label="현재 주행거리 (km)" marginBottom={error ? 8 : 24}>
         <input
           id="mileage-sheet-input"
           type="number"
@@ -63,9 +45,9 @@ export default function MileageSheet({ currentMileage, onSave, onClose }: Props)
           onChange={e => { setValue(e.target.value); setError(''); }}
           placeholder="예: 99000"
           autoFocus
-          style={{ ...inputStyle, borderColor: error ? 'var(--color-urgent-text)' : 'var(--color-border)' }}
+          style={{ ...sheetInputStyle, borderColor: error ? 'var(--color-urgent-text)' : 'var(--color-border)' }}
         />
-      </div>
+      </FormField>
 
       {error && (
         <p role="alert" style={{ fontSize: 12, color: 'var(--color-urgent-text)', marginBottom: 16 }}>

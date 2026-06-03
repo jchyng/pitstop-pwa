@@ -6,6 +6,7 @@ import { getCustomInterval, setCustomInterval, resetCustomInterval } from '@/lib
 import BottomSheet from '@/components/BottomSheet';
 import SheetHeader from '@/components/SheetHeader';
 import PrimaryButton from '@/components/PrimaryButton';
+import { sheetInputStyle } from '@/lib/sheetStyles';
 
 interface Props {
   item: ConsumableItem; // 공식(비병합) item
@@ -15,16 +16,10 @@ interface Props {
 }
 
 const baseInputStyle: React.CSSProperties = {
+  ...sheetInputStyle,
   flex: 1,
-  padding: '11px 12px',
-  border: '1px solid var(--color-border)',
-  borderRadius: 10,
+  width: undefined,
   fontSize: 16,
-  background: 'var(--color-surface-hover)',
-  color: 'var(--color-text-primary)',
-  fontFamily: 'var(--font)',
-  outline: 'none',
-  boxSizing: 'border-box',
   fontVariantNumeric: 'tabular-nums',
   minWidth: 0,
 };

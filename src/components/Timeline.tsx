@@ -1,9 +1,6 @@
 import type { LogEntry } from '@/types';
 import { CONDITION_COLORS, CONDITION_LABEL } from '@/lib/conditionColors';
-
-function formatDate(iso: string): string {
-  return iso.replace(/-/g, '.');
-}
+import { formatDate } from '@/lib/dateUtils';
 
 interface Props {
   grouped: [string, LogEntry[]][];

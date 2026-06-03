@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import BottomNav from '@/components/BottomNav';
+import PageHeader from '@/components/PageHeader';
 import ExpenseSheet from '@/components/ExpenseSheet';
 import EditExpenseSheet from '@/components/EditExpenseSheet';
 import EditLogSheet from '@/components/EditLogSheet';
 import { getExpenses, getLogs } from '@/lib/storage';
 import { EXPENSE_CATEGORY_MAP } from '@/lib/expenseCategories';
+import { groupByMonth } from '@/lib/itemUtils';
 import type { ExpenseEntry, LogEntry } from '@/types';
 
 const DISPLAY_CATS = [
@@ -115,16 +117,7 @@ export default function CostPage() {
     return items.sort((a, b) => b.date.localeCompare(a.date));
   }, [yearExpenses, yearLogs]);
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, DisplayItem[]>();
-    for (const item of displayItems) {
-      const [y, m] = item.date.split('-');
-      const label = `${y}년 ${Number(m)}월`;
-      if (!map.has(label)) map.set(label, []);
-      map.get(label)!.push(item);
-    }
-    return [...map.entries()];
-  }, [displayItems]);
+  const grouped = useMemo(() => groupByMonth(displayItems), [displayItems]);
 
   const availableYears = useMemo(() => {
     const years = new Set<number>();
@@ -148,36 +141,7 @@ export default function CostPage() {
         background: 'var(--color-bg)',
       }}
     >
-      {/* Header */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '20px var(--page-pad) 14px',
-          position: 'sticky',
-          top: 0,
-          background: 'var(--color-bg)',
-          zIndex: 10,
-        }}
-      >
-        <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.5px' }}>유지비</h1>
-        {carName && (
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 600,
-              padding: '5px 10px',
-              borderRadius: 20,
-              background: 'var(--color-surface-hover)',
-              color: 'var(--color-text-secondary)',
-              border: '1px solid var(--color-border)',
-            }}
-          >
-            {carName}
-          </span>
-        )}
-      </header>
+      <PageHeader title="유지비" carLabel={carName || undefined} sticky />
 
       <main
         style={{
