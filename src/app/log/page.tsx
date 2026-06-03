@@ -95,7 +95,7 @@ export default function LogPage() {
       style={{
         maxWidth: 390,
         margin: '0 auto',
-        minHeight: '100dvh',
+        height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--color-bg)',
@@ -144,7 +144,8 @@ export default function LogPage() {
           display: 'flex',
           gap: 7,
           flexShrink: 0,
-        }}
+          touchAction: 'pan-x',
+        } as React.CSSProperties}
       >
         {['전체', ...categories].map(cat => {
           const active = filterCategory === cat;

@@ -144,6 +144,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           overflowX: 'auto',
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-x',
           gap: 0,
           padding: '8px 0',
           position: 'relative',

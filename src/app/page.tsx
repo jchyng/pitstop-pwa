@@ -250,7 +250,7 @@ export default function Home() {
       style={{
         maxWidth: 390,
         margin: '0 auto',
-        minHeight: '100dvh',
+        height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--color-bg)',
@@ -289,6 +289,12 @@ export default function Home() {
         onAddCar={() => setShowAddCarSheet(true)}
         onDeleteCar={handleDeleteCar}
       />
+
+      {selectedCarId && (
+        <div style={{ padding: '0 var(--page-pad)' }}>
+          <ViewToggle view={view} attentionCount={attentionItems.length} onChange={setView} />
+        </div>
+      )}
 
       {/* Main content */}
       <main
@@ -353,12 +359,6 @@ export default function Home() {
         {/* 차량 등록 시 소모품 목록 */}
         {selectedCarId && (
           <>
-            <ViewToggle
-              view={view}
-              attentionCount={attentionItems.length}
-              onChange={setView}
-            />
-
             {/* View: 봐야 할 항목 */}
             {view === 'attention' && (
               <div id="view-attention" role="tabpanel" aria-label="봐야 할 항목">
