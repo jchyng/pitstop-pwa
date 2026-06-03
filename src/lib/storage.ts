@@ -8,7 +8,7 @@
 //   pitstop_migrated_{car_id}           — 기존 last_log → 배열 마이그레이션 완료 여부
 //   pitstop_custom_intervals_{car_id}   — 사용자 커스텀 교체 주기
 
-import type { LogEntry, LogType, ConsumableItem, InspectCondition } from '@/types';
+import type { LogEntry, LogType, ConsumableItem, InspectCondition, ExpenseEntry, ExpenseCategory } from '@/types';
 
 const key = {
   mileage: (carId: string) => `pitstop_mileage_${carId}`,
@@ -18,6 +18,7 @@ const key = {
   logs: (carId: string) => `pitstop_logs_${carId}`,
   migrated: (carId: string) => `pitstop_migrated_${carId}`,
   customIntervals: (carId: string) => `pitstop_custom_intervals_${carId}`,
+  expenses: (carId: string) => `pitstop_expenses_${carId}`,
 };
 
 // 현재 주행거리 (숫자, 없으면 null)
@@ -85,7 +86,7 @@ export function addLog(carId: string, entry: LogEntry): void {
 export function updateLog(
   carId: string,
   id: string,
-  patch: Pick<LogEntry, 'date' | 'mileage' | 'note'>,
+  patch: { date: string; mileage: number | null; note?: string; cost?: number },
 ): void {
   const logs = getLogs(carId);
   const idx = logs.findIndex(l => l.id === id);
@@ -216,6 +217,37 @@ export function resetCustomInterval(carId: string, itemId: string): void {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('pitstop_custom_changed'));
   }
+}
+
+// 유지비 지출 (ExpenseEntry) CRUD
+
+export function getExpenses(carId: string): ExpenseEntry[] {
+  const raw = localStorage.getItem(key.expenses(carId));
+  if (!raw) return [];
+  try { return JSON.parse(raw) as ExpenseEntry[]; } catch { return []; }
+}
+
+export function addExpense(carId: string, entry: ExpenseEntry): void {
+  const list = getExpenses(carId);
+  list.push(entry);
+  localStorage.setItem(key.expenses(carId), JSON.stringify(list));
+}
+
+export function updateExpense(
+  carId: string,
+  id: string,
+  patch: { category: ExpenseCategory; amount: number; date: string; note?: string },
+): void {
+  const list = getExpenses(carId);
+  const idx = list.findIndex(e => e.id === id);
+  if (idx === -1) return;
+  list[idx] = { ...list[idx], ...patch };
+  localStorage.setItem(key.expenses(carId), JSON.stringify(list));
+}
+
+export function deleteExpense(carId: string, id: string): void {
+  const list = getExpenses(carId).filter(e => e.id !== id);
+  localStorage.setItem(key.expenses(carId), JSON.stringify(list));
 }
 
 // official item + custom override → 병합된 item 반환 (urgency threshold 비례 조정 포함)

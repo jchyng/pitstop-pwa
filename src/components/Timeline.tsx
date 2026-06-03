@@ -1,4 +1,5 @@
 import type { LogEntry } from '@/types';
+import { CONDITION_COLORS, CONDITION_LABEL } from '@/lib/conditionColors';
 
 function formatDate(iso: string): string {
   return iso.replace(/-/g, '.');
@@ -56,18 +57,11 @@ export default function Timeline({
               : (showItemName ? `${entry.itemName} 교체` : '교체 완료');
             const conditionLabel =
               entry.logType === 'inspect' && entry.condition
-                ? entry.condition === 'good'
-                  ? '양호'
-                  : entry.condition === 'caution'
-                  ? '주의'
-                  : '교체 필요'
+                ? CONDITION_LABEL[entry.condition]
                 : null;
-            const conditionColor =
-              entry.condition === 'replace_needed'
-                ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-overdue-sub)' }
-                : entry.condition === 'caution'
-                ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-urgent-text)' }
-                : { bg: 'var(--color-normal-bg)', fg: 'var(--color-normal-text)' };
+            const conditionColor = entry.condition
+              ? CONDITION_COLORS[entry.condition]
+              : CONDITION_COLORS.good;
             const clickable = !!onEntryClick;
 
             return (

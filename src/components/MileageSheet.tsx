@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import BottomSheet from '@/components/BottomSheet';
+import SheetHeader from '@/components/SheetHeader';
+import PrimaryButton from '@/components/PrimaryButton';
 
 interface Props {
   currentMileage: number | null;
@@ -42,28 +44,7 @@ export default function MileageSheet({ currentMileage, onSave, onClose }: Props)
 
   return (
     <BottomSheet onClose={onClose} ariaLabel="주행거리 업데이트">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          주행거리 업데이트
-        </p>
-        <button
-          onClick={onClose}
-          aria-label="닫기"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 22,
-            lineHeight: 1,
-            color: 'var(--color-text-muted)',
-            padding: '0 2px',
-            fontFamily: 'var(--font)',
-          }}
-        >
-          ×
-        </button>
-      </div>
+      <SheetHeader title="주행거리 업데이트" onClose={onClose} marginBottom={24} />
 
       {/* Input */}
       <div style={{ marginBottom: error ? 8 : 24 }}>
@@ -92,23 +73,7 @@ export default function MileageSheet({ currentMileage, onSave, onClose }: Props)
         </p>
       )}
 
-      <button
-        onClick={handleSave}
-        style={{
-          width: '100%',
-          padding: '15px 0',
-          borderRadius: 12,
-          border: 'none',
-          background: 'var(--color-text-primary)',
-          color: 'var(--color-bg)',
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: 'pointer',
-          fontFamily: 'var(--font)',
-        }}
-      >
-        저장
-      </button>
+      <PrimaryButton onClick={handleSave}>저장</PrimaryButton>
     </BottomSheet>
   );
 }

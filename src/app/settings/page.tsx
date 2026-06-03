@@ -29,7 +29,7 @@ export default function SettingsPage() {
       >
         <p style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>설정 (준비 중)</p>
       </main>
-      <BottomNav activeTab="home" />
+      <BottomNav activeTab="settings" />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import type { ConsumableItem } from '@/types';
 import { getCustomInterval, setCustomInterval, resetCustomInterval } from '@/lib/storage';
 import BottomSheet from '@/components/BottomSheet';
+import SheetHeader from '@/components/SheetHeader';
+import PrimaryButton from '@/components/PrimaryButton';
 
 interface Props {
   item: ConsumableItem; // 공식(비병합) item
@@ -124,28 +126,7 @@ export default function IntervalEditSheet({ item, carId, onSave, onClose }: Prop
 
   return (
     <BottomSheet onClose={onClose} ariaLabel="교체 주기 설정">
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          교체 주기 설정
-        </p>
-        <button
-          onClick={onClose}
-          aria-label="닫기"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 22,
-            lineHeight: 1,
-            color: 'var(--color-text-muted)',
-            padding: '0 2px',
-            fontFamily: 'var(--font)',
-          }}
-        >
-          ×
-        </button>
-      </div>
+      <SheetHeader title="교체 주기 설정" onClose={onClose} marginBottom={24} />
 
       {/* km 입력 */}
       {hasKm && (
@@ -195,23 +176,7 @@ export default function IntervalEditSheet({ item, carId, onSave, onClose }: Prop
         </button>
       )}
 
-      <button
-        onClick={handleSave}
-        style={{
-          width: '100%',
-          padding: '15px 0',
-          borderRadius: 12,
-          border: 'none',
-          background: 'var(--color-text-primary)',
-          color: 'var(--color-bg)',
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: 'pointer',
-          fontFamily: 'var(--font)',
-        }}
-      >
-        저장하기
-      </button>
+      <PrimaryButton onClick={handleSave}>저장하기</PrimaryButton>
     </BottomSheet>
   );
 }

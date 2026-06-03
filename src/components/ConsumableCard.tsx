@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { ConsumableItem, UrgencyResult, LogType, InspectCondition } from '@/types';
+import { CONDITION_COLORS, CONDITION_LABEL } from '@/lib/conditionColors';
 
 interface Props {
   item: ConsumableItem;
@@ -17,11 +18,6 @@ interface Props {
   onClick: () => void;
 }
 
-const CONDITION_LABEL: Record<InspectCondition, string> = {
-  good: '양호',
-  caution: '주의',
-  replace_needed: '교체 필요',
-};
 
 const BADGE_BASE: React.CSSProperties = {
   fontSize: 10,
@@ -116,12 +112,9 @@ export default function ConsumableCard({
   const isWarning = status === 'warning';
   const isUnknown = status === 'unknown';
 
-  const conditionBadgeStyle =
-    lastInspectCondition === 'replace_needed'
-      ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-overdue-sub)' }
-      : lastInspectCondition === 'caution'
-      ? { bg: 'var(--color-urgent-bg)', fg: 'var(--color-urgent-text)' }
-      : { bg: 'var(--color-normal-bg)', fg: 'var(--color-normal-text)' };
+  const conditionBadgeStyle = lastInspectCondition
+    ? CONDITION_COLORS[lastInspectCondition]
+    : CONDITION_COLORS.good;
 
   const statColor = isOverdue
     ? 'var(--color-overdue-sub)'

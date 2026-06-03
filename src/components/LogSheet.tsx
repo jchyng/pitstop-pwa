@@ -4,6 +4,8 @@ import { useState } from 'react';
 import type { ConsumableItem, LogType, InspectCondition } from '@/types';
 import { setLastLog, setLastMileage, setLastLogType, addLog } from '@/lib/storage';
 import BottomSheet from '@/components/BottomSheet';
+import SheetHeader from '@/components/SheetHeader';
+import PrimaryButton from '@/components/PrimaryButton';
 
 const CONDITION_OPTIONS: { value: InspectCondition; label: string; tone: 'normal' | 'caution' | 'bad' }[] = [
   { value: 'good', label: '양호', tone: 'normal' },
@@ -47,6 +49,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
   const [logType, setLogType] = useState<LogType>(isInspectItem ? 'inspect' : 'replace');
   const [condition, setCondition] = useState<InspectCondition>('good');
   const [alsoReplaced, setAlsoReplaced] = useState(false);
+  const [costStr, setCostStr] = useState('');
   const [note, setNote] = useState('');
 
   const showCondition = logType === 'inspect';
@@ -56,6 +59,8 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
     if (!date) return;
     const km = Number(mileageStr);
     const mileage = Number.isFinite(km) && km > 0 ? km : null;
+    const costNum = Number(costStr.replace(/,/g, ''));
+    const cost = Number.isFinite(costNum) && costNum > 0 ? costNum : undefined;
 
     if (logType === 'inspect') {
       addLog(carId, {
@@ -67,6 +72,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         mileage,
         logType: 'inspect',
         condition,
+        cost,
         note: note.trim() || undefined,
       });
 
@@ -80,6 +86,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
           date,
           mileage,
           logType: 'replace',
+          cost,
           note: note.trim() || undefined,
         });
         setLastLog(carId, item.id, date);
@@ -99,6 +106,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         date,
         mileage,
         logType: 'replace',
+        cost,
         note: note.trim() || undefined,
       });
       setLastLog(carId, item.id, date);
@@ -112,28 +120,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
 
   return (
     <BottomSheet onClose={onClose} ariaLabel={`${item.name_ko} 기록`}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)' }}>
-          {item.name_ko}
-        </p>
-        <button
-          onClick={onClose}
-          aria-label="닫기"
-          style={{
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 22,
-            lineHeight: 1,
-            color: 'var(--color-text-muted)',
-            padding: '0 2px',
-            fontFamily: 'var(--font)',
-          }}
-        >
-          ×
-        </button>
-      </div>
+      <SheetHeader title={item.name_ko} onClose={onClose} marginBottom={20} />
 
       {/* Tab selector (점검 항목만) */}
       {isInspectItem && (
@@ -263,6 +250,40 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         />
       </div>
 
+      {/* Cost */}
+      <div style={{ marginBottom: 14 }}>
+        <label
+          htmlFor="log-cost"
+          style={{ display: 'block', fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6, fontWeight: 500 }}
+        >
+          비용 (선택)
+        </label>
+        <div style={{ position: 'relative' }}>
+          <input
+            id="log-cost"
+            type="number"
+            value={costStr}
+            onChange={e => setCostStr(e.target.value)}
+            placeholder="0"
+            inputMode="numeric"
+            style={{ ...sheetInputStyle, paddingRight: 36 }}
+          />
+          <span
+            style={{
+              position: 'absolute',
+              right: 12,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--color-text-muted)',
+              fontSize: 14,
+              pointerEvents: 'none',
+            }}
+          >
+            원
+          </span>
+        </div>
+      </div>
+
       {/* Note */}
       <div style={{ marginBottom: showSmartReplace ? 16 : 24 }}>
         <label
@@ -334,26 +355,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         </div>
       )}
 
-      {/* Save */}
-      <button
-        onClick={handleSave}
-        disabled={!date}
-        style={{
-          width: '100%',
-          padding: '15px 0',
-          borderRadius: 12,
-          border: 'none',
-          background: date ? 'var(--color-text-primary)' : 'var(--color-border)',
-          color: date ? 'var(--color-bg)' : 'var(--color-text-muted)',
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: date ? 'pointer' : 'default',
-          fontFamily: 'var(--font)',
-          transition: 'background 0.12s',
-        }}
-      >
-        저장
-      </button>
+      <PrimaryButton onClick={handleSave} disabled={!date}>저장</PrimaryButton>
     </BottomSheet>
   );
 }

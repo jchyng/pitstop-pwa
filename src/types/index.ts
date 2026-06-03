@@ -85,4 +85,18 @@ export interface LogEntry {
   logType: LogType;
   condition?: InspectCondition; // logType === 'inspect'일 때 기록되는 점검 결과
   note?: string;
+  cost?: number;        // 정비 비용 (원 단위, 선택)
+}
+
+// 유지비 지출 카테고리
+export type ExpenseCategory = 'insurance' | 'tax' | 'fuel' | 'other';
+
+// 유지비 지출 한 건 (정비 외 — 보험/세금/주유/기타)
+export interface ExpenseEntry {
+  id: string;
+  carId: string;
+  category: ExpenseCategory;
+  amount: number;   // 원 단위 정수
+  date: string;     // YYYY-MM-DD
+  note?: string;
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-type Tab = 'home' | 'log';
+type Tab = 'home' | 'log' | 'cost' | 'settings';
 
 interface Props {
   activeTab: Tab;
@@ -21,10 +21,27 @@ const LogIcon = () => (
   </svg>
 );
 
+const CostIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.8" fill="none" />
+    <path d="M2 11h20" stroke="currentColor" strokeWidth="1.8" />
+    <circle cx="17" cy="15.5" r="1.5" fill="currentColor" />
+    <path d="M16 7V5a2 2 0 00-2-2H6a2 2 0 00-2 2v2" stroke="currentColor" strokeWidth="1.8" fill="none" />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" fill="none" />
+    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" strokeWidth="1.6" fill="none" />
+  </svg>
+);
 
 const tabs: { id: Tab; label: string; href: string; Icon: React.FC }[] = [
-  { id: 'home', label: '홈',  href: '/',    Icon: HomeIcon },
-  { id: 'log',  label: '기록', href: '/log', Icon: LogIcon },
+  { id: 'home',     label: '홈',    href: '/',         Icon: HomeIcon     },
+  { id: 'log',      label: '기록',  href: '/log',      Icon: LogIcon      },
+  { id: 'cost',     label: '유지비', href: '/cost',     Icon: CostIcon     },
+  { id: 'settings', label: '설정',  href: '/settings', Icon: SettingsIcon },
 ];
 
 export default function BottomNav({ activeTab }: Props) {
@@ -76,7 +93,7 @@ export default function BottomNav({ activeTab }: Props) {
             }}
           >
             <Icon />
-            <span style={{ fontSize: 11, fontWeight: 500, lineHeight: 1 }}>{label}</span>
+            <span style={{ fontSize: 10, fontWeight: 500, lineHeight: 1 }}>{label}</span>
           </Link>
         );
       })}
