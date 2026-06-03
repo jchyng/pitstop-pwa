@@ -281,7 +281,7 @@ export default function Home() {
         role="main"
         style={{
           flex: 1,
-          padding: '12px var(--page-pad) 0',
+          padding: '0 var(--page-pad) 0',
           paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
           overflowY: 'auto',
         }}
@@ -470,7 +470,7 @@ export default function Home() {
 
             {/* View: 전체보기 */}
             {view === 'full' && (
-              <div id="view-all" role="tabpanel" aria-label="전체보기">
+              <div id="view-all" role="tabpanel" aria-label="전체보기" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
                 {byCategory.map(({ category, items }) => (
                   <CategorySection
                     key={category}

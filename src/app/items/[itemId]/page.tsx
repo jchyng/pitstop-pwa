@@ -162,7 +162,7 @@ export default function ItemDetailPage() {
           display: 'flex',
           alignItems: 'center',
           gap: 8,
-          padding: '16px var(--page-pad) 12px',
+          padding: '20px var(--page-pad) 14px',
         }}
       >
         <button

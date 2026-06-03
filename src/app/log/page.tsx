@@ -7,7 +7,6 @@ import PageHeader from '@/components/PageHeader';
 import Timeline from '@/components/Timeline';
 import type { CarData, LogEntry } from '@/types';
 import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
-import { FUEL_LABEL } from '@/lib/labels';
 import { groupByMonth } from '@/lib/itemUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -16,7 +15,6 @@ export default function LogPage() {
   const [carId, setCarId] = useState('');
   const [carData, setCarData] = useState<CarData | null>(null);
   const [carName, setCarName] = useState('');
-  const [carChipLabel, setCarChipLabel] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterCategory, setFilterCategory] = useState('전체');
   const [isLoading, setIsLoading] = useState(true);
@@ -29,15 +27,13 @@ export default function LogPage() {
       }
 
       const idxRes = await fetch('/cars/index.json');
-      const idx: { car_id: string; name_ko: string; model: string; fuel: string; file: string }[] = await idxRes.json();
+      const idx: { car_id: string; name_ko: string; file: string }[] = await idxRes.json();
       const meta = idx.find(c => c.car_id === id);
       if (!meta) {
         setIsLoading(false);
         return;
       }
       setCarName(meta.name_ko);
-      const fuelLabel = FUEL_LABEL[meta.fuel] ?? meta.fuel;
-      setCarChipLabel(`${meta.model} - ${fuelLabel}`);
 
       const dataRes = await fetch(meta.file);
       const data: CarData = await dataRes.json();
@@ -85,7 +81,7 @@ export default function LogPage() {
         background: 'var(--color-bg)',
       }}
     >
-      <PageHeader title="정비 이력" carLabel={carChipLabel || undefined} />
+      <PageHeader title="정비 이력" carLabel={carName || undefined} />
 
       {/* Filter chips */}
       <div
@@ -103,7 +99,6 @@ export default function LogPage() {
       >
         {['전체', ...categories].map(cat => {
           const active = filterCategory === cat;
-          const label = cat;
           return (
             <button
               key={cat}
@@ -127,7 +122,7 @@ export default function LogPage() {
                 color: active ? 'var(--color-bg)' : 'var(--color-text-secondary)',
               }}
             >
-              {label}
+              {cat}
             </button>
           );
         })}

@@ -22,7 +22,7 @@ export default function CategorySection({ category, items, currentMileage, onCar
   if (items.length === 0) return null;
 
   return (
-    <section style={{ marginTop: 22 }} aria-labelledby={`sec-${category}`}>
+    <section aria-labelledby={`sec-${category}`}>
       <p
         id={`sec-${category}`}
         style={{
