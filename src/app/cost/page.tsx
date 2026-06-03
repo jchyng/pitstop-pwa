@@ -29,22 +29,23 @@ interface DisplayItem {
 }
 
 export default function CostPage() {
-  const [carId] = useState<string>(() =>
-    typeof window !== 'undefined'
-      ? (localStorage.getItem('pitstop_selected_car') ?? '')
-      : ''
-  );
+  const [carId, setCarId] = useState<string>('');
   const [carName, setCarName] = useState('');
-  const [expenses, setExpenses] = useState<ExpenseEntry[]>(() =>
-    typeof window !== 'undefined' && carId ? getExpenses(carId) : []
-  );
-  const [logs, setLogs] = useState<LogEntry[]>(() =>
-    typeof window !== 'undefined' && carId ? getLogs(carId) : []
-  );
+  const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [editExpense, setEditExpense] = useState<ExpenseEntry | null>(null);
   const [editLog, setEditLog] = useState<LogEntry | null>(null);
+
+  useEffect(() => {
+    const id = localStorage.getItem('pitstop_selected_car') ?? '';
+    setCarId(id);
+    if (id) {
+      setExpenses(getExpenses(id));
+      setLogs(getLogs(id));
+    }
+  }, []);
 
   useEffect(() => {
     if (!carId) return;
