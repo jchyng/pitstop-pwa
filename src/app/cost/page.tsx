@@ -6,10 +6,11 @@ import PageHeader from '@/components/PageHeader';
 import ExpenseSheet from '@/components/ExpenseSheet';
 import EditExpenseSheet from '@/components/EditExpenseSheet';
 import EditLogSheet from '@/components/EditLogSheet';
-import { getExpenses, getLogs } from '@/lib/storage';
+import { getExpenses, getLogs, getMyCars } from '@/lib/storage';
 import { EXPENSE_CATEGORY_MAP } from '@/lib/expenseCategories';
 import { groupByMonth } from '@/lib/itemUtils';
-import type { ExpenseEntry, LogEntry } from '@/types';
+import type { ExpenseEntry, LogEntry, CarIndex } from '@/types';
+import CarPickerSheet from '@/components/CarPickerSheet';
 
 const DISPLAY_CATS = [
   { key: 'maintenance', label: '정비·수리', emoji: '🔧' },
@@ -33,32 +34,44 @@ interface DisplayItem {
 export default function CostPage() {
   const [carId, setCarId] = useState<string>('');
   const [carName, setCarName] = useState('');
+  const [carList, setCarList] = useState<CarIndex[]>([]);
   const [expenses, setExpenses] = useState<ExpenseEntry[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showAddSheet, setShowAddSheet] = useState(false);
+  const [showCarPicker, setShowCarPicker] = useState(false);
   const [editExpense, setEditExpense] = useState<ExpenseEntry | null>(null);
   const [editLog, setEditLog] = useState<LogEntry | null>(null);
 
   useEffect(() => {
-    const id = localStorage.getItem('pitstop_selected_car') ?? '';
-    setCarId(id);
-    if (id) {
-      setExpenses(getExpenses(id));
-      setLogs(getLogs(id));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!carId) return;
+    const savedId = localStorage.getItem('pitstop_selected_car') ?? '';
+    const myCarIds = getMyCars();
     fetch('/cars/index.json')
       .then(r => r.json())
-      .then((idx: { car_id: string; name_ko: string }[]) => {
-        const car = idx.find(c => c.car_id === carId);
+      .then((idx: CarIndex[]) => {
+        const myCars = idx.filter(c => myCarIds.includes(c.car_id));
+        setCarList(myCars);
+        const id = myCars.find(c => c.car_id === savedId)?.car_id ?? myCars[0]?.car_id ?? '';
+        setCarId(id);
+        const car = myCars.find(c => c.car_id === id);
         if (car) setCarName(car.name_ko);
+        if (id) {
+          setExpenses(getExpenses(id));
+          setLogs(getLogs(id));
+        }
       })
       .catch(() => {});
-  }, [carId]);
+  }, []);
+
+  function handleCarSelect(id: string) {
+    const car = carList.find(c => c.car_id === id);
+    if (!car) return;
+    localStorage.setItem('pitstop_selected_car', id);
+    setCarId(id);
+    setCarName(car.name_ko);
+    setExpenses(getExpenses(id));
+    setLogs(getLogs(id));
+  }
 
   function refresh() {
     if (!carId) return;
@@ -141,7 +154,12 @@ export default function CostPage() {
         background: 'var(--color-bg)',
       }}
     >
-      <PageHeader title="유지비" carLabel={carName || undefined} sticky />
+      <PageHeader
+        title="유지비"
+        carLabel={carName || undefined}
+        onCarClick={carList.length > 1 ? () => setShowCarPicker(true) : undefined}
+        sticky
+      />
 
       <main
         style={{
@@ -168,13 +186,12 @@ export default function CostPage() {
             >
               <button
                 onClick={() => setSelectedYear(y => y - 1)}
-                disabled={!availableYears.includes(selectedYear - 1)}
                 aria-label="이전 연도"
                 style={{
                   background: 'none',
                   border: 'none',
-                  cursor: availableYears.includes(selectedYear - 1) ? 'pointer' : 'default',
-                  color: availableYears.includes(selectedYear - 1) ? 'var(--color-text-primary)' : 'var(--color-border)',
+                  cursor: 'pointer',
+                  color: 'var(--color-text-primary)',
                   fontSize: 20,
                   lineHeight: 1,
                   padding: '4px 8px',
@@ -187,13 +204,13 @@ export default function CostPage() {
               </span>
               <button
                 onClick={() => setSelectedYear(y => y + 1)}
-                disabled={!availableYears.includes(selectedYear + 1)}
+                disabled={selectedYear >= new Date().getFullYear()}
                 aria-label="다음 연도"
                 style={{
                   background: 'none',
                   border: 'none',
-                  cursor: availableYears.includes(selectedYear + 1) ? 'pointer' : 'default',
-                  color: availableYears.includes(selectedYear + 1) ? 'var(--color-text-primary)' : 'var(--color-border)',
+                  cursor: selectedYear >= new Date().getFullYear() ? 'default' : 'pointer',
+                  color: selectedYear >= new Date().getFullYear() ? 'var(--color-border)' : 'var(--color-text-primary)',
                   fontSize: 20,
                   lineHeight: 1,
                   padding: '4px 8px',
@@ -378,6 +395,15 @@ export default function CostPage() {
           carId={carId}
           onSave={refresh}
           onClose={() => setEditLog(null)}
+        />
+      )}
+
+      {showCarPicker && (
+        <CarPickerSheet
+          carList={carList}
+          selectedCarId={carId}
+          onSelect={handleCarSelect}
+          onClose={() => setShowCarPicker(false)}
         />
       )}
     </div>

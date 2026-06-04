@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
 import PageHeader from '@/components/PageHeader';
 import Timeline from '@/components/Timeline';
-import type { CarData, LogEntry } from '@/types';
-import { getLogs, migrateLogsIfNeeded } from '@/lib/storage';
+import type { CarData, LogEntry, CarIndex } from '@/types';
+import { getLogs, migrateLogsIfNeeded, getMyCars } from '@/lib/storage';
+import CarPickerSheet from '@/components/CarPickerSheet';
 import { groupByMonth } from '@/lib/itemUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
@@ -15,20 +16,29 @@ export default function LogPage() {
   const [carId, setCarId] = useState('');
   const [carData, setCarData] = useState<CarData | null>(null);
   const [carName, setCarName] = useState('');
+  const [carList, setCarList] = useState<CarIndex[]>([]);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [filterCategory, setFilterCategory] = useState('전체');
   const [isLoading, setIsLoading] = useState(true);
+  const [showCarPicker, setShowCarPicker] = useState(false);
+
   useEffect(() => {
     async function load() {
-      const id = localStorage.getItem('pitstop_selected_car') ?? '';
+      const savedId = localStorage.getItem('pitstop_selected_car') ?? '';
+      const myCarIds = getMyCars();
+
+      const idxRes = await fetch('/cars/index.json');
+      const idx: CarIndex[] = await idxRes.json();
+      const myCars = idx.filter(c => myCarIds.includes(c.car_id));
+      setCarList(myCars);
+
+      const id = myCars.find(c => c.car_id === savedId)?.car_id ?? myCars[0]?.car_id ?? '';
       if (!id) {
         setIsLoading(false);
         return;
       }
 
-      const idxRes = await fetch('/cars/index.json');
-      const idx: { car_id: string; name_ko: string; file: string }[] = await idxRes.json();
-      const meta = idx.find(c => c.car_id === id);
+      const meta = myCars.find(c => c.car_id === id);
       if (!meta) {
         setIsLoading(false);
         return;
@@ -47,6 +57,22 @@ export default function LogPage() {
 
     load();
   }, []);
+
+  async function handleCarSelect(id: string) {
+    const meta = carList.find(c => c.car_id === id);
+    if (!meta) return;
+    localStorage.setItem('pitstop_selected_car', id);
+    setCarId(id);
+    setCarName(meta.name_ko);
+    setFilterCategory('전체');
+    setIsLoading(true);
+    const dataRes = await fetch(meta.file);
+    const data: CarData = await dataRes.json();
+    setCarData(data);
+    migrateLogsIfNeeded(id, data.items);
+    setLogs(getLogs(id));
+    setIsLoading(false);
+  }
 
   const categories = useMemo(() => {
     if (!carData) return [];
@@ -81,7 +107,11 @@ export default function LogPage() {
         background: 'var(--color-bg)',
       }}
     >
-      <PageHeader title="정비 이력" carLabel={carName || undefined} />
+      <PageHeader
+        title="정비 이력"
+        carLabel={carName || undefined}
+        onCarClick={carList.length > 1 ? () => setShowCarPicker(true) : undefined}
+      />
 
       {/* Filter chips */}
       <div
@@ -249,6 +279,14 @@ export default function LogPage() {
 
       <BottomNav activeTab="log" />
 
+      {showCarPicker && (
+        <CarPickerSheet
+          carList={carList}
+          selectedCarId={carId}
+          onSelect={handleCarSelect}
+          onClose={() => setShowCarPicker(false)}
+        />
+      )}
     </div>
   );
 }
