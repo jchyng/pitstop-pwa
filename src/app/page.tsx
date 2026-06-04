@@ -723,15 +723,26 @@ export default function Home() {
                               listStyle: 'none',
                               display: 'flex',
                               alignItems: 'center',
-                              padding: '10px 14px 10px 15px',
                               background: 'var(--color-surface)',
                               border: '1px solid var(--color-border)',
                               borderRadius: 'var(--radius-card)',
-                              gap: 10,
-                              opacity: 0.55,
+                              overflow: 'hidden',
+                              opacity: 0.6,
                             }}
                           >
-                            <div style={{ flex: 1, minWidth: 0 }}>
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => router.push(`/items/${x.item.id}`)}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') router.push(`/items/${x.item.id}`); }}
+                              aria-label={`${x.item.name_ko} 이력 보기`}
+                              style={{
+                                flex: 1,
+                                minWidth: 0,
+                                padding: '10px 0 10px 15px',
+                                cursor: 'pointer',
+                              }}
+                            >
                               <p style={{
                                 fontSize: 15,
                                 fontWeight: 600,
@@ -744,7 +755,9 @@ export default function Home() {
                                 {x.item.name_ko}
                               </p>
                               <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
-                                {x.item.category}
+                                {x.lastLoggedDate
+                                  ? `마지막: ${x.lastLoggedDate}`
+                                  : x.item.category}
                               </p>
                             </div>
                             <button
@@ -752,14 +765,15 @@ export default function Home() {
                               onClick={() => unhideItem(selectedCarId, x.item.id)}
                               aria-label={`${x.item.name_ko} 다시 표시`}
                               style={{
-                                width: 36,
-                                height: 36,
+                                width: 48,
+                                height: '100%',
+                                minHeight: 52,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: 10,
-                                background: 'var(--color-bg)',
+                                border: 'none',
+                                borderLeft: '1px solid var(--color-border)',
+                                background: 'none',
                                 cursor: 'pointer',
                                 color: 'var(--color-text-secondary)',
                                 flexShrink: 0,
