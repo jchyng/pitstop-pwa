@@ -152,7 +152,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
   const totalCards = carList.length + 1;
 
   return (
-    <div style={{ paddingBottom: 4 }}>
+    <div style={{ paddingBottom: 2 }}>
       {/* 스크롤 트랙 */}
       <div
         ref={scrollRef}
@@ -167,7 +167,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           WebkitOverflowScrolling: 'touch',
           touchAction: 'pan-x',
           gap: 0,
-          padding: '8px 0',
+          padding: '4px 0',
           position: 'relative',
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
@@ -205,8 +205,8 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
             >
               <div style={{
                 overflow: 'hidden',
-                minHeight: 136,
-                padding: '14px 16px 14px',
+                minHeight: 108,
+                padding: '11px 14px 11px',
                 background: 'var(--color-surface)',
                 borderRadius: 'var(--radius-card)',
                 border: '1px solid var(--color-border)',
@@ -386,7 +386,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
           }}
         >
           <div style={{
-            minHeight: 136,
+            minHeight: 108,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -424,7 +424,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
       </div>
 
       {/* 도트 인디케이터 */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 5, paddingTop: 6 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 5, paddingTop: 4 }}>
         {Array.from({ length: totalCards }, (_, i) => (
           <div
             key={i}

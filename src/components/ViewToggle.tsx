@@ -12,7 +12,7 @@ export default function ViewToggle({ view, attentionCount, onChange }: Props) {
       style={{
         display: 'flex',
         borderBottom: '1px solid var(--color-border)',
-        marginBottom: 20,
+        marginBottom: 14,
         gap: 0,
       }}
     >
@@ -28,7 +28,7 @@ export default function ViewToggle({ view, attentionCount, onChange }: Props) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 6,
-          padding: '10px 4px 11px',
+          padding: '8px 4px 9px',
           border: 'none',
           borderBottom: view === 'full' ? '2px solid var(--color-nav-active)' : '2px solid transparent',
           background: 'none',
@@ -57,7 +57,7 @@ export default function ViewToggle({ view, attentionCount, onChange }: Props) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 6,
-          padding: '10px 4px 11px',
+          padding: '8px 4px 9px',
           border: 'none',
           borderBottom: view === 'attention' ? '2px solid var(--color-nav-active)' : '2px solid transparent',
           background: 'none',

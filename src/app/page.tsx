@@ -256,7 +256,7 @@ export default function Home() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          padding: '16px var(--page-pad) 12px',
+          padding: '12px var(--page-pad) 10px',
         }}
         role="banner"
       >
