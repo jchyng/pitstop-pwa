@@ -16,6 +16,7 @@ import LogSheet from '@/components/LogSheet';
 import BottomSheet from '@/components/BottomSheet';
 import ViewToggle from '@/components/ViewToggle';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import OnboardingOverlay from '@/components/OnboardingOverlay';
 
 interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
@@ -55,6 +56,7 @@ export default function Home() {
   const [userItemVersion, setUserItemVersion] = useState(0);
   const [showAddCustomSheet, setShowAddCustomSheet] = useState(false);
   const [logSheetForUserItem, setLogSheetForUserItem] = useState<ConsumableItem | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const carList = useMemo(
     () => carCatalog.filter(c => myCarIds.includes(c.car_id)),
@@ -72,6 +74,9 @@ export default function Home() {
     // 스와이프 힌트 노출 여부 (microtask로 hydration 이후 적용)
     Promise.resolve().then(() => {
       setSwipeHintSeen(!!localStorage.getItem('pitstop_swipe_hint_seen'));
+      if (!localStorage.getItem('pitstop_onboarding_v1')) {
+        setShowOnboarding(true);
+      }
     });
     return () => {
       window.removeEventListener('pitstop_custom_changed', refreshCustom);
@@ -401,50 +406,83 @@ export default function Home() {
       >
         {/* 차량 미등록 상태 */}
         {!selectedCarId && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '48px 0 60px',
-              gap: 0,
-            }}
-          >
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true" style={{ marginBottom: 16, opacity: 0.18 }}>
-              <rect x="6" y="22" width="52" height="26" rx="8" stroke="var(--color-text-primary)" strokeWidth="3" />
-              <path d="M14 22l6-12h24l6 12" stroke="var(--color-text-primary)" strokeWidth="3" strokeLinejoin="round" />
-              <circle cx="18" cy="48" r="6" stroke="var(--color-text-primary)" strokeWidth="3" />
-              <circle cx="46" cy="48" r="6" stroke="var(--color-text-primary)" strokeWidth="3" />
-              <path d="M6 34h52" stroke="var(--color-text-primary)" strokeWidth="2" strokeDasharray="4 3" />
-            </svg>
-            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px', marginBottom: 6 }}>
-              등록된 차량이 없습니다
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 24 }}>
-              내 차량을 등록하면 소모품 교체 주기를 관리할 수 있어요
-            </p>
-            <button
-              type="button"
-              onClick={() => setShowAddCarSheet(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '12px 24px',
-                background: 'var(--color-nav-active)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 999,
-                fontSize: 14,
-                fontWeight: 700,
-                fontFamily: 'var(--font)',
-                cursor: 'pointer',
-                letterSpacing: '-0.2px',
-              }}
+          <div style={{ paddingTop: 28 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                차량이 아직 없어요
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', textAlign: 'center' }}>
+                차량을 등록하면 소모품 교체 주기를 관리할 수 있어요
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowAddCarSheet(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '12px 24px',
+                  background: 'var(--color-nav-active)',
+                  color: 'var(--color-bg)',
+                  border: 'none',
+                  borderRadius: 999,
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: 'var(--font)',
+                  cursor: 'pointer',
+                  letterSpacing: '-0.2px',
+                  marginTop: 4,
+                }}
+              >
+                + 차량 등록
+              </button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>예시</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+            </div>
+            <ul
+              aria-hidden="true"
+              style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0, opacity: 0.3, pointerEvents: 'none', userSelect: 'none' }}
             >
-              + 차량 등록
-            </button>
+              {([
+                { name: '엔진오일', sub: '1년 전 · 34,200km', num: '3,200', unit: 'km 초과', color: 'var(--color-overdue-sub)' },
+                { name: '에어클리너', sub: '8개월 전 · 41,600km', num: '1,400', unit: 'km 남음', color: 'var(--color-warning-text)' },
+                { name: '브레이크패드', sub: '6개월 전 · 40,100km', num: '18,200', unit: 'km 남음', color: 'var(--color-text-primary)' },
+              ] as { name: string; sub: string; num: string; unit: string; color: string }[]).map(card => (
+                <li
+                  key={card.name}
+                  style={{
+                    listStyle: 'none',
+                    display: 'flex',
+                    alignItems: 'stretch',
+                    borderRadius: 'var(--radius-card)',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: 'var(--shadow-card)',
+                    background: 'var(--color-surface)',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ flex: 1, padding: '10px 6px 10px 15px' }}>
+                    <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 4, lineHeight: 1.3 }}>
+                      {card.name}
+                    </p>
+                    <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                      {card.sub}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', padding: '10px 15px 10px 6px', minWidth: 80, textAlign: 'right' }}>
+                    <span style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.1, letterSpacing: '-0.5px', color: card.color, fontVariantNumeric: 'tabular-nums' }}>
+                      {card.num}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 500, marginTop: 2, color: card.color, whiteSpace: 'nowrap' }}>
+                      {card.unit}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 
@@ -832,6 +870,20 @@ export default function Home() {
             setLogSheetForUserItem(null);
           }}
           onClose={() => setLogSheetForUserItem(null)}
+        />
+      )}
+
+      {showOnboarding && (
+        <OnboardingOverlay
+          onComplete={() => {
+            localStorage.setItem('pitstop_onboarding_v1', '1');
+            setShowOnboarding(false);
+          }}
+          onRegisterCar={() => {
+            localStorage.setItem('pitstop_onboarding_v1', '1');
+            setShowOnboarding(false);
+            setShowAddCarSheet(true);
+          }}
         />
       )}
 
