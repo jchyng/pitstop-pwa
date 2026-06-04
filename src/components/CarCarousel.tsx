@@ -65,6 +65,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
   const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // carList가 채워진 시점에 이미 올바른 인덱스로 초기화 (lazy init)
+  const [addPressed, setAddPressed] = useState(false);
   const [activeIndex, setActiveIndex] = useState(() => {
     if (carList.length === 0) return 0;
     const idx = carList.findIndex(c => c.car_id === selectedCarId);
@@ -376,6 +377,12 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
             if (e.key === 'Enter' || e.key === ' ') onAddCar();
             if (e.key === 'ArrowLeft' && carList.length > 0) scrollToIndex(carList.length - 1);
           }}
+          onMouseDown={() => setAddPressed(true)}
+          onMouseUp={() => setAddPressed(false)}
+          onMouseLeave={() => setAddPressed(false)}
+          onTouchStart={() => setAddPressed(true)}
+          onTouchEnd={() => setAddPressed(false)}
+          onTouchCancel={() => setAddPressed(false)}
           style={{
             flexShrink: 0,
             width: '100%',
@@ -391,27 +398,47 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 10,
-            background: 'var(--color-surface)',
+            gap: 8,
+            background: addPressed ? 'var(--color-surface-hover)' : 'var(--color-surface)',
             borderRadius: 'var(--radius-card)',
-            border: '1.5px dashed var(--color-border)',
-            padding: '16px',
+            border: '1.5px solid var(--color-border)',
+            padding: '14px 16px',
+            transition: 'background 0.12s ease',
+            boxShadow: 'var(--shadow-card)',
           }}>
-            <svg width="52" height="36" viewBox="0 0 64 44" fill="none" aria-hidden="true">
+            <svg width="48" height="33" viewBox="0 0 64 44" fill="none" aria-hidden="true">
               <rect x="4" y="16" width="56" height="22" rx="6" stroke="var(--color-text-muted)" strokeWidth="2.5" />
               <path d="M12 16l6-12h28l6 12" stroke="var(--color-text-muted)" strokeWidth="2.5" strokeLinejoin="round" />
               <circle cx="16" cy="38" r="5" stroke="var(--color-text-muted)" strokeWidth="2.5" />
               <circle cx="48" cy="38" r="5" stroke="var(--color-text-muted)" strokeWidth="2.5" />
               <path d="M4 26h56" stroke="var(--color-text-muted)" strokeWidth="1" strokeOpacity="0.35" />
-              <path d="M28 16v22" stroke="var(--color-text-muted)" strokeWidth="1" strokeOpacity="0.3" />
             </svg>
             <div style={{ textAlign: 'center' }}>
-              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font)', marginBottom: 3 }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font)', marginBottom: 2 }}>
                 차량 등록하기
               </p>
               <p style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'var(--font)', lineHeight: 1.5 }}>
                 소모품 교체 주기를 관리해요
               </p>
+            </div>
+            <div
+              aria-hidden="true"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '6px 16px',
+                background: 'var(--color-nav-active)',
+                color: 'var(--color-bg)',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: 'var(--font)',
+                letterSpacing: '-0.1px',
+              }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 300, lineHeight: 1, marginTop: -1 }}>+</span>
+              등록하기
             </div>
           </div>
         </div>
