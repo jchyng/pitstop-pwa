@@ -14,6 +14,7 @@ import AddCarSheet from '@/components/AddCarSheet';
 import BottomSheet from '@/components/BottomSheet';
 import ViewToggle from '@/components/ViewToggle';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import GuideBanner from '@/components/GuideBanner';
 
 interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
@@ -282,6 +283,12 @@ export default function Home() {
         onAddCar={() => setShowAddCarSheet(true)}
         onDeleteCar={handleDeleteCar}
       />
+
+      {selectedCarId && (
+        <div style={{ padding: '6px var(--page-pad) 0' }}>
+          <GuideBanner />
+        </div>
+      )}
 
       {selectedCarId && (
         <div style={{ padding: '0 var(--page-pad)' }}>
