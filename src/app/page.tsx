@@ -12,7 +12,6 @@ import ConsumableCard from '@/components/ConsumableCard';
 import MileageSheet from '@/components/MileageSheet';
 import AddCarSheet from '@/components/AddCarSheet';
 import AddCustomItemSheet from '@/components/AddCustomItemSheet';
-import LogSheet from '@/components/LogSheet';
 import BottomSheet from '@/components/BottomSheet';
 import ViewToggle from '@/components/ViewToggle';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -55,7 +54,6 @@ export default function Home() {
   const [swipeHintSeen, setSwipeHintSeen] = useState(true); // 초기값 true → hydration 깜빡임 방지
   const [userItemVersion, setUserItemVersion] = useState(0);
   const [showAddCustomSheet, setShowAddCustomSheet] = useState(false);
-  const [logSheetForUserItem, setLogSheetForUserItem] = useState<ConsumableItem | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const carList = useMemo(
@@ -660,7 +658,7 @@ export default function Home() {
                           lastLoggedDate={x.lastLoggedDate}
                           lastLoggedMileage={x.lastLoggedMileage}
                           lastLogType={x.lastLogType}
-                          onClick={() => setLogSheetForUserItem(x.item)}
+                          onClick={() => router.push(`/items/${x.item.id}`)}
                           onDelete={() => handleDeleteUserItem(x.item.id)}
                         />
                       ))}
@@ -835,19 +833,6 @@ export default function Home() {
         <AddCustomItemSheet
           onSave={handleAddUserItem}
           onClose={() => setShowAddCustomSheet(false)}
-        />
-      )}
-
-      {logSheetForUserItem && (
-        <LogSheet
-          item={logSheetForUserItem}
-          carId={selectedCarId}
-          currentMileage={currentMileage}
-          onSave={() => {
-            setUserItemVersion(v => v + 1);
-            setLogSheetForUserItem(null);
-          }}
-          onClose={() => setLogSheetForUserItem(null)}
         />
       )}
 

@@ -245,7 +245,7 @@ export default function CostPage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 20,
+                gap: 16,
                 marginBottom: 16,
               }}
             >
@@ -256,10 +256,10 @@ export default function CostPage() {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: 'var(--color-text-primary)',
-                  fontSize: 20,
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 24,
                   lineHeight: 1,
-                  padding: '4px 8px',
+                  padding: '8px 12px',
                 }}
               >
                 ‹
@@ -275,10 +275,11 @@ export default function CostPage() {
                   background: 'none',
                   border: 'none',
                   cursor: selectedYear >= new Date().getFullYear() ? 'default' : 'pointer',
-                  color: selectedYear >= new Date().getFullYear() ? 'var(--color-border)' : 'var(--color-text-primary)',
-                  fontSize: 20,
+                  color: 'var(--color-text-secondary)',
+                  fontSize: 24,
                   lineHeight: 1,
-                  padding: '4px 8px',
+                  padding: '8px 12px',
+                  opacity: selectedYear >= new Date().getFullYear() ? 0.25 : 1,
                 }}
               >
                 ›

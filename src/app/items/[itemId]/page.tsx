@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import type { CarData, LogEntry } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, getLogs, migrateLogsIfNeeded, mergeItemWithCustom, getCustomInterval } from '@/lib/storage';
+import { getMileage, getLogs, migrateLogsIfNeeded, mergeItemWithCustom, getCustomInterval, getUserItems } from '@/lib/storage';
 import LogSheet from '@/components/LogSheet';
 import IntervalEditSheet from '@/components/IntervalEditSheet';
 import EditLogSheet from '@/components/EditLogSheet';
@@ -46,10 +46,26 @@ export default function ItemDetailPage() {
       });
   }, [itemId]);
 
-  const item = useMemo(
-    () => carData?.items.find(i => i.id === itemId) ?? null,
-    [carData, itemId],
-  );
+  const isUserItem = itemId.startsWith('user-');
+
+  const item = useMemo(() => {
+    const official = carData?.items.find(i => i.id === itemId) ?? null;
+    if (official) return official;
+    if (!carId) return null;
+    const ui = getUserItems(carId).find(u => u.id === itemId);
+    if (!ui) return null;
+    return {
+      id: ui.id,
+      name_ko: ui.name_ko,
+      category: '기타' as const,
+      behavior: 'replace_only' as const,
+      interval_km: null,
+      max_km: null,
+      interval_months: null,
+      urgency_threshold_km: null,
+      urgency_threshold_days: null,
+    };
+  }, [carData, itemId, carId]);
 
   const mergedItem = useMemo(() => {
     if (!item || !carId) return null;
@@ -274,7 +290,7 @@ export default function ItemDetailPage() {
                   {urgency.displayText}
                 </p>
               </div>
-              {intervalText && (
+              {(intervalText || isUserItem) && (
                 <button
                   onClick={() => setShowIntervalSheet(true)}
                   aria-label="교체 주기 편집"
@@ -310,8 +326,8 @@ export default function ItemDetailPage() {
                       />
                     </svg>
                   </p>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-secondary)' }}>
-                    {intervalText}
+                  <p style={{ fontSize: 14, fontWeight: 600, color: intervalText ? 'var(--color-text-secondary)' : 'var(--color-text-muted)' }}>
+                    {intervalText || '주기 미설정'}
                   </p>
                   {isCustom && (
                     <span
