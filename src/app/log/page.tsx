@@ -1,18 +1,17 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import BottomNav from '@/components/BottomNav';
 import PageHeader from '@/components/PageHeader';
 import Timeline from '@/components/Timeline';
 import type { CarData, LogEntry, CarIndex } from '@/types';
 import { getLogs, migrateLogsIfNeeded, getMyCars } from '@/lib/storage';
 import CarPickerSheet from '@/components/CarPickerSheet';
+import EditLogSheet from '@/components/EditLogSheet';
 import { groupByMonth } from '@/lib/itemUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function LogPage() {
-  const router = useRouter();
   const [carId, setCarId] = useState('');
   const [carData, setCarData] = useState<CarData | null>(null);
   const [carName, setCarName] = useState('');
@@ -21,6 +20,7 @@ export default function LogPage() {
   const [filterCategory, setFilterCategory] = useState('전체');
   const [isLoading, setIsLoading] = useState(true);
   const [showCarPicker, setShowCarPicker] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -235,7 +235,7 @@ export default function LogPage() {
             mostRecentId={mostRecentId}
             showItemName
             showCategory
-            onEntryClick={entry => router.push(`/items/${entry.itemId}`)}
+            onEntryClick={entry => setEditingEntry(entry)}
           />
         )}
       </main>
@@ -285,6 +285,15 @@ export default function LogPage() {
           selectedCarId={carId}
           onSelect={handleCarSelect}
           onClose={() => setShowCarPicker(false)}
+        />
+      )}
+
+      {editingEntry && (
+        <EditLogSheet
+          entry={editingEntry}
+          carId={carId}
+          onSave={() => setLogs(getLogs(carId))}
+          onClose={() => setEditingEntry(null)}
         />
       )}
     </div>
