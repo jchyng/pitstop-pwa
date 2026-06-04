@@ -23,8 +23,11 @@ export default function GuideCategory({
   return (
     <div style={{ marginBottom: 4 }}>
       {/* 섹션 헤더 */}
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
+        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onToggle()}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -107,7 +110,7 @@ export default function GuideCategory({
         >
           <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </button>
+      </div>
 
       {/* 아이템 목록 */}
       {!collapsed && (
