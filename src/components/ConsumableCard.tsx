@@ -40,9 +40,9 @@ function addMonths(dateStr: string, months: number): string {
 function buildRecentValue(lastKm: number | null, lastDate: string | null): string | null {
   if (lastKm === null && lastDate === null) return null;
   const parts: string[] = [];
-  if (lastKm !== null) parts.push(`${lastKm.toLocaleString()}km`);
   if (lastDate) parts.push(formatDate(lastDate));
-  return parts.join(' · ');
+  if (lastKm !== null) parts.push(`${lastKm.toLocaleString()}km`);
+  return parts.join(' - ');
 }
 
 
