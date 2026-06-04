@@ -62,6 +62,7 @@ function TrashIcon() {
 export default function CarCarousel({ carList, selectedCarId, currentMileage, onSelect, onEditMileage, onAddCar, onDeleteCar }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // carList가 채워진 시점에 이미 올바른 인덱스로 초기화 (lazy init)
   const [activeIndex, setActiveIndex] = useState(() => {
@@ -87,11 +88,37 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carList, selectedCarId]);
 
+  function updateDots(progress: number, withTransition: boolean) {
+    dotRefs.current.forEach((dot, i) => {
+      if (!dot) return;
+      dot.style.transition = withTransition ? 'width 0.2s ease, background 0.2s ease' : 'none';
+      const proximity = Math.max(0, 1 - Math.abs(progress - i));
+      dot.style.width = `${6 + 12 * proximity}px`;
+      dot.style.background = proximity >= 0.5
+        ? 'var(--color-text-primary)'
+        : 'var(--color-border)';
+    });
+  }
+
   function handleScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    // 스크롤 위치 기반 실시간 도트 업데이트
+    const cardWidth = el.clientWidth;
+    if (cardWidth > 0) {
+      const progress = el.scrollLeft / cardWidth;
+      updateDots(progress, false);
+    }
+
+    // activeIndex·onSelect는 스크롤이 끝난 후 갱신
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      const el = scrollRef.current;
       if (!el) return;
+      // 전환 다시 활성화
+      dotRefs.current.forEach(dot => {
+        if (dot) dot.style.transition = 'width 0.2s ease, background 0.2s ease';
+      });
       const containerCenter = el.getBoundingClientRect().left + el.clientWidth / 2;
       let closestIdx = 0;
       let closestDist = Infinity;
@@ -401,6 +428,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
         {Array.from({ length: totalCards }, (_, i) => (
           <div
             key={i}
+            ref={el => { dotRefs.current[i] = el; }}
             style={{
               width: activeIndex === i ? 18 : 6,
               height: 6,
