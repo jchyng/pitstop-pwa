@@ -1,0 +1,45 @@
+{
+  "car_id": "rexton-sports-khan-diesel",
+  "source": "렉스턴 스포츠 칸 취급설명서",
+  "version": null,
+  "categories": {
+    "엔진·오일": {
+      "images": [
+        "/manuals/rexton-sports-khan-diesel/engine-oil.png",
+        "/manuals/rexton-sports-khan-diesel/engine-oil-2.png"
+      ],
+      "page_ref": "7-3, 7-5"
+    },
+    "연료·증발가스": {
+      "images": [
+        "/manuals/rexton-sports-khan-diesel/fuel-evap.png"
+      ],
+      "page_ref": "7-9"
+    },
+    "공조·외부": {
+      "images": [
+        "/manuals/rexton-sports-khan-diesel/brake-coolant-transmission-2.png"
+      ],
+      "page_ref": "7-7"
+    },
+    "제동·냉각·변속": {
+      "images": [
+        "/manuals/rexton-sports-khan-diesel/brake-coolant-transmission.png",
+        "/manuals/rexton-sports-khan-diesel/brake-coolant-transmission-2.png"
+      ],
+      "page_ref": "7-6, 7-7"
+    },
+    "점화·벨트": {
+      "images": [
+        "/manuals/rexton-sports-khan-diesel/engine-oil-2.png"
+      ],
+      "page_ref": "7-5"
+    },
+    "타이어·배터리": {
+      "images": [
+        "/manuals/rexton-sports-khan-diesel/brake-coolant-transmission-2.png"
+      ],
+      "page_ref": "7-7"
+    }
+  }
+}
