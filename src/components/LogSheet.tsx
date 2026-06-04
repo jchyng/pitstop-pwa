@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ConsumableItem, LogType, InspectCondition } from '@/types';
-import { setLastLog, setLastMileage, setLastLogType, addLog } from '@/lib/storage';
+import { setLastLog, setLastMileage, setLastLogType, addLog, setMileage } from '@/lib/storage';
 import BottomSheet from '@/components/BottomSheet';
 import SheetHeader from '@/components/SheetHeader';
 import PrimaryButton from '@/components/PrimaryButton';
@@ -35,6 +35,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
   const [alsoReplaced, setAlsoReplaced] = useState(false);
   const [costStr, setCostStr] = useState('');
   const [note, setNote] = useState('');
+  const [mileageConfirmValue, setMileageConfirmValue] = useState<number | null>(null);
 
   const showCondition = logType === 'inspect';
   const showSmartReplace = showCondition && condition === 'replace_needed';
@@ -98,6 +99,20 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
       setLastLogType(carId, item.id, 'replace');
     }
 
+    if (mileage !== null && currentMileage !== null && mileage > currentMileage) {
+      setMileageConfirmValue(mileage);
+      return;
+    }
+
+    onSave();
+    onClose();
+  }
+
+  function handleMileageConfirm(update: boolean) {
+    if (update && mileageConfirmValue !== null) {
+      setMileage(carId, mileageConfirmValue);
+    }
+    setMileageConfirmValue(null);
     onSave();
     onClose();
   }
@@ -267,7 +282,62 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
         </div>
       )}
 
-      <PrimaryButton onClick={handleSave} disabled={!date}>저장</PrimaryButton>
+      {mileageConfirmValue !== null ? (
+        <div
+          style={{
+            padding: '16px',
+            borderRadius: 12,
+            background: 'var(--color-surface-hover)',
+            border: '1px solid var(--color-border)',
+            marginBottom: 8,
+          }}
+        >
+          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 6 }}>
+            현재 주행거리를 업데이트할까요?
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 14, lineHeight: 1.5 }}>
+            입력한 주행거리({mileageConfirmValue.toLocaleString()} km)가 현재 설정된 주행거리보다 높아요.
+          </p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => handleMileageConfirm(false)}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: 10,
+                border: '1.5px solid var(--color-border)',
+                background: 'transparent',
+                color: 'var(--color-text-secondary)',
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              아니요
+            </button>
+            <button
+              onClick={() => handleMileageConfirm(true)}
+              style={{
+                flex: 2,
+                padding: '10px 0',
+                borderRadius: 10,
+                border: 'none',
+                background: 'var(--color-text-primary)',
+                color: 'var(--color-bg)',
+                fontWeight: 600,
+                fontSize: 13,
+                cursor: 'pointer',
+                fontFamily: 'var(--font)',
+              }}
+            >
+              {mileageConfirmValue.toLocaleString()} km로 업데이트
+            </button>
+          </div>
+        </div>
+      ) : (
+        <PrimaryButton onClick={handleSave} disabled={!date}>저장</PrimaryButton>
+      )}
     </BottomSheet>
   );
 }
