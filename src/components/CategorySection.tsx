@@ -16,9 +16,10 @@ interface Props {
   items: ItemWithLog[];
   currentMileage: number | null;
   onCardClick: (item: ItemWithLog) => void;
+  onHide: (item: ItemWithLog) => void;
 }
 
-export default function CategorySection({ category, items, currentMileage, onCardClick }: Props) {
+export default function CategorySection({ category, items, currentMileage, onCardClick, onHide }: Props) {
   if (items.length === 0) return null;
 
   return (
@@ -51,6 +52,7 @@ export default function CategorySection({ category, items, currentMileage, onCar
             lastReplaceMileage={x.lastReplaceMileage}
             isCustom={x.isCustom}
             onClick={() => onCardClick(x)}
+            onHide={() => onHide(x)}
           />
         ))}
       </ul>

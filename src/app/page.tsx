@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar, getHiddenItems, unhideItem } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar, getHiddenItems, hideItem, unhideItem } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarCarousel from '@/components/CarCarousel';
 import CategorySection from '@/components/CategorySection';
@@ -48,7 +48,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [customVersion, setCustomVersion] = useState(0);
   const [hiddenVersion, setHiddenVersion] = useState(0);
-  const [showHiddenSheet, setShowHiddenSheet] = useState(false);
+  const [hiddenExpanded, setHiddenExpanded] = useState(false);
 
   const carList = useMemo(
     () => carCatalog.filter(c => myCarIds.includes(c.car_id)),
@@ -447,6 +447,7 @@ export default function Home() {
                               lastReplaceMileage={x.lastReplaceMileage}
                               isCustom={x.isCustom}
                               onClick={() => router.push(`/items/${x.item.id}`)}
+                              onHide={() => hideItem(selectedCarId, x.item.id)}
                             />
                           ))}
                         </ul>
@@ -483,6 +484,7 @@ export default function Home() {
                               lastReplaceMileage={x.lastReplaceMileage}
                               isCustom={x.isCustom}
                               onClick={() => router.push(`/items/${x.item.id}`)}
+                              onHide={() => hideItem(selectedCarId, x.item.id)}
                             />
                           ))}
                         </ul>
@@ -519,6 +521,7 @@ export default function Home() {
                               lastReplaceMileage={x.lastReplaceMileage}
                               isCustom={x.isCustom}
                               onClick={() => router.push(`/items/${x.item.id}`)}
+                              onHide={() => hideItem(selectedCarId, x.item.id)}
                             />
                           ))}
                         </ul>
@@ -539,35 +542,129 @@ export default function Home() {
                     items={items}
                     currentMileage={currentMileage}
                     onCardClick={(x) => router.push(`/items/${x.item.id}`)}
+                    onHide={(x) => hideItem(selectedCarId, x.item.id)}
                   />
                 ))}
+
+                {/* 숨긴 항목 — 접이식 섹션 */}
                 {hiddenItemsList.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowHiddenSheet(true)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      padding: '10px 14px',
-                      background: 'none',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 10,
-                      cursor: 'pointer',
-                      fontFamily: 'var(--font)',
-                      color: 'var(--color-text-muted)',
-                      fontSize: 13,
-                      fontWeight: 500,
-                      width: '100%',
-                      textAlign: 'left',
-                    }}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                    숨긴 항목 {hiddenItemsList.length}개
-                  </button>
+                  <section>
+                    <button
+                      type="button"
+                      onClick={() => setHiddenExpanded(v => !v)}
+                      aria-expanded={hiddenExpanded}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        width: '100%',
+                        padding: '4px 0 8px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font)',
+                        textAlign: 'left',
+                      }}
+                    >
+                      <span style={{
+                        fontSize: 11.5,
+                        fontWeight: 600,
+                        color: 'var(--color-text-muted)',
+                        letterSpacing: '0.07em',
+                        textTransform: 'uppercase',
+                      }}>
+                        숨긴 항목
+                      </span>
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: 'var(--color-text-muted)',
+                        background: 'var(--color-surface-hover)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 10,
+                        padding: '1px 7px',
+                      }}>
+                        {hiddenItemsList.length}
+                      </span>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        aria-hidden="true"
+                        style={{
+                          marginLeft: 'auto',
+                          color: 'var(--color-text-muted)',
+                          transform: hiddenExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transition: 'transform 0.2s ease',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+
+                    {hiddenExpanded && (
+                      <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
+                        {hiddenItemsList.map(x => (
+                          <li
+                            key={x.item.id}
+                            style={{
+                              listStyle: 'none',
+                              display: 'flex',
+                              alignItems: 'center',
+                              padding: '10px 14px 10px 15px',
+                              background: 'var(--color-surface)',
+                              border: '1px solid var(--color-border)',
+                              borderRadius: 'var(--radius-card)',
+                              gap: 10,
+                              opacity: 0.55,
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{
+                                fontSize: 15,
+                                fontWeight: 600,
+                                color: 'var(--color-text-primary)',
+                                margin: 0,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                              }}>
+                                {x.item.name_ko}
+                              </p>
+                              <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '2px 0 0' }}>
+                                {x.item.category}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => unhideItem(selectedCarId, x.item.id)}
+                              aria-label={`${x.item.name_ko} 다시 표시`}
+                              style={{
+                                width: 36,
+                                height: 36,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '1px solid var(--color-border)',
+                                borderRadius: 10,
+                                background: 'var(--color-bg)',
+                                cursor: 'pointer',
+                                color: 'var(--color-text-secondary)',
+                                flexShrink: 0,
+                              }}
+                            >
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+                              </svg>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
                 )}
               </div>
             )}
@@ -592,61 +689,6 @@ export default function Home() {
           onAdd={handleAddCar}
           onClose={() => setShowAddCarSheet(false)}
         />
-      )}
-
-      {showHiddenSheet && (
-        <BottomSheet onClose={() => setShowHiddenSheet(false)} ariaLabel="숨긴 항목 관리">
-          <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px', marginBottom: 4 }}>
-            숨긴 항목
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 20 }}>
-            항목을 다시 표시하면 목록에 나타납니다.
-          </p>
-          <ul style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0, margin: 0 }}>
-            {hiddenItemsList.map((x, i) => (
-              <li
-                key={x.item.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '12px 0',
-                  borderTop: i === 0 ? '1px solid var(--color-border)' : 'none',
-                  borderBottom: '1px solid var(--color-border)',
-                  listStyle: 'none',
-                  gap: 10,
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>{x.item.name_ko}</p>
-                  <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '2px 0 0' }}>{x.item.category}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { unhideItem(selectedCarId, x.item.id); }}
-                  style={{
-                    padding: '7px 14px',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 20,
-                    background: 'none',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: 'var(--color-text-primary)',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font)',
-                    flexShrink: 0,
-                  }}
-                >
-                  다시 표시
-                </button>
-              </li>
-            ))}
-          </ul>
-          {hiddenItemsList.length === 0 && (
-            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', textAlign: 'center', padding: '20px 0' }}>
-              숨긴 항목이 없습니다.
-            </p>
-          )}
-        </BottomSheet>
       )}
 
       {deleteTargetId && (() => {
