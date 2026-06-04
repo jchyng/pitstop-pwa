@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar, getHiddenItems, unhideItem } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarCarousel from '@/components/CarCarousel';
 import CategorySection from '@/components/CategorySection';
@@ -47,17 +47,24 @@ export default function Home() {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [customVersion, setCustomVersion] = useState(0);
+  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [showHiddenSheet, setShowHiddenSheet] = useState(false);
 
   const carList = useMemo(
     () => carCatalog.filter(c => myCarIds.includes(c.car_id)),
     [carCatalog, myCarIds],
   );
 
-  // 커스텀 주기 변경 시 대시보드 갱신
+  // 커스텀 주기 / 숨기기 변경 시 대시보드 갱신
   useEffect(() => {
-    const refresh = () => setCustomVersion(v => v + 1);
-    window.addEventListener('pitstop_custom_changed', refresh);
-    return () => window.removeEventListener('pitstop_custom_changed', refresh);
+    const refreshCustom = () => setCustomVersion(v => v + 1);
+    const refreshHidden = () => setHiddenVersion(v => v + 1);
+    window.addEventListener('pitstop_custom_changed', refreshCustom);
+    window.addEventListener('pitstop_hidden_changed', refreshHidden);
+    return () => {
+      window.removeEventListener('pitstop_custom_changed', refreshCustom);
+      window.removeEventListener('pitstop_hidden_changed', refreshHidden);
+    };
   }, []);
 
   // 카탈로그 + 내 차량 목록 로드
@@ -124,17 +131,33 @@ export default function Home() {
     });
   }, [carData, currentMileage, selectedCarId, customVersion]);
 
+  const hiddenIds = useMemo(
+    () => selectedCarId ? getHiddenItems(selectedCarId) : new Set<string>(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedCarId, hiddenVersion],
+  );
+
+  const visibleItems = useMemo(
+    () => itemsWithLog.filter(x => !hiddenIds.has(x.item.id)),
+    [itemsWithLog, hiddenIds],
+  );
+
+  const hiddenItemsList = useMemo(
+    () => itemsWithLog.filter(x => hiddenIds.has(x.item.id)),
+    [itemsWithLog, hiddenIds],
+  );
+
   const overdueItems = useMemo(
-    () => itemsWithLog.filter(x => x.urgency.status === 'overdue'),
-    [itemsWithLog],
+    () => visibleItems.filter(x => x.urgency.status === 'overdue'),
+    [visibleItems],
   );
   const cautionItems = useMemo(
-    () => itemsWithLog.filter(x => x.urgency.status === 'caution'),
-    [itemsWithLog],
+    () => visibleItems.filter(x => x.urgency.status === 'caution'),
+    [visibleItems],
   );
   const warningItems = useMemo(
-    () => itemsWithLog.filter(x => x.urgency.status === 'warning'),
-    [itemsWithLog],
+    () => visibleItems.filter(x => x.urgency.status === 'warning'),
+    [visibleItems],
   );
 
   const attentionItems = useMemo(() => {
@@ -148,9 +171,9 @@ export default function Home() {
   const byCategory = useMemo(() => {
     return CATEGORIES.map(cat => ({
       category: cat,
-      items: itemsWithLog.filter(x => x.item.category === cat),
+      items: visibleItems.filter(x => x.item.category === cat),
     }));
-  }, [itemsWithLog]);
+  }, [visibleItems]);
 
   function handleCarSelect(carId: string) {
     const nextMileage = getMileage(carId);
@@ -518,6 +541,34 @@ export default function Home() {
                     onCardClick={(x) => router.push(`/items/${x.item.id}`)}
                   />
                 ))}
+                {hiddenItemsList.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowHiddenSheet(true)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '10px 14px',
+                      background: 'none',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 10,
+                      cursor: 'pointer',
+                      fontFamily: 'var(--font)',
+                      color: 'var(--color-text-muted)',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      width: '100%',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                    숨긴 항목 {hiddenItemsList.length}개
+                  </button>
+                )}
               </div>
             )}
           </>
@@ -541,6 +592,61 @@ export default function Home() {
           onAdd={handleAddCar}
           onClose={() => setShowAddCarSheet(false)}
         />
+      )}
+
+      {showHiddenSheet && (
+        <BottomSheet onClose={() => setShowHiddenSheet(false)} ariaLabel="숨긴 항목 관리">
+          <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '-0.3px', marginBottom: 4 }}>
+            숨긴 항목
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 20 }}>
+            항목을 다시 표시하면 목록에 나타납니다.
+          </p>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0, margin: 0 }}>
+            {hiddenItemsList.map((x, i) => (
+              <li
+                key={x.item.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '12px 0',
+                  borderTop: i === 0 ? '1px solid var(--color-border)' : 'none',
+                  borderBottom: '1px solid var(--color-border)',
+                  listStyle: 'none',
+                  gap: 10,
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>{x.item.name_ko}</p>
+                  <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '2px 0 0' }}>{x.item.category}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { unhideItem(selectedCarId, x.item.id); }}
+                  style={{
+                    padding: '7px 14px',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 20,
+                    background: 'none',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: 'var(--color-text-primary)',
+                    cursor: 'pointer',
+                    fontFamily: 'var(--font)',
+                    flexShrink: 0,
+                  }}
+                >
+                  다시 표시
+                </button>
+              </li>
+            ))}
+          </ul>
+          {hiddenItemsList.length === 0 && (
+            <p style={{ fontSize: 14, color: 'var(--color-text-muted)', textAlign: 'center', padding: '20px 0' }}>
+              숨긴 항목이 없습니다.
+            </p>
+          )}
+        </BottomSheet>
       )}
 
       {deleteTargetId && (() => {

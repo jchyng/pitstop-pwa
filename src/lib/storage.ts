@@ -7,6 +7,7 @@
 //   pitstop_logs_{car_id}               — 정비 이력 배열 (LogEntry[])
 //   pitstop_migrated_{car_id}           — 기존 last_log → 배열 마이그레이션 완료 여부
 //   pitstop_custom_intervals_{car_id}   — 사용자 커스텀 교체 주기
+//   pitstop_hidden_items_{car_id}       — 숨긴 항목 ID 배열
 
 import type { LogEntry, LogType, ConsumableItem, InspectCondition, ExpenseEntry, ExpenseCategory } from '@/types';
 
@@ -19,6 +20,7 @@ const key = {
   migrated: (carId: string) => `pitstop_migrated_${carId}`,
   customIntervals: (carId: string) => `pitstop_custom_intervals_${carId}`,
   expenses: (carId: string) => `pitstop_expenses_${carId}`,
+  hiddenItems: (carId: string) => `pitstop_hidden_items_${carId}`,
 };
 
 // 현재 주행거리 (숫자, 없으면 null)
@@ -248,6 +250,32 @@ export function updateExpense(
 export function deleteExpense(carId: string, id: string): void {
   const list = getExpenses(carId).filter(e => e.id !== id);
   localStorage.setItem(key.expenses(carId), JSON.stringify(list));
+}
+
+// 숨긴 항목 관리
+
+export function getHiddenItems(carId: string): Set<string> {
+  const raw = localStorage.getItem(key.hiddenItems(carId));
+  if (!raw) return new Set();
+  try { return new Set(JSON.parse(raw) as string[]); } catch { return new Set(); }
+}
+
+export function hideItem(carId: string, itemId: string): void {
+  const hidden = getHiddenItems(carId);
+  hidden.add(itemId);
+  localStorage.setItem(key.hiddenItems(carId), JSON.stringify([...hidden]));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pitstop_hidden_changed'));
+  }
+}
+
+export function unhideItem(carId: string, itemId: string): void {
+  const hidden = getHiddenItems(carId);
+  hidden.delete(itemId);
+  localStorage.setItem(key.hiddenItems(carId), JSON.stringify([...hidden]));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pitstop_hidden_changed'));
+  }
 }
 
 // official item + custom override → 병합된 item 반환 (urgency threshold 비례 조정 포함)
