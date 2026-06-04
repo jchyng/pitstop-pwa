@@ -45,23 +45,6 @@ function buildRecentValue(lastKm: number | null, lastDate: string | null): strin
   return parts.join(' · ');
 }
 
-function buildNextValue(item: ConsumableItem, lastKm: number | null, lastDate: string | null): string | null {
-  const parts: string[] = [];
-  if (item.interval_km !== null && lastKm !== null) {
-    const nextKm = lastKm + item.interval_km;
-    if (item.max_km && item.max_km !== item.interval_km) {
-      const maxKm = lastKm + item.max_km;
-      parts.push(`${nextKm.toLocaleString()}km (마지노선 ${maxKm.toLocaleString()}km)`);
-    } else {
-      parts.push(`${nextKm.toLocaleString()}km`);
-    }
-  }
-  if (item.interval_months !== null && lastDate) {
-    parts.push(addMonths(lastDate, item.interval_months));
-  }
-  return parts.length > 0 ? parts.join(' · ') : null;
-}
-
 
 function parseStatDisplay(displayText: string): { num: string; unit: string } {
   if (displayText === '미기록') return { num: '—', unit: '미기록' };
@@ -115,16 +98,7 @@ export default function ConsumableCard({
     ? 'var(--color-text-muted)'
     : 'var(--color-text-primary)';
 
-  const nextColor = isOverdue
-    ? 'var(--color-overdue-sub)'
-    : isCaution
-    ? 'var(--color-caution-text)'
-    : isWarning
-    ? 'var(--color-warning-text)'
-    : 'var(--color-text-secondary)';
-
   const recentValue = buildRecentValue(lastLoggedMileage, lastLoggedDate);
-  const nextValue = buildNextValue(item, lastLoggedMileage, lastLoggedDate);
   const intervalValue = buildIntervalText(item);
 
   return (
@@ -230,22 +204,6 @@ export default function ConsumableCard({
               </span>
             </div>
 
-            {/* 다음 */}
-            {nextValue && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>다음</span>
-                <span
-                  style={{
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                    color: nextColor,
-                    fontWeight: (isOverdue || isCaution || isWarning) ? 500 : 400,
-                  }}
-                >
-                  {nextValue}
-                </span>
-              </div>
-            )}
           </div>
         </div>
 
