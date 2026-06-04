@@ -88,6 +88,20 @@ export interface LogEntry {
   cost?: number;        // 정비 비용 (원 단위, 선택)
 }
 
+// 취급설명서 카테고리별 이미지 데이터
+export interface ManualCategoryData {
+  images: string[];   // e.g. ["/manuals/avante-cn7-gasoline/engine-table.jpg"]
+  page_ref?: string;  // e.g. "p.4-12"
+}
+
+// 차량별 취급설명서 인덱스 (/public/manuals/{carId}/index.json)
+export interface ManualIndex {
+  car_id: string;
+  source: string;     // e.g. "아반떼 CN7 취급설명서"
+  version?: string;   // e.g. "2020년판"
+  categories: Partial<Record<string, ManualCategoryData>>;
+}
+
 // 유지비 지출 카테고리
 export type ExpenseCategory = 'insurance' | 'tax' | 'fuel' | 'other';
 
