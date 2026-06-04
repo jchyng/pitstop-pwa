@@ -17,9 +17,10 @@ interface Props {
   currentMileage: number | null;
   onCardClick: (item: ItemWithLog) => void;
   onHide: (item: ItemWithLog) => void;
+  showSwipeHint?: boolean;
 }
 
-export default function CategorySection({ category, items, currentMileage, onCardClick, onHide }: Props) {
+export default function CategorySection({ category, items, currentMileage, onCardClick, onHide, showSwipeHint }: Props) {
   if (items.length === 0) return null;
 
   return (
@@ -38,7 +39,7 @@ export default function CategorySection({ category, items, currentMileage, onCar
         {category}
       </p>
       <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
-        {items.map(x => (
+        {items.map((x, i) => (
           <ConsumableCard
             key={x.item.id}
             item={x.item}
@@ -53,6 +54,7 @@ export default function CategorySection({ category, items, currentMileage, onCar
             isCustom={x.isCustom}
             onClick={() => onCardClick(x)}
             onHide={() => onHide(x)}
+            demoSwipe={showSwipeHint && i === 0}
           />
         ))}
       </ul>

@@ -19,6 +19,7 @@ interface Props {
   isCustom?: boolean;
   onClick: () => void;
   onHide?: () => void;
+  demoSwipe?: boolean;
 }
 
 const BADGE_BASE: React.CSSProperties = {
@@ -71,6 +72,7 @@ export default function ConsumableCard({
   isCustom,
   onClick,
   onHide,
+  demoSwipe,
 }: Props) {
   const [pressed, setPressed] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
@@ -210,6 +212,29 @@ export default function ConsumableCard({
       li.removeEventListener('touchcancel', onTouchEnd);
     };
   }, [onHide]);
+
+  // 첫 방문 시 스와이프 힌트 peek 애니메이션 (1회만)
+  useEffect(() => {
+    if (!demoSwipe) return;
+
+    const peekTimer = setTimeout(() => {
+      swipeOffsetRef.current = -34;
+      setSwipeOffset(-34); // isTransitioning=false → 즉시 이동 (no transition)
+
+      const returnTimer = setTimeout(() => {
+        setIsTransitioning(true);
+        swipeOffsetRef.current = 0;
+        setSwipeOffset(0);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('pitstop_swipe_hint_seen', '1');
+        }
+      }, 520);
+
+      return () => clearTimeout(returnTimer);
+    }, 900);
+
+    return () => clearTimeout(peekTimer);
+  }, [demoSwipe]);
 
   // 스와이프 비율에 따라 액션 영역 불투명도
   const actionOpacity = Math.min(1, -swipeOffset / (ACTION_WIDTH * 0.65));

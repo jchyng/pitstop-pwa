@@ -49,6 +49,7 @@ export default function Home() {
   const [customVersion, setCustomVersion] = useState(0);
   const [hiddenVersion, setHiddenVersion] = useState(0);
   const [hiddenExpanded, setHiddenExpanded] = useState(false);
+  const [swipeHintSeen, setSwipeHintSeen] = useState(true); // 초기값 true → hydration 깜빡임 방지
 
   const carList = useMemo(
     () => carCatalog.filter(c => myCarIds.includes(c.car_id)),
@@ -61,6 +62,8 @@ export default function Home() {
     const refreshHidden = () => setHiddenVersion(v => v + 1);
     window.addEventListener('pitstop_custom_changed', refreshCustom);
     window.addEventListener('pitstop_hidden_changed', refreshHidden);
+    // 스와이프 힌트 노출 여부
+    setSwipeHintSeen(!!localStorage.getItem('pitstop_swipe_hint_seen'));
     return () => {
       window.removeEventListener('pitstop_custom_changed', refreshCustom);
       window.removeEventListener('pitstop_hidden_changed', refreshHidden);
@@ -535,7 +538,7 @@ export default function Home() {
             {/* View: 전체보기 */}
             {view === 'full' && (
               <div id="view-all" role="tabpanel" aria-label="전체보기" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-                {byCategory.map(({ category, items }) => (
+                {byCategory.map(({ category, items }, sectionIdx) => (
                   <CategorySection
                     key={category}
                     category={category}
@@ -543,6 +546,7 @@ export default function Home() {
                     currentMileage={currentMileage}
                     onCardClick={(x) => router.push(`/items/${x.item.id}`)}
                     onHide={(x) => hideItem(selectedCarId, x.item.id)}
+                    showSwipeHint={!swipeHintSeen && sectionIdx === 0}
                   />
                 ))}
 
