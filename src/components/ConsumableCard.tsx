@@ -153,9 +153,9 @@ export default function ConsumableCard({
         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       >
         {/* Body */}
-        <div style={{ flex: 1, minWidth: 0, padding: '12px 6px 12px 15px' }}>
+        <div style={{ flex: 1, minWidth: 0, padding: '10px 6px 10px 15px' }}>
           {/* Name row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, flexWrap: 'wrap', minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, flexWrap: 'wrap', minWidth: 0 }}>
             <p
               style={{
                 fontSize: 16,
@@ -209,9 +209,9 @@ export default function ConsumableCard({
             })()}
           </div>
 
-          {/* Info rows: 최근 / 다음 / 권장 주기 */}
+          {/* Info rows: 최근 / 다음 */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {/* 최근 */}
+            {/* 최근 — 기록 없을 때 주기를 인라인으로 표시 */}
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>최근</span>
               <span
@@ -222,7 +222,11 @@ export default function ConsumableCard({
                   fontStyle: recentValue ? 'normal' : 'italic',
                 }}
               >
-                {recentValue ?? '기록 없음'}
+                {recentValue
+                  ? recentValue
+                  : intervalValue
+                  ? `기록 없음 · ${intervalValue}`
+                  : '기록 없음'}
               </span>
             </div>
 
@@ -242,16 +246,6 @@ export default function ConsumableCard({
                 </span>
               </div>
             )}
-
-            {/* 권장 주기 */}
-            {intervalValue && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>권장 주기</span>
-                <span style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--color-text-muted)' }}>
-                  {intervalValue}
-                </span>
-              </div>
-            )}
           </div>
         </div>
 
@@ -262,7 +256,7 @@ export default function ConsumableCard({
             flexDirection: 'column',
             alignItems: 'flex-end',
             justifyContent: 'center',
-            padding: '12px 15px 12px 6px',
+            padding: '10px 15px 10px 6px',
             flexShrink: 0,
             minWidth: 80,
             textAlign: 'right',

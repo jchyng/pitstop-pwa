@@ -14,7 +14,6 @@ import AddCarSheet from '@/components/AddCarSheet';
 import BottomSheet from '@/components/BottomSheet';
 import ViewToggle from '@/components/ViewToggle';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import GuideBanner from '@/components/GuideBanner';
 
 interface ItemWithLog extends ItemWithUrgency {
   lastLoggedDate: string | null;
@@ -263,6 +262,7 @@ export default function Home() {
       >
         <h1
           style={{
+            flex: 1,
             fontSize: 22,
             fontWeight: 700,
             letterSpacing: '-0.5px',
@@ -271,6 +271,29 @@ export default function Home() {
         >
           <span style={{ color: 'var(--color-nav-active)' }}>P</span>itstop
         </h1>
+        {selectedCarId && (
+          <button
+            onClick={() => router.push('/guide')}
+            aria-label="정비 주기 가이드"
+            style={{
+              width: 36,
+              height: 36,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid var(--color-border)',
+              borderRadius: 10,
+              background: 'none',
+              cursor: 'pointer',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="3" width="13" height="18" rx="2" stroke="currentColor" strokeWidth="1.8" />
+              <path d="M8 8h6M8 12h6M8 16h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
       </header>
 
       {/* Car carousel */}
@@ -283,12 +306,6 @@ export default function Home() {
         onAddCar={() => setShowAddCarSheet(true)}
         onDeleteCar={handleDeleteCar}
       />
-
-      {selectedCarId && (
-        <div style={{ padding: '6px var(--page-pad) 0' }}>
-          <GuideBanner />
-        </div>
-      )}
 
       {selectedCarId && (
         <div style={{ padding: '0 var(--page-pad)' }}>
