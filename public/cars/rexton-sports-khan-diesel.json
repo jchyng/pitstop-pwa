@@ -10,21 +10,22 @@
       "max_km": null,
       "interval_months": 12,
       "urgency_threshold_km": 2000,
-      "urgency_threshold_days": 30,
-      "notes": "가혹 조건(도심 주행·짧은 거리) 시 6개월/10,000km로 단축. 수시 점검",
+      "urgency_threshold_days": 36,
+      "notes": "가혹 조건 시 10,000km 또는 6개월. MB 229.51 SAE 5W30 DPF용",
       "behavior": "replace_only"
     },
     {
       "id": "air-cleaner",
-      "name_ko": "에어크리너 필터",
+      "name_ko": "에어클리너 필터",
       "category": "엔진·오일",
-      "interval_km": 20000,
+      "interval_km": 30000,
       "max_km": null,
       "interval_months": null,
+      "inspect_interval_km": 10000,
       "urgency_threshold_km": 3000,
       "urgency_threshold_days": null,
-      "notes": "오염 심한 도로·비포장 운행 시 조기 교환",
-      "behavior": "replace_only"
+      "notes": "10,000km마다 청소, 30,000km마다 교환. 오염 심한 도로·비포장 운행 시 조기 교환",
+      "behavior": "both"
     },
     {
       "id": "fuel-filter",
@@ -35,7 +36,7 @@
       "interval_months": null,
       "urgency_threshold_km": 5000,
       "urgency_threshold_days": null,
-      "notes": "수분 분리기는 20,000km마다 점검",
+      "notes": "수분 분리 작업은 20,000km마다 시행",
       "behavior": "replace_only"
     },
     {
@@ -45,9 +46,9 @@
       "interval_km": 10000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 2000,
+      "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": "오염 심한 경우 5,000km마다 교환",
+      "notes": "오염 심한 경우 교환주기 앞당김",
       "behavior": "replace_only"
     },
     {
@@ -58,8 +59,8 @@
       "max_km": null,
       "interval_months": 24,
       "urgency_threshold_km": null,
-      "urgency_threshold_days": 60,
-      "notes": "수시 점검",
+      "urgency_threshold_days": 72,
+      "notes": "DOT 4R. 수시 점검",
       "behavior": "replace_only"
     },
     {
@@ -71,31 +72,31 @@
       "interval_months": 60,
       "urgency_threshold_km": 20000,
       "urgency_threshold_days": 180,
-      "notes": "수시 보충",
+      "notes": "5년 또는 200,000km. 수시 보충",
       "behavior": "replace_only"
     },
     {
       "id": "atf",
-      "name_ko": "미션오일 (AISIN 자동)",
+      "name_ko": "미션오일 (자동변속기)",
       "category": "제동·냉각·변속",
-      "interval_km": 60000,
+      "interval_km": 30000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 10000,
+      "urgency_threshold_km": 3000,
       "urgency_threshold_days": null,
-      "notes": "30,000km마다 점검 후 60,000km 교환. 가혹 시 단축",
-      "behavior": "replace_only"
+      "notes": "최초 3년/60,000km 무교환. 이후 30,000km마다 점검, 필요 시 교환. NWS9638",
+      "behavior": "both"
     },
     {
       "id": "axle-oil",
       "name_ko": "앞/뒤 액슬 오일",
       "category": "제동·냉각·변속",
-      "interval_km": 60000,
+      "interval_km": 30000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 10000,
+      "urgency_threshold_km": 3000,
       "urgency_threshold_days": null,
-      "notes": "4륜 차량 해당",
+      "notes": "API GL-5 SAE 80W/90. 앞·뒤 각 30,000km마다 교환",
       "behavior": "replace_only"
     },
     {
@@ -105,21 +106,21 @@
       "interval_km": 60000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 10000,
+      "urgency_threshold_km": 6000,
       "urgency_threshold_days": null,
-      "notes": "4륜 차량 해당",
-      "behavior": "replace_only"
+      "notes": "10,000km마다 점검. 60,000km마다 교환. ATF DEXRON II/III",
+      "behavior": "both"
     },
     {
       "id": "brake-pad",
       "name_ko": "브레이크패드",
       "category": "제동·냉각·변속",
-      "interval_km": 20000,
+      "interval_km": 10000,
       "max_km": null,
-      "interval_months": 12,
-      "urgency_threshold_km": 3000,
-      "urgency_threshold_days": 30,
-      "notes": "점검 주기. 마모 시 교환",
+      "interval_months": null,
+      "urgency_threshold_km": 1000,
+      "urgency_threshold_days": null,
+      "notes": "10,000km마다 점검. 마모 시 교환",
       "behavior": "inspect_only"
     },
     {
@@ -129,9 +130,9 @@
       "interval_km": 15000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 2000,
+      "urgency_threshold_km": 1500,
       "urgency_threshold_days": null,
-      "notes": "점검 주기. 마모·균열 시 교환",
+      "notes": "15,000km마다 점검. 마모·균열 시 교환",
       "behavior": "inspect_only"
     },
     {
@@ -141,7 +142,7 @@
       "interval_km": 5000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 1000,
+      "urgency_threshold_km": 500,
       "urgency_threshold_days": null,
       "notes": "공기압 수시 점검. 4륜 규격 준수",
       "behavior": "replace_only"
@@ -150,12 +151,85 @@
       "id": "tire-inspection",
       "name_ko": "타이어 점검",
       "category": "타이어·배터리",
-      "interval_km": 30000,
+      "interval_km": 10000,
       "max_km": null,
       "interval_months": null,
-      "urgency_threshold_km": 5000,
+      "urgency_threshold_km": 1000,
       "urgency_threshold_days": null,
-      "notes": "마모 한계선 도달 시 교체",
+      "notes": "마모 한계선 도달 시 교체. 휠 밸런스·얼라이먼트 포함",
+      "behavior": "inspect_only"
+    },
+    {
+      "id": "brake-pipe-hose",
+      "name_ko": "브레이크 파이프·호스",
+      "category": "제동·냉각·변속",
+      "interval_km": 20000,
+      "max_km": null,
+      "interval_months": 12,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": 36,
+      "notes": "최초 1,000km 점검. 이후 20,000km 또는 1년마다 점검. 손상 시 교환",
+      "behavior": "inspect_only"
+    },
+    {
+      "id": "driveshaft-boot",
+      "name_ko": "드라이브 샤프트 부트",
+      "category": "제동·냉각·변속",
+      "interval_km": 10000,
+      "max_km": null,
+      "interval_months": null,
+      "urgency_threshold_km": 1000,
+      "urgency_threshold_days": null,
+      "notes": "10,000km마다 점검. 파손 시 그리스 충진 또는 부트 교환",
+      "behavior": "inspect_only"
+    },
+    {
+      "id": "ball-joint",
+      "name_ko": "볼 조인트",
+      "category": "제동·냉각·변속",
+      "interval_km": 100000,
+      "max_km": null,
+      "interval_months": null,
+      "inspect_interval_km": 10000,
+      "urgency_threshold_km": 10000,
+      "urgency_threshold_days": null,
+      "notes": "10,000km마다 점검. 100,000km마다 교환",
+      "behavior": "both"
+    },
+    {
+      "id": "mtf",
+      "name_ko": "수동변속기 오일",
+      "category": "제동·냉각·변속",
+      "interval_km": 60000,
+      "max_km": null,
+      "interval_months": 36,
+      "urgency_threshold_km": 6000,
+      "urgency_threshold_days": 108,
+      "notes": "수동변속기 차량 해당. HK MTF 75W85. 가혹 조건 시 단축",
+      "behavior": "replace_only"
+    },
+    {
+      "id": "power-steering-oil",
+      "name_ko": "파워 스티어링 오일",
+      "category": "공조·외부",
+      "interval_km": null,
+      "max_km": null,
+      "interval_months": 12,
+      "urgency_threshold_km": null,
+      "urgency_threshold_days": 36,
+      "notes": "수시 점검·보충. PSF3 규격. 오일량이 MIN 이하면 즉시 보충",
+      "behavior": "inspect_only"
+    },
+    {
+      "id": "tailgate-hinge-spring",
+      "name_ko": "테일게이트 힌지 스프링",
+      "category": "공조·외부",
+      "interval_km": 20000,
+      "max_km": null,
+      "interval_months": 12,
+      "urgency_threshold_km": 2000,
+      "urgency_threshold_days": 36,
+      "notes": "이음 발생 시 그리스 도포. 가혹 조건 시 수시 점검",
       "behavior": "inspect_only"
     }
   ]
