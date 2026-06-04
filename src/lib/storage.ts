@@ -86,7 +86,7 @@ export function addLog(carId: string, entry: LogEntry): void {
 export function updateLog(
   carId: string,
   id: string,
-  patch: { date: string; mileage: number | null; note?: string; cost?: number },
+  patch: { date: string; mileage: number | null; note?: string; cost?: number; condition?: InspectCondition },
 ): void {
   const logs = getLogs(carId);
   const idx = logs.findIndex(l => l.id === id);
