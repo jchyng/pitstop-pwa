@@ -183,28 +183,21 @@ export default function ConsumableCard({
             })()}
           </div>
 
-          {/* Info rows: 최근 / 다음 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {/* 최근 — 기록 없을 때 주기를 인라인으로 표시 */}
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0, width: 46 }}>최근</span>
-              <span
-                style={{
-                  fontSize: 13,
-                  lineHeight: 1.5,
-                  color: recentValue ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
-                  fontStyle: recentValue ? 'normal' : 'italic',
-                }}
-              >
-                {recentValue
-                  ? recentValue
-                  : intervalValue
-                  ? `기록 없음 · ${intervalValue}`
-                  : '기록 없음'}
-              </span>
-            </div>
-
-          </div>
+          {/* 최근 기록 — 기록 없을 때 주기를 인라인으로 표시 */}
+          <span
+            style={{
+              fontSize: 13,
+              lineHeight: 1.5,
+              color: recentValue ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
+              fontStyle: recentValue ? 'normal' : 'italic',
+            }}
+          >
+            {recentValue
+              ? recentValue
+              : intervalValue
+              ? `기록 없음 · ${intervalValue}`
+              : '기록 없음'}
+          </span>
         </div>
 
         {/* Stat */}
