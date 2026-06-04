@@ -11,6 +11,7 @@ import EditLogSheet from '@/components/EditLogSheet';
 import Timeline from '@/components/Timeline';
 import { formatDate } from '@/lib/dateUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import GhostTimeline from '@/components/GhostTimeline';
 import { buildIntervalText, groupByMonth } from '@/lib/itemUtils';
 
 export default function ItemDetailPage() {
@@ -470,61 +471,41 @@ export default function ItemDetailPage() {
             <LoadingSpinner />
           </div>
         ) : sortedLogs.length === 0 ? (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 16,
-              padding: '40px 12px 0',
-            }}
-          >
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-              style={{ color: 'var(--color-text-muted)', opacity: 0.75 }}
-            >
-              <path
-                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
+          <div style={{ padding: '28px 0 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 20 }}>
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', textAlign: 'center', margin: 0 }}>
                 아직 {item?.name_ko ?? '이 소모품'} 기록이 없어요
               </p>
-              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
-                아래 버튼으로 첫 번째 기록을 남겨보세요
-              </p>
+              {intervalText && (
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 4,
+                    padding: '10px 20px',
+                    background: 'var(--color-surface-hover)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 10,
+                    minWidth: 180,
+                    marginTop: 4,
+                  }}
+                >
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+                    {isInspectItem ? '권장 점검 주기' : '권장 교체 주기'}
+                  </p>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                    {intervalText}
+                  </p>
+                </div>
+              )}
             </div>
-            {intervalText && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 4,
-                  padding: '12px 20px',
-                  background: 'var(--color-surface-hover)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 10,
-                  minWidth: 180,
-                }}
-              >
-                <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
-                  {isInspectItem ? '권장 점검 주기' : '권장 교체 주기'}
-                </p>
-                <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
-                  {intervalText}
-                </p>
-              </div>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>예시</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+            </div>
+            <GhostTimeline variant="item" />
           </div>
         ) : filteredLogs.length === 0 ? (
           <p style={{ fontSize: 14, color: 'var(--color-text-muted)', textAlign: 'center', padding: '32px 0' }}>

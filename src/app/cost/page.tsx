@@ -286,9 +286,61 @@ export default function CostPage() {
             <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 12 }}>상세 내역</p>
 
             {grouped.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--color-text-muted)', fontSize: 14 }}>
-                <p style={{ marginBottom: 8 }}>아직 지출 기록이 없어요.</p>
-                <p style={{ fontSize: 12 }}>아래 버튼으로 추가해보세요.</p>
+              <div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '24px 0 20px' }}>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                    아직 지출 기록이 없어요
+                  </p>
+                  <p style={{ fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>
+                    아래 버튼으로 첫 지출을 기록해보세요
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>예시</span>
+                  <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+                </div>
+                <div aria-hidden="true" style={{ opacity: 0.3, pointerEvents: 'none', userSelect: 'none' }}>
+                  {([
+                    { month: '2025/11', items: [
+                      { emoji: '🔧', label: '엔진오일 교체', date: '11/12', amount: '65,000원' },
+                      { emoji: '🔩', label: '에어필터 교체', date: '11/12', amount: '18,000원' },
+                    ]},
+                    { month: '2025/09', items: [
+                      { emoji: '🚗', label: '브레이크패드 교체', date: '09/04', amount: '95,000원' },
+                    ]},
+                  ] as { month: string; items: { emoji: string; label: string; date: string; amount: string }[] }[]).map(group => (
+                    <div key={group.month} style={{ marginBottom: 8 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)', padding: '6px 0', marginBottom: 2 }}>
+                        {group.month}
+                      </p>
+                      {group.items.map((item, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            width: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            padding: '12px 0',
+                            borderBottom: '1px solid var(--color-border)',
+                          }}
+                        >
+                          <span style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}>{item.emoji}</span>
+                          <span style={{ flex: 1, fontSize: 14, color: 'var(--color-text-primary)', fontWeight: 500 }}>
+                            {item.label}
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--color-text-muted)', flexShrink: 0 }}>
+                            {item.date}
+                          </span>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', flexShrink: 0, minWidth: 80, textAlign: 'right' }}>
+                            {item.amount}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               grouped.map(([month, items]) => (

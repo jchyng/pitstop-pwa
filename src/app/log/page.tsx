@@ -10,6 +10,7 @@ import CarPickerSheet from '@/components/CarPickerSheet';
 import EditLogSheet from '@/components/EditLogSheet';
 import { groupByMonth } from '@/lib/itemUtils';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import GhostTimeline from '@/components/GhostTimeline';
 
 export default function LogPage() {
   const [carId, setCarId] = useState('');
@@ -177,57 +178,21 @@ export default function LogPage() {
             <LoadingSpinner />
           </div>
         ) : sorted.length === 0 ? (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '50vh',
-              gap: 16,
-              padding: '0 12px',
-            }}
-          >
-            <svg
-              width="64"
-              height="52"
-              viewBox="0 0 24 22"
-              fill="none"
-              aria-hidden="true"
-              style={{ color: 'var(--color-text-muted)', opacity: 0.75 }}
-            >
-              <rect x="1" y="9" width="22" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M5 9L8 3H16L19 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="6" cy="19" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="var(--color-bg)"/>
-              <circle cx="18" cy="19" r="2.5" stroke="currentColor" strokeWidth="1.5" fill="var(--color-bg)"/>
-              <line x1="1" y1="14" x2="23" y2="14" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.4"/>
-              <line x1="12" y1="9" x2="12" y2="19" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.35"/>
-            </svg>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>
-              <p style={{ fontSize: 16, fontWeight: 600, color: 'var(--color-text-primary)', textAlign: 'center', margin: 0 }}>
-                첫 정비 기록을 남겨볼까요?
+          <div style={{ padding: '28px 0 0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 20 }}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
+                아직 기록이 없어요
               </p>
-              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
-                홈에서 소모품을 선택하면<br />정비 기록을 남길 수 있어요
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>
+                홈에서 소모품을 선택해 첫 기록을 남겨보세요
               </p>
             </div>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 8,
-                padding: '12px 16px',
-                background: 'var(--color-surface-hover)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 10,
-                maxWidth: 270,
-              }}
-            >
-              <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }} aria-hidden="true">💡</span>
-              <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                꾸준한 기록이 소모품 교체 시기를 정확하게 알려줘요
-              </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>예시</span>
+              <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
             </div>
+            <GhostTimeline variant="full" />
           </div>
         ) : (
           <Timeline
