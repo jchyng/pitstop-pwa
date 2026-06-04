@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition } from '@/types';
+import type { CarData, ItemWithUrgency, LogType, CarIndex, InspectCondition, ConsumableItem, UserCustomItem } from '@/types';
 import { calculateUrgency } from '@/lib/urgency';
-import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar, getHiddenItems, hideItem, unhideItem } from '@/lib/storage';
+import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar, getHiddenItems, hideItem, unhideItem, getUserItems, addUserItem, deleteUserItem } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarCarousel from '@/components/CarCarousel';
 import CategorySection from '@/components/CategorySection';
 import ConsumableCard from '@/components/ConsumableCard';
 import MileageSheet from '@/components/MileageSheet';
 import AddCarSheet from '@/components/AddCarSheet';
+import AddCustomItemSheet from '@/components/AddCustomItemSheet';
+import LogSheet from '@/components/LogSheet';
 import BottomSheet from '@/components/BottomSheet';
 import ViewToggle from '@/components/ViewToggle';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -50,23 +52,31 @@ export default function Home() {
   const [hiddenVersion, setHiddenVersion] = useState(0);
   const [hiddenExpanded, setHiddenExpanded] = useState(false);
   const [swipeHintSeen, setSwipeHintSeen] = useState(true); // 초기값 true → hydration 깜빡임 방지
+  const [userItemVersion, setUserItemVersion] = useState(0);
+  const [showAddCustomSheet, setShowAddCustomSheet] = useState(false);
+  const [logSheetForUserItem, setLogSheetForUserItem] = useState<ConsumableItem | null>(null);
 
   const carList = useMemo(
     () => carCatalog.filter(c => myCarIds.includes(c.car_id)),
     [carCatalog, myCarIds],
   );
 
-  // 커스텀 주기 / 숨기기 변경 시 대시보드 갱신
+  // 커스텀 주기 / 숨기기 / 유저 항목 변경 시 대시보드 갱신
   useEffect(() => {
     const refreshCustom = () => setCustomVersion(v => v + 1);
     const refreshHidden = () => setHiddenVersion(v => v + 1);
+    const refreshUserItems = () => setUserItemVersion(v => v + 1);
     window.addEventListener('pitstop_custom_changed', refreshCustom);
     window.addEventListener('pitstop_hidden_changed', refreshHidden);
-    // 스와이프 힌트 노출 여부
-    setSwipeHintSeen(!!localStorage.getItem('pitstop_swipe_hint_seen'));
+    window.addEventListener('pitstop_user_items_changed', refreshUserItems);
+    // 스와이프 힌트 노출 여부 (microtask로 hydration 이후 적용)
+    Promise.resolve().then(() => {
+      setSwipeHintSeen(!!localStorage.getItem('pitstop_swipe_hint_seen'));
+    });
     return () => {
       window.removeEventListener('pitstop_custom_changed', refreshCustom);
       window.removeEventListener('pitstop_hidden_changed', refreshHidden);
+      window.removeEventListener('pitstop_user_items_changed', refreshUserItems);
     };
   }, []);
 
@@ -133,6 +143,30 @@ export default function Home() {
       return { item: mergedItem, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, lastInspectCondition, lastReplaceDate, lastReplaceMileage, isCustom };
     });
   }, [carData, currentMileage, selectedCarId, customVersion]);
+
+  const userItemsWithLog = useMemo<ItemWithLog[]>(() => {
+    if (!selectedCarId) return [];
+    // userItemVersion을 의존성에 포함해 추가/삭제/기록 후 리렌더 트리거
+    void userItemVersion;
+    return getUserItems(selectedCarId).map(ui => {
+      const item: ConsumableItem = {
+        id: ui.id,
+        name_ko: ui.name_ko,
+        category: '기타',
+        behavior: 'replace_only',
+        interval_km: null,
+        max_km: null,
+        interval_months: null,
+        urgency_threshold_km: null,
+        urgency_threshold_days: null,
+      };
+      const lastLoggedDate = getLastLog(selectedCarId, ui.id);
+      const lastLoggedMileage = getLastMileage(selectedCarId, ui.id);
+      const lastLogType = getLastLogType(selectedCarId, ui.id);
+      const urgency = calculateUrgency({ item, currentMileage, lastLoggedMileage, lastLoggedDate, lastInspectCondition: null });
+      return { item, urgency, lastLoggedDate, lastLoggedMileage, lastLogType, lastInspectCondition: null, isCustom: false, lastReplaceDate: null, lastReplaceMileage: null };
+    });
+  }, [selectedCarId, currentMileage, userItemVersion]);
 
   const hiddenIds = useMemo(
     () => selectedCarId ? getHiddenItems(selectedCarId) : new Set<string>(),
@@ -218,6 +252,21 @@ export default function Home() {
   function handleMileageSave(mileage: number) {
     setMileage(selectedCarId, mileage);
     setCurrentMileage(mileage);
+  }
+
+  function handleAddUserItem(name: string) {
+    const newItem: UserCustomItem = {
+      id: `user-${Date.now()}`,
+      name_ko: name,
+      created_at: new Date().toISOString().slice(0, 10),
+    };
+    addUserItem(selectedCarId, newItem);
+    setUserItemVersion(v => v + 1);
+  }
+
+  function handleDeleteUserItem(itemId: string) {
+    deleteUserItem(selectedCarId, itemId);
+    setUserItemVersion(v => v + 1);
   }
 
   const overdueSorted = useMemo(
@@ -550,6 +599,63 @@ export default function Home() {
                   />
                 ))}
 
+                {/* 기타 — 사용자 커스텀 항목 */}
+                <section>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <p style={{
+                      fontSize: 11.5,
+                      fontWeight: 600,
+                      color: 'var(--color-text-muted)',
+                      letterSpacing: '0.07em',
+                      textTransform: 'uppercase',
+                    }}>
+                      기타
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCustomSheet(true)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        padding: '3px 10px',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 20,
+                        background: 'none',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: 'var(--color-text-secondary)',
+                        cursor: 'pointer',
+                        fontFamily: 'var(--font)',
+                      }}
+                    >
+                      <span style={{ fontSize: 14, lineHeight: 1 }}>+</span> 항목 추가
+                    </button>
+                  </div>
+
+                  {userItemsWithLog.length > 0 ? (
+                    <ul style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 0 }} role="list">
+                      {userItemsWithLog.map(x => (
+                        <ConsumableCard
+                          key={x.item.id}
+                          item={x.item}
+                          urgency={x.urgency}
+                          currentMileage={currentMileage}
+                          lastLoggedDate={x.lastLoggedDate}
+                          lastLoggedMileage={x.lastLoggedMileage}
+                          lastLogType={x.lastLogType}
+                          onClick={() => setLogSheetForUserItem(x.item)}
+                          onDelete={() => handleDeleteUserItem(x.item.id)}
+                        />
+                      ))}
+                    </ul>
+                  ) : (
+                    <p style={{ fontSize: 13, color: 'var(--color-text-muted)', padding: '8px 0', fontStyle: 'italic' }}>
+                      직접 추가한 항목이 없습니다
+                    </p>
+                  )}
+                </section>
+
                 {/* 숨긴 항목 — 접이식 섹션 */}
                 {hiddenItemsList.length > 0 && (
                   <section>
@@ -692,6 +798,26 @@ export default function Home() {
           myCarIds={myCarIds}
           onAdd={handleAddCar}
           onClose={() => setShowAddCarSheet(false)}
+        />
+      )}
+
+      {showAddCustomSheet && (
+        <AddCustomItemSheet
+          onSave={handleAddUserItem}
+          onClose={() => setShowAddCustomSheet(false)}
+        />
+      )}
+
+      {logSheetForUserItem && (
+        <LogSheet
+          item={logSheetForUserItem}
+          carId={selectedCarId}
+          currentMileage={currentMileage}
+          onSave={() => {
+            setUserItemVersion(v => v + 1);
+            setLogSheetForUserItem(null);
+          }}
+          onClose={() => setLogSheetForUserItem(null)}
         />
       )}
 

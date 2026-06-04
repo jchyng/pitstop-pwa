@@ -8,8 +8,9 @@
 //   pitstop_migrated_{car_id}           — 기존 last_log → 배열 마이그레이션 완료 여부
 //   pitstop_custom_intervals_{car_id}   — 사용자 커스텀 교체 주기
 //   pitstop_hidden_items_{car_id}       — 숨긴 항목 ID 배열
+//   pitstop_user_items_{car_id}         — 사용자 직접 추가한 커스텀 항목 배열
 
-import type { LogEntry, LogType, ConsumableItem, InspectCondition, ExpenseEntry, ExpenseCategory } from '@/types';
+import type { LogEntry, LogType, ConsumableItem, InspectCondition, ExpenseEntry, ExpenseCategory, UserCustomItem } from '@/types';
 
 const key = {
   mileage: (carId: string) => `pitstop_mileage_${carId}`,
@@ -21,6 +22,7 @@ const key = {
   customIntervals: (carId: string) => `pitstop_custom_intervals_${carId}`,
   expenses: (carId: string) => `pitstop_expenses_${carId}`,
   hiddenItems: (carId: string) => `pitstop_hidden_items_${carId}`,
+  userItems: (carId: string) => `pitstop_user_items_${carId}`,
 };
 
 // 현재 주행거리 (숫자, 없으면 null)
@@ -275,6 +277,31 @@ export function unhideItem(carId: string, itemId: string): void {
   localStorage.setItem(key.hiddenItems(carId), JSON.stringify([...hidden]));
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('pitstop_hidden_changed'));
+  }
+}
+
+// 사용자 커스텀 항목 CRUD
+
+export function getUserItems(carId: string): UserCustomItem[] {
+  const raw = localStorage.getItem(key.userItems(carId));
+  if (!raw) return [];
+  try { return JSON.parse(raw) as UserCustomItem[]; } catch { return []; }
+}
+
+export function addUserItem(carId: string, item: UserCustomItem): void {
+  const items = getUserItems(carId);
+  items.push(item);
+  localStorage.setItem(key.userItems(carId), JSON.stringify(items));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pitstop_user_items_changed'));
+  }
+}
+
+export function deleteUserItem(carId: string, itemId: string): void {
+  const items = getUserItems(carId).filter(i => i.id !== itemId);
+  localStorage.setItem(key.userItems(carId), JSON.stringify(items));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('pitstop_user_items_changed'));
   }
 }
 

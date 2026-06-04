@@ -105,6 +105,13 @@ export interface ManualIndex {
 // 유지비 지출 카테고리
 export type ExpenseCategory = 'insurance' | 'tax' | 'fuel' | 'other';
 
+// 사용자가 직접 추가한 커스텀 정비 항목
+export interface UserCustomItem {
+  id: string;        // 'user-{Date.now()}'
+  name_ko: string;
+  created_at: string;
+}
+
 // 유지비 지출 한 건 (정비 외 — 보험/세금/주유/기타)
 export interface ExpenseEntry {
   id: string;

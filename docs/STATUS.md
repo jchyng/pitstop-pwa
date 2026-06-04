@@ -16,6 +16,7 @@
 | 정비 주기 가이드 | `src/app/guide/page.tsx`, `src/components/GuideCategory.tsx` |
 | 취급설명서 이미지 뷰어 (UI) | `src/components/ManualViewerSheet.tsx` |
 | 유지비 입력 / 조회 / 수정 / 삭제 | `src/app/cost/page.tsx`, `src/components/ExpenseSheet.tsx` |
+| 커스텀 항목 추가 / 기록 / 삭제 | `src/components/AddCustomItemSheet.tsx`, `src/lib/storage.ts` |
 
 ## 미완성
 
