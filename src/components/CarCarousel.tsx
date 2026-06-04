@@ -391,34 +391,28 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
+            gap: 10,
             background: 'var(--color-surface)',
             borderRadius: 'var(--radius-card)',
-            border: '2px dashed var(--color-border)',
+            border: '1.5px dashed var(--color-border)',
+            padding: '16px',
           }}>
-          <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: '50%',
-            border: '2px dashed var(--color-text-muted)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--color-text-muted)',
-            fontSize: 22,
-            fontWeight: 300,
-            lineHeight: 1,
-          }}>
-            +
-          </div>
-          <p style={{
-            fontSize: 14,
-            fontWeight: 500,
-            color: 'var(--color-text-muted)',
-            fontFamily: 'var(--font)',
-          }}>
-            차량 등록
-          </p>
+            <svg width="52" height="36" viewBox="0 0 64 44" fill="none" aria-hidden="true">
+              <rect x="4" y="16" width="56" height="22" rx="6" stroke="var(--color-text-muted)" strokeWidth="2.5" />
+              <path d="M12 16l6-12h28l6 12" stroke="var(--color-text-muted)" strokeWidth="2.5" strokeLinejoin="round" />
+              <circle cx="16" cy="38" r="5" stroke="var(--color-text-muted)" strokeWidth="2.5" />
+              <circle cx="48" cy="38" r="5" stroke="var(--color-text-muted)" strokeWidth="2.5" />
+              <path d="M4 26h56" stroke="var(--color-text-muted)" strokeWidth="1" strokeOpacity="0.35" />
+              <path d="M28 16v22" stroke="var(--color-text-muted)" strokeWidth="1" strokeOpacity="0.3" />
+            </svg>
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', fontFamily: 'var(--font)', marginBottom: 3 }}>
+                차량 등록하기
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'var(--font)', lineHeight: 1.5 }}>
+                소모품 교체 주기를 관리해요
+              </p>
+            </div>
           </div>
         </div>
       </div>

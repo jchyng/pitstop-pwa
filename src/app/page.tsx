@@ -406,36 +406,14 @@ export default function Home() {
       >
         {/* 차량 미등록 상태 */}
         {!selectedCarId && (
-          <div style={{ paddingTop: 28 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+          <div style={{ paddingTop: 20 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, marginBottom: 20 }}>
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                차량이 아직 없어요
+                위 카드를 눌러 차량을 등록해보세요
               </p>
               <p style={{ fontSize: 13, color: 'var(--color-text-muted)', textAlign: 'center' }}>
-                차량을 등록하면 소모품 교체 주기를 관리할 수 있어요
+                등록하면 소모품 교체 주기를 한눈에 볼 수 있어요
               </p>
-              <button
-                type="button"
-                onClick={() => setShowAddCarSheet(true)}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '12px 24px',
-                  background: 'var(--color-nav-active)',
-                  color: 'var(--color-bg)',
-                  border: 'none',
-                  borderRadius: 999,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  fontFamily: 'var(--font)',
-                  cursor: 'pointer',
-                  letterSpacing: '-0.2px',
-                  marginTop: 4,
-                }}
-              >
-                + 차량 등록
-              </button>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
