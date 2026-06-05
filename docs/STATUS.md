@@ -17,6 +17,8 @@
 | 취급설명서 이미지 뷰어 (UI) | `src/components/ManualViewerSheet.tsx` |
 | 유지비 입력 / 조회 / 수정 / 삭제 | `src/app/cost/page.tsx`, `src/components/ExpenseSheet.tsx` |
 | 커스텀 항목 추가 / 기록 / 삭제 | `src/components/AddCustomItemSheet.tsx`, `src/lib/storage.ts` |
+| 차종 카탈로그 3종으로 축소 (지인 테스트) | `public/cars/index.json` |
+| 네비게이션 활성 색상 수정 (#ef4444) | `src/app/globals.css` |
 
 ## 미완성
 
@@ -26,7 +28,7 @@
 | `manual_spec` 데이터 수집 | 미착수 | 차량 JSON에 필드 선언만 있음 |
 | 취급설명서 이미지 수집 | 미착수 | `avante-cn7-gasoline` 빈 껍데기만 존재 |
 | 소모품 이모지 | 미착수 | 기획 메모에 언급, 디자인 미확정 |
-| 차종 검색 대소문자 무시 | 미착수 | `AddCarSheet` 검색 필터에 적용 필요 |
+| 차종 검색 대소문자 무시 | ✅ 완료 | `AddCarSheet` `toLowerCase()` 적용 |
 
 ## Phase 2 이후 (미착수)
 

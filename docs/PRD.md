@@ -16,11 +16,17 @@
 | 2     | 정비 기록 저장 + 기기 간 동기화                | 카카오 로그인 | Supabase PostgreSQL            |
 | 3     | 교환 임박 웹 푸시 알림                         | Phase 2 유지  | Supabase Edge Functions (cron) |
 
-## 지원 차종 (초기)
+## 지원 차종
 
-- 아반떼 MD 가솔린
-- 그랜저 HG 가솔린
-- 렉스턴 스포츠 칸 디젤
+### 지인 테스트 단계 (현재)
+
+| 차종 | car_id |
+|------|--------|
+| 아반떼 MD 가솔린 | `avante-md-gasoline` |
+| 그랜저 HG 2.4 가솔린 | `grandeur-hg-gasoline` |
+| 렉스턴 스포츠 칸 디젤 | `rexton-sports-khan-diesel` |
+
+지인 피드백 수렴 후 차종 추가 여부 결정. 현재 `public/cars/` 에는 40종 JSON이 준비돼 있으며, `index.json`에 추가하는 것만으로 서비스에 노출된다.
 
 ## 핵심 화면
 

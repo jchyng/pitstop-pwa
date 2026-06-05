@@ -185,7 +185,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
             }}
           />
           <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {modelNamesForBrand.filter(mn => mn.includes(modelSearch)).map(mn => {
+          {modelNamesForBrand.filter(mn => mn.toLowerCase().includes(modelSearch.toLowerCase())).map(mn => {
             const carsForModelName = catalog.filter(c => c.brand === brand && c.model_name === mn);
             const allAdded = carsForModelName.every(c => myCarIds.includes(c.car_id));
             return (
@@ -216,7 +216,7 @@ export default function AddCarSheet({ catalog, myCarIds, onAdd, onClose }: Props
               </button>
             );
           })}
-          {modelNamesForBrand.filter(mn => mn.includes(modelSearch)).length === 0 && (
+          {modelNamesForBrand.filter(mn => mn.toLowerCase().includes(modelSearch.toLowerCase())).length === 0 && modelSearch && (
             <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: 14, padding: '20px 0' }}>
               검색 결과가 없습니다
             </p>
