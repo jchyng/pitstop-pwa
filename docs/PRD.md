@@ -26,7 +26,7 @@
 | 그랜저 HG 2.4 가솔린 | `grandeur-hg-gasoline` |
 | 렉스턴 스포츠 칸 디젤 | `rexton-sports-khan-diesel` |
 
-지인 피드백 수렴 후 차종 추가 여부 결정. 현재 `public/cars/` 에는 40종 JSON이 준비돼 있으며, `index.json`에 추가하는 것만으로 서비스에 노출된다.
+지인 피드백 수렴 후 차종 추가 여부 결정. 새 차종 추가 시 `public/cars/{car_id}.json` 생성 후 `index.json`에 항목 추가하면 된다.
 
 ## 핵심 화면
 
