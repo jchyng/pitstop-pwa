@@ -99,7 +99,7 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
       setLastLogType(carId, item.id, 'replace');
     }
 
-    if (mileage !== null && currentMileage !== null && mileage > currentMileage) {
+    if (mileage !== null && (currentMileage === null || mileage > currentMileage)) {
       setMileageConfirmValue(mileage);
       return;
     }
@@ -296,7 +296,9 @@ export default function LogSheet({ item, carId, currentMileage, onSave, onClose 
             현재 주행거리를 업데이트할까요?
           </p>
           <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 14, lineHeight: 1.5 }}>
-            입력한 주행거리({mileageConfirmValue.toLocaleString()} km)가 현재 설정된 주행거리보다 높아요.
+            {currentMileage === null
+              ? `입력한 주행거리(${mileageConfirmValue.toLocaleString()} km)로 차량 주행거리를 설정할게요.`
+              : `입력한 주행거리(${mileageConfirmValue.toLocaleString()} km)가 현재 설정된 주행거리보다 높아요.`}
           </p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button

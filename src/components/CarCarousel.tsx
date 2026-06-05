@@ -253,16 +253,49 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
 
                 <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'space-between', gap: 8, marginTop: 'auto' }}>
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: 5 }}>
-                    <p style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: 'var(--color-text-secondary)',
-                      lineHeight: 1.2,
-                      letterSpacing: '-0.01em',
-                      fontFamily: 'var(--font)',
-                    }}>
-                      주행거리
-                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <p style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'var(--color-text-secondary)',
+                        lineHeight: 1.2,
+                        letterSpacing: '-0.01em',
+                        fontFamily: 'var(--font)',
+                      }}>
+                        주행거리
+                      </p>
+                      <button
+                        type="button"
+                        onClick={e => {
+                          e.stopPropagation();
+                          if (!isActive) {
+                            selectCard(i, car.car_id);
+                            return;
+                          }
+                          onEditMileage();
+                        }}
+                        aria-label={cardMileage === null ? '주행거리 입력' : '주행거리 수정'}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          padding: '3px 7px',
+                          border: `1px solid ${isActive ? 'rgba(17, 17, 17, 0.12)' : 'var(--color-border)'}`,
+                          borderRadius: 999,
+                          background: isActive ? 'rgba(248, 250, 252, 0.92)' : 'transparent',
+                          cursor: 'pointer',
+                          color: isActive ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
+                          fontFamily: 'var(--font)',
+                          fontSize: 11,
+                          fontWeight: 600,
+                          lineHeight: 1,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        <PencilIcon />
+                        {actionLabel}
+                      </button>
+                    </div>
 
                     {cardMileage !== null ? (
                       <p
@@ -302,39 +335,6 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                         미입력
                       </p>
                     )}
-
-                    <button
-                      type="button"
-                      onClick={e => {
-                        e.stopPropagation();
-                        if (!isActive) {
-                          selectCard(i, car.car_id);
-                          return;
-                        }
-                        onEditMileage();
-                      }}
-                      aria-label={cardMileage === null ? '주행거리 입력' : '주행거리 수정'}
-                      style={{
-                        alignSelf: 'flex-start',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 4,
-                        padding: '5px 9px',
-                        border: `1px solid ${isActive ? 'rgba(17, 17, 17, 0.12)' : 'var(--color-border)'}`,
-                        borderRadius: 999,
-                        background: isActive ? 'rgba(248, 250, 252, 0.92)' : 'transparent',
-                        cursor: 'pointer',
-                        color: isActive ? 'var(--color-text-secondary)' : 'var(--color-text-muted)',
-                        fontFamily: 'var(--font)',
-                        fontSize: 11,
-                        fontWeight: 600,
-                        lineHeight: 1,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      <PencilIcon />
-                      {actionLabel}
-                    </button>
                   </div>
 
                   <div style={{

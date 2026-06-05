@@ -75,6 +75,8 @@ export default function Home() {
       if (!localStorage.getItem('pitstop_onboarding_v1')) {
         setShowOnboarding(true);
       }
+      const savedView = sessionStorage.getItem('pitstop_home_view') as 'attention' | 'full' | null;
+      if (savedView) setView(savedView);
     });
     return () => {
       window.removeEventListener('pitstop_custom_changed', refreshCustom);
@@ -387,7 +389,7 @@ export default function Home() {
 
       {selectedCarId && (
         <div style={{ padding: '0 var(--page-pad)' }}>
-          <ViewToggle view={view} attentionCount={attentionItems.length} onChange={setView} />
+          <ViewToggle view={view} attentionCount={attentionItems.length} onChange={v => { setView(v); sessionStorage.setItem('pitstop_home_view', v); }} />
         </div>
       )}
 
