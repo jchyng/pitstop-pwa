@@ -5,6 +5,7 @@ import type { ConsumableItem, UrgencyResult, LogType, InspectCondition } from '@
 import { CONDITION_COLORS, CONDITION_LABEL } from '@/lib/conditionColors';
 import { relativeDate, formatDate } from '@/lib/dateUtils';
 import { buildIntervalText } from '@/lib/itemUtils';
+import { Trash2, EyeOff } from 'lucide-react';
 
 interface Props {
   item: ConsumableItem;
@@ -276,23 +277,12 @@ export default function ConsumableCard({
         >
           {onDelete ? (
             <>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: '#fff' }}>
-                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <Trash2 size={16} aria-hidden="true" color="#fff" />
               <span style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>삭제</span>
             </>
           ) : (
             <>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--color-text-muted)' }}>
-                <path
-                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+              <EyeOff size={17} aria-hidden="true" color="var(--color-text-muted)" />
               <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>감추기</span>
             </>
           )}

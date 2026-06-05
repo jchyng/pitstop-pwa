@@ -7,6 +7,7 @@ import { calculateUrgency } from '@/lib/urgency';
 import { getMileage, setMileage, getLastLog, getLastMileage, getLastLogType, getLastInspectCondition, getLastReplaceEntry, mergeItemWithCustom, getCustomInterval, getMyCars, addMyCar, removeMyCar, getHiddenItems, hideItem, unhideItem, getUserItems, addUserItem, deleteUserItem } from '@/lib/storage';
 import BottomNav from '@/components/BottomNav';
 import CarCarousel from '@/components/CarCarousel';
+import { ChevronDown, Eye, FileText } from 'lucide-react';
 import CategorySection from '@/components/CategorySection';
 import ConsumableCard from '@/components/ConsumableCard';
 import MileageSheet from '@/components/MileageSheet';
@@ -368,10 +369,7 @@ export default function Home() {
               color: 'var(--color-text-secondary)',
             }}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="4" y="3" width="13" height="18" rx="2" stroke="currentColor" strokeWidth="1.8" />
-              <path d="M8 8h6M8 12h6M8 16h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
+            <FileText size={17} aria-hidden="true" />
           </button>
         )}
       </header>
@@ -712,22 +710,17 @@ export default function Home() {
                       }}>
                         {hiddenItemsList.length}
                       </span>
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
+                      <ChevronDown
+                        size={14}
                         aria-hidden="true"
+                        color="var(--color-text-muted)"
                         style={{
                           marginLeft: 'auto',
-                          color: 'var(--color-text-muted)',
                           transform: hiddenExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                           transition: 'transform 0.2s ease',
                           flexShrink: 0,
                         }}
-                      >
-                        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
+                      />
                     </button>
 
                     {hiddenExpanded && (
@@ -795,10 +788,7 @@ export default function Home() {
                                 flexShrink: 0,
                               }}
                             >
-                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
-                              </svg>
+                              <Eye size={15} aria-hidden="true" />
                             </button>
                           </li>
                         ))}

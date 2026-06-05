@@ -1,5 +1,6 @@
 import type { ConsumableItem } from '@/types';
 import { buildIntervalText } from '@/lib/itemUtils';
+import { FileText } from 'lucide-react';
 
 interface Props {
   item: ConsumableItem;
@@ -133,10 +134,7 @@ export default function GuideItemRow({ item, hasEvidence, onEvidenceTap, isLast 
             color: 'var(--color-text-secondary)',
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="4" y="3" width="13" height="18" rx="2" stroke="currentColor" strokeWidth="1.8" />
-            <path d="M8 8h6M8 12h6M8 16h4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
+          <FileText size={14} aria-hidden="true" />
         </button>
       )}
     </div>

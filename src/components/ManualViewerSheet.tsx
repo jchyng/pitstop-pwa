@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ManualCategoryData } from '@/types';
 import BottomSheet from './BottomSheet';
 import SheetHeader from './SheetHeader';
+import { CircleCheck, ImageOff } from 'lucide-react';
 
 interface Props {
   category: string;
@@ -36,10 +37,7 @@ export default function ManualViewerSheet({ category, manualData, source, versio
           borderRadius: 8,
         }}
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-          <path d="M9 12l2 2 4-4" stroke="var(--color-nav-active)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="12" cy="12" r="9" stroke="var(--color-nav-active)" strokeWidth="1.5" />
-        </svg>
+        <CircleCheck size={12} color="var(--color-nav-active)" aria-hidden="true" style={{ flexShrink: 0 }} />
         <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flex: 1 }}>
           출처: {source}{version ? ` (${version})` : ''}
           {manualData.page_ref ? ` · ${manualData.page_ref}` : ''}
@@ -112,12 +110,7 @@ export default function ManualViewerSheet({ category, manualData, source, versio
             minHeight: 160,
           }}
         >
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="3" width="18" height="18" rx="3" stroke="var(--color-text-muted)" strokeWidth="1.5" />
-            <path d="M3 15l5-5 4 4 3-3 6 6" stroke="var(--color-text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="8.5" cy="8.5" r="1.5" fill="var(--color-text-muted)" />
-            <line x1="1" y1="1" x2="23" y2="23" stroke="var(--color-text-muted)" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
+          <ImageOff size={40} color="var(--color-text-muted)" aria-hidden="true" />
           <p
             style={{
               fontSize: 13,

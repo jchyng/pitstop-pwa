@@ -20,6 +20,7 @@ function getCarImagePath(carId: string): string {
 }
 
 import { FUEL_LABEL_BY_ID as FUEL_LABEL } from '@/lib/labels';
+import { Pencil, Trash2 } from 'lucide-react';
 
 function formatCarName(nameKo: string, carId: string): string {
   const match = carId.match(/-?(gasoline|diesel|lpg|hybrid|electric)$/);
@@ -39,25 +40,6 @@ function getCarImageTuning(carId: string) {
   return CAR_IMAGE_TUNING[carId] ?? { scale: 1, offsetX: 0, offsetY: 2 };
 }
 
-function PencilIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <polyline points="3 6 5 6 21 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 export default function CarCarousel({ carList, selectedCarId, currentMileage, onSelect, onEditMileage, onAddCar, onDeleteCar }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -246,7 +228,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                         alignItems: 'center',
                       }}
                     >
-                      <TrashIcon />
+                      <Trash2 size={14} aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -292,7 +274,7 @@ export default function CarCarousel({ carList, selectedCarId, currentMileage, on
                           whiteSpace: 'nowrap',
                         }}
                       >
-                        <PencilIcon />
+                        <Pencil size={13} aria-hidden="true" />
                         {actionLabel}
                       </button>
                     </div>

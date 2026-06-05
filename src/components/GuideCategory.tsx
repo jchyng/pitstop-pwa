@@ -1,5 +1,6 @@
 import type { ConsumableItem, ManualCategoryData } from '@/types';
 import GuideItemRow from './GuideItemRow';
+import { FileText, ChevronDown } from 'lucide-react';
 
 interface Props {
   category: string;
@@ -87,29 +88,21 @@ export default function GuideCategory({
               color: 'var(--color-nav-active)',
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="4" y="3" width="13" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
-              <path d="M8 8h6M8 12h6M8 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
+            <FileText size={12} aria-hidden="true" />
             <span style={{ fontSize: 10, fontWeight: 600 }}>공식자료</span>
           </button>
         )}
 
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
+        <ChevronDown
+          size={14}
           aria-hidden="true"
+          color="var(--color-text-muted)"
           style={{
-            color: 'var(--color-text-muted)',
             transition: 'transform 0.2s',
             transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
             flexShrink: 0,
           }}
-        >
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        />
       </div>
 
       {/* 아이템 목록 */}

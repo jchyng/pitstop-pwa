@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { ChevronDown, Check } from 'lucide-react';
 
 interface CarOption {
   car_id: string;
@@ -57,13 +58,12 @@ export default function CarChip({ cars, selectedCarId, onSelect }: Props) {
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
           {selected?.name_ko ?? ''}
         </span>
-        <svg
-          width="14" height="14" viewBox="0 0 24 24"
-          style={{ flexShrink: 0, transition: 'transform 0.15s', transform: isOpen ? 'rotate(180deg)' : 'none' }}
+        <ChevronDown
+          size={14}
           aria-hidden="true"
-        >
-          <path fill="var(--color-text-muted)" d="M7 10l5 5 5-5z" />
-        </svg>
+          color="var(--color-text-muted)"
+          style={{ flexShrink: 0, transition: 'transform 0.15s', transform: isOpen ? 'rotate(180deg)' : 'none' }}
+        />
       </button>
 
       {isOpen && (
@@ -109,9 +109,7 @@ export default function CarChip({ cars, selectedCarId, onSelect }: Props) {
               >
                 {car.name_ko}
                 {active && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" fill="none" />
-                  </svg>
+                  <Check size={14} aria-hidden="true" />
                 )}
               </li>
             );

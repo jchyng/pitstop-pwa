@@ -2,6 +2,7 @@
 
 import BottomSheet from './BottomSheet';
 import type { CarIndex } from '@/types';
+import { Check } from 'lucide-react';
 
 interface Props {
   carList: CarIndex[];
@@ -47,9 +48,7 @@ export default function CarPickerSheet({ carList, selectedCarId, onSelect, onClo
                   {car.name_ko}
                 </span>
                 {active && (
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                    <path d="M4 9l4 4 6-7" stroke="var(--color-nav-active)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <Check size={18} color="var(--color-nav-active)" aria-hidden="true" />
                 )}
               </button>
             </li>

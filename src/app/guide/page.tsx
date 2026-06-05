@@ -7,6 +7,7 @@ import { getMileage } from '@/lib/storage';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import GuideCategory from '@/components/GuideCategory';
 import ManualViewerSheet from '@/components/ManualViewerSheet';
+import { ChevronLeft, CircleCheck } from 'lucide-react';
 
 const CATEGORIES = [
   '엔진·오일',
@@ -163,9 +164,7 @@ export default function GuidePage() {
             flexShrink: 0,
           }}
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronLeft size={22} aria-hidden="true" />
         </button>
 
         <h1
@@ -208,10 +207,7 @@ export default function GuidePage() {
             borderRadius: 8,
           }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-            <path d="M9 12l2 2 4-4" stroke="var(--color-nav-active)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="12" cy="12" r="9" stroke="var(--color-nav-active)" strokeWidth="1.8" />
-          </svg>
+          <CircleCheck size={13} color="var(--color-nav-active)" aria-hidden="true" style={{ flexShrink: 0 }} />
           <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
             {carData.name_ko}{' '}
             {hasManualData ? `공식 취급설명서 기반` : `권장 정비 주기`}
