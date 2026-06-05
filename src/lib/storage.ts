@@ -23,6 +23,7 @@ const key = {
   expenses: (carId: string) => `pitstop_expenses_${carId}`,
   hiddenItems: (carId: string) => `pitstop_hidden_items_${carId}`,
   userItems: (carId: string) => `pitstop_user_items_${carId}`,
+  recentLabels: (carId: string) => `pitstop_recent_labels_${carId}`,
 };
 
 // 현재 주행거리 (숫자, 없으면 null)
@@ -237,10 +238,22 @@ export function addExpense(carId: string, entry: ExpenseEntry): void {
   localStorage.setItem(key.expenses(carId), JSON.stringify(list));
 }
 
+export function getRecentLabels(carId: string): string[] {
+  const raw = localStorage.getItem(key.recentLabels(carId));
+  if (!raw) return [];
+  try { return JSON.parse(raw) as string[]; } catch { return []; }
+}
+
+export function addRecentLabel(carId: string, label: string): void {
+  const current = getRecentLabels(carId);
+  const updated = [label, ...current.filter(l => l !== label)].slice(0, 8);
+  localStorage.setItem(key.recentLabels(carId), JSON.stringify(updated));
+}
+
 export function updateExpense(
   carId: string,
   id: string,
-  patch: { category: ExpenseCategory; amount: number; date: string; note?: string },
+  patch: { category: ExpenseCategory; amount: number; date: string; note?: string; customLabel?: string },
 ): void {
   const list = getExpenses(carId);
   const idx = list.findIndex(e => e.id === id);

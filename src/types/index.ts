@@ -120,4 +120,5 @@ export interface ExpenseEntry {
   amount: number;   // 원 단위 정수
   date: string;     // YYYY-MM-DD
   note?: string;
+  customLabel?: string; // category === 'other'일 때 사용자 직접 입력한 이름
 }

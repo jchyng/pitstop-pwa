@@ -17,7 +17,7 @@ const DISPLAY_CATS = [
   { key: 'insurance',   label: '자동차 보험', emoji: '🛡️' },
   { key: 'tax',         label: '자동차세',   emoji: '🏛️' },
   { key: 'fuel',        label: '주유비',     emoji: '⛽' },
-  { key: 'other',       label: '기타',       emoji: '📦' },
+  { key: 'other',       label: '직접 입력',  emoji: '✏️' },
 ];
 
 interface DisplayItem {
@@ -112,7 +112,7 @@ export default function CostPage() {
         id: `exp_${e.id}`,
         date: e.date,
         emoji: EXPENSE_CATEGORY_MAP[e.category].emoji,
-        label: EXPENSE_CATEGORY_MAP[e.category].label,
+        label: e.category === 'other' && e.customLabel ? e.customLabel : EXPENSE_CATEGORY_MAP[e.category].label,
         amount: e.amount,
         type: 'expense' as const,
         rawExpense: e,

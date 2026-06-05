@@ -11,7 +11,7 @@ export const EXPENSE_CATEGORIES: ExpenseCategoryMeta[] = [
   { value: 'insurance', label: '자동차 보험', emoji: '🛡️', isAnnual: true  },
   { value: 'tax',       label: '자동차세',    emoji: '🏛️', isAnnual: true  },
   { value: 'fuel',      label: '주유비',      emoji: '⛽',  isAnnual: false },
-  { value: 'other',     label: '기타',        emoji: '📦', isAnnual: false },
+  { value: 'other',     label: '직접 입력',    emoji: '✏️', isAnnual: false },
 ];
 
 export const EXPENSE_CATEGORY_MAP = Object.fromEntries(
